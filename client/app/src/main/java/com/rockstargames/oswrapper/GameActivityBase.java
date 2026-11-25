@@ -1,3 +1,4 @@
+// Clean-room rewrite. Provenance, pinned names and what libGame.so expects: docs/OSWRAPPER.md.
 package com.rockstargames.oswrapper;
 
 import android.content.Intent;
@@ -9,91 +10,144 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.nvidia.devtech.NvAPKFile;
+import com.ferzdevzgta.game.R;
 import com.nvidia.devtech.NvAPKFileHelper;
 import com.nvidia.devtech.NvUtil;
-import com.ferzdevzgta.game.R;
-
 
 import java.io.File;
 
-import android.view.WindowManager;
-
+/**
+ * The activity the engine runs inside: it owns the GL surface, forwards lifecycle and
+ * network changes to {@link GameThread}, and exposes the services the engine calls back.
+ *
+ * Subclasses extend this and do the game-specific work in {@link #onActivitySetup()} and
+ * {@link #onActivityReady(boolean)}.
+ */
 public abstract class GameActivityBase extends AppCompatActivity {
-    public Handler handler = null;
-    protected boolean supportPauseResume = true;
-    private boolean ranInit = false;
+
     public static final String TAG = "GameActivityBase";
+
+    /**
+     * Engine data root. This is not the SAMP storage directory: the SAMP client reads
+     * settings and logs from /storage/emulated/0/GTA/ (see client/app/src/main/cpp/samp),
+     * while libGame.so looks for its own data under its VICE convention. They are two
+     * different paths on purpose, so do not merge them without a device test.
+     */
+    private static final String ENGINE_DATA_ROOT = "VICE";
+
+    /** Window flags that hide the status and navigation bars and keep them hidden. */
+    private static final int SYSTEM_UI_FLAGS =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+    private static final int EGL_CONTEXT_CLIENT_VERSION = 3;
+    private static final int NETWORK_NONE = 0;
+    private static final int NETWORK_CELLULAR = 1;
+    private static final int NETWORK_WIFI = 2;
+
+    private static GameActivityBase instance;
+
+    public Handler handler;
+    public GamePlatformServices services;
+    public GameView view;
+
+    protected boolean supportPauseResume = true;
     protected boolean ResumeEventDone = false;
     protected ConnectivityManager connectivityManager;
     protected WifiManager wifiManager;
-    public GamePlatformServices services;
-    public GameView view;
+
+    private boolean ranInit;
     private int lastNetworkType;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private PermissionCallback requestPermissionCallback;
-    private static GameActivityBase instance;
 
-    // Simple callback interface replacing Kotlin Function1<Boolean, Unit>
+    /** Replaces the Kotlin function type the original code passed around. */
     public interface PermissionCallback {
         void onResult(boolean granted);
     }
 
+    public static GameActivityBase getInstance() {
+        return instance;
+    }
+
+    // --- accessors ----------------------------------------------------------
 
     protected ConnectivityManager getConnectivityManager() {
-        if (connectivityManager == null)
+        if (connectivityManager == null) {
             throw new IllegalStateException("connectivityManager not initialized");
+        }
         return connectivityManager;
     }
 
     protected WifiManager getWifiManager() {
-        if (wifiManager == null)
+        if (wifiManager == null) {
             throw new IllegalStateException("wifiManager not initialized");
+        }
         return wifiManager;
     }
 
     public GamePlatformServices getServices() {
-        if (services == null)
+        if (services == null) {
             throw new IllegalStateException("services not initialized");
+        }
         return services;
     }
 
     public GameView getView() {
-        if (view == null)
+        if (view == null) {
             throw new IllegalStateException("view not initialized");
+        }
         return view;
     }
 
-    public void setServices(GamePlatformServices s) {
-        if (s == null) throw new NullPointerException("services is null");
-        this.services = s;
+    public void setServices(GamePlatformServices services) {
+        if (services == null) {
+            throw new NullPointerException("services is null");
+        }
+        this.services = services;
     }
 
-    public void setView(GameView v) {
-        if (v == null) throw new NullPointerException("view is null");
-        this.view = v;
+    public void setView(GameView view) {
+        if (view == null) {
+            throw new NullPointerException("view is null");
+        }
+        this.view = view;
     }
 
-    protected void setConnectivityManager(ConnectivityManager cm) {
-        if (cm == null) throw new NullPointerException("connectivityManager is null");
-        this.connectivityManager = cm;
+    protected void setConnectivityManager(ConnectivityManager manager) {
+        if (manager == null) {
+            throw new NullPointerException("connectivityManager is null");
+        }
+        this.connectivityManager = manager;
     }
 
-    protected void setWifiManager(WifiManager wm) {
-        if (wm == null) throw new NullPointerException("wifiManager is null");
-        this.wifiManager = wm;
+    protected void setWifiManager(WifiManager manager) {
+        if (manager == null) {
+            throw new NullPointerException("wifiManager is null");
+        }
+        this.wifiManager = manager;
     }
 
-    protected int getLastNetworkType() { return lastNetworkType; }
+    protected int getLastNetworkType() {
+        return lastNetworkType;
+    }
 
-    // -----------------------------------------------------------------------
-    // Network helpers
-    // -----------------------------------------------------------------------
+    public boolean getSupportPauseResume() {
+        return supportPauseResume;
+    }
+
+    // --- network ------------------------------------------------------------
 
     protected boolean isNetworkAvailable() {
         NetworkInfo info = getConnectivityManager().getActiveNetworkInfo();
@@ -105,276 +159,213 @@ public abstract class GameActivityBase extends AppCompatActivity {
     }
 
     protected int getCurrentNetworkType() {
-        if (!isNetworkAvailable()) return 0;
-        return isWifiAvailable() ? 2 : 1;
+        if (!isNetworkAvailable()) {
+            return NETWORK_NONE;
+        }
+        return isWifiAvailable() ? NETWORK_WIFI : NETWORK_CELLULAR;
     }
 
     private void checkNetworkType() {
         int current = getCurrentNetworkType();
-        if (current != lastNetworkType) {
-            lastNetworkType = current;
-            GameThread.INSTANCE.onNetworkChanged(lastNetworkType);
+        if (current == lastNetworkType) {
+            return;
         }
+        lastNetworkType = current;
+        GameThread.INSTANCE.onNetworkChanged(current);
     }
 
-    // -----------------------------------------------------------------------
-    // UI helpers
-    // -----------------------------------------------------------------------
+    // --- storage ------------------------------------------------------------
 
-    private void hideSystemUI() {
-        getWindow().getDecorView().setSystemUiVisibility(5894);
-    }
-
-    // -----------------------------------------------------------------------
-    // Overridable hooks
-    // -----------------------------------------------------------------------
-
-    protected void onActivitySetup() {}
-    protected void onActivityReady(boolean firstInit) {}
-
-    // -----------------------------------------------------------------------
-    // Inject event
-    // -----------------------------------------------------------------------
-
-    // -----------------------------------------------------------------------
-    // Lifecycle
-    // -----------------------------------------------------------------------
-
-    private String baseDirectory;
-    private String baseDirectoryRoot;
-
+    /**
+     * The engine's data directory, created on demand. Returns "" when the path cannot be
+     * created, which the caller has to treat as "no external data", not as a crash.
+     */
     public String GetGameBaseDirectory() {
-        // Standard path: /storage/emulated/0/Documents/SampMobile/
-        File documentsDir = new File("/storage/emulated/0/");
-        File gameDir = new File(documentsDir, "VICE");
-
-        try {
-            if (!gameDir.exists()) {
-                boolean created = gameDir.mkdirs();
-
-            }
-            return gameDir.getAbsolutePath() + "/";
-        } catch (Exception e) {
-
+        File gameDir = new File(new File("/storage/emulated/0/"), ENGINE_DATA_ROOT);
+        if (!gameDir.exists() && !gameDir.mkdirs()) {
+            Log.w(TAG, "cannot create " + gameDir + ", the engine will run without external data");
             return "";
         }
+        return gameDir.getAbsolutePath() + "/";
     }
-    public static GameActivityBase getInstance() {
-        return instance;
-    }
+
+    // --- overridable hooks --------------------------------------------------
+
+    protected void onActivitySetup() {}
+
+    protected void onActivityReady(boolean firstInit) {}
+
+    // --- lifecycle ----------------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //SavesRestoring.DoSmth(this);
-        //UnityPIayerNativeActivity.Init(this);
-        //injectEvent();
         instance = this;
-
-        Log.i(TAG, "[!!] onCreate");
+        Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        //AssetUtils.extractAssets(this);
         handler = new Handler();
-        // Resolve storage paths
-        File extDir = getExternalFilesDir(null);
-        if (extDir == null) throw new IllegalStateException("getExternalFilesDir returned null");
-        String storagePath = extDir.getAbsolutePath();
 
-        // دۆزینەوەی storageBase بۆ ئەوەی ئیرۆر نەدات
-        int androidIdx = storagePath.indexOf("/Android");
-        if (androidIdx < 0) throw new IllegalStateException("Cannot find /Android in path: " + storagePath);
-        String storageBase = storagePath.substring(0, androidIdx);
-
-        Log.i(TAG, "[!!] onCreate: STORAGE_ROOT = " + storagePath
-                + " STORAGE_ROOT_BASE = " + storageBase);
-        this.baseDirectory = GetGameBaseDirectory();
-
-        // 3. ناردنی زانیارییەکان بۆ کتێبخانەی گرافیک و ناوەکی
-        NvUtil.getInstance().setActivity(this);
-        NvUtil.getInstance().setAppLocalValue("STORAGE_ROOT", storagePath);
-        NvUtil.getInstance().setAppLocalValue("STORAGE_ROOT_BASE", storageBase);
-        NvAPKFileHelper.getInstance().setContext(this);
-        NvAPKFile file = new NvAPKFile();
-        file.is = null;
-        try {
-            Intent intent = getIntent();
-
-            GameThread.INSTANCE.onInitialSetup(this);
-        } catch (UnsatisfiedLinkError e) {
+        // Two Android storage roots are handed to the engine: the app-private directory the
+        // engine may write into, and the shared root above it.
+        File external = getExternalFilesDir(null);
+        if (external == null) {
+            throw new IllegalStateException("getExternalFilesDir returned null");
         }
+        String storagePath = external.getAbsolutePath();
+        int androidIndex = storagePath.indexOf("/Android");
+        if (androidIndex < 0) {
+            throw new IllegalStateException("cannot find /Android in " + storagePath);
+        }
+        String storageBase = storagePath.substring(0, androidIndex);
+        Log.i(TAG, "storage: app=" + storagePath + " shared=" + storageBase);
 
+        NvUtil util = NvUtil.getInstance();
+        util.setActivity(this);
+        util.setAppLocalValue("STORAGE_ROOT", storagePath);
+        util.setAppLocalValue("STORAGE_ROOT_BASE", storageBase);
+        NvAPKFileHelper.getInstance().setContext(this);
+
+        try {
+            GameThread.INSTANCE.onInitialSetup(this);
+        } catch (UnsatisfiedLinkError missingEngine) {
+            // Expected in a framework-only APK: the classes are here, libGame.so is not.
+            Log.w(TAG, "engine library not loaded, skipping initial setup: " + missingEngine.getMessage());
+        }
 
         onActivitySetup();
 
         boolean initialized = GameNative.implIsInitialized();
-        Log.i(TAG, "[!!] onCreate: initialized = " + initialized);
+        Log.i(TAG, "engine initialized = " + initialized);
 
-        // 4. خزمەتگوزارییەکانی سیستەم
-        setWifiManager((WifiManager) getSystemService(WifiManager.class));
-        setConnectivityManager((ConnectivityManager) getSystemService(ConnectivityManager.class));
+        ranInit = initialized;
 
-        // Network callback
+        setWifiManager(getSystemService(WifiManager.class));
+        setConnectivityManager(getSystemService(ConnectivityManager.class));
         getConnectivityManager().registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(Network network) {
-                Log.i(TAG, "[!!] ConnectivityManager: onAvailable: " + network);
+                Log.i(TAG, "network available: " + network);
                 checkNetworkType();
             }
 
             @Override
             public void onLost(Network network) {
-                Log.i(TAG, "[!!] ConnectivityManager: onLost: " + network);
+                Log.i(TAG, "network lost: " + network);
                 checkNetworkType();
             }
 
             @Override
             public void onUnavailable() {
-                Log.i(TAG, "[!!] ConnectivityManager: onUnavailable");
+                Log.i(TAG, "network unavailable");
                 checkNetworkType();
             }
         });
 
-        // Permission launcher
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 granted -> {
-                    Log.i(TAG, "[!!] requestPermission: ActivityResultLauncher: result = " + granted);
-                    if (requestPermissionCallback != null) {
-                        requestPermissionCallback.onResult(granted);
-                    }
+                    Log.i(TAG, "permission result: " + granted);
+                    PermissionCallback callback = requestPermissionCallback;
                     requestPermissionCallback = null;
+                    if (callback != null) {
+                        callback.onResult(granted);
+                    }
                 });
-
-        /*
-        // Rockstar SDK setup (only once)
-        if (!initialized) {
-            Log.i(TAG, "[!!] SDK setup");
-            final GameThread gt = GameThread.INSTANCE;
-            Rockstar.setup(
-                    this,
-                    () -> gt.onRockstarStateChanged(),
-                    ticket -> gt.onRockstarTicketChanged(ticket)
-            );
-        } */
 
         hideSystemUI();
         setContentView(R.layout.game);
 
         view = findViewById(R.id.viewGame);
-
         getWindow().setSustainedPerformanceMode(true);
-
-        SurfaceHolder holder = view.getHolder();
-        holder.setKeepScreenOn(true); // Keep only the necessary calls
-
-        holder.addCallback(new SurfaceHolder.Callback2() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                Log.i("GL", "Surface Created");
-
-                // Update the thread's reference immediately
-                GameThread.INSTANCE.cachedSurfaceHolder = holder;
-                GameThread.INSTANCE.viewIsActive = true;
-
-                // Dynamic Resolution Scaling for Speed
-                if (GameThread.INSTANCE.fixedWidth > 0) {
-                    holder.setFixedSize(GameThread.INSTANCE.fixedWidth, GameThread.INSTANCE.fixedHeight);
-                }
-                GameThread.INSTANCE.InitEGLAndGLES2(3);
-                // Trigger the native engine initialization
-                // Note: Ensure ResumeEventDone logic is handled safely
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                GameThread.INSTANCE.surfaceWidth = width;
-                GameThread.INSTANCE.surfaceHeight = height;
-                // Optionally notify native engine of resolution change
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                Log.i("GL", "Surface Destroyed");
-                GameThread.INSTANCE.viewIsActive = false;
-                GameThread.INSTANCE.destroyEGLSurface();
-
-                // CRITICAL: Clear the reference so we don't use a dead surface later
-                GameThread.INSTANCE.cachedSurfaceHolder = null;
-            }
-
-            @Override
-            public void surfaceRedrawNeeded(SurfaceHolder holder) {
-                // Callback2 requirement - helpful for rotation smoothness
-            }
-        });
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        SurfaceHolder holder = view.getHolder();
+        holder.setKeepScreenOn(true);
+        holder.addCallback(new SurfaceHolder.Callback2() {
+            @Override
+            public void surfaceCreated(SurfaceHolder surfaceHolder) {
+                Log.i("GL", "surface created");
+                GameThread thread = GameThread.INSTANCE;
+                thread.cachedSurfaceHolder = surfaceHolder;
+                thread.viewIsActive = true;
+                if (thread.fixedWidth > 0) {
+                    surfaceHolder.setFixedSize(thread.fixedWidth, thread.fixedHeight);
+                }
+                thread.InitEGLAndGLES2(EGL_CONTEXT_CLIENT_VERSION);
+            }
+
+            @Override
+            public void surfaceChanged(
+                    SurfaceHolder surfaceHolder, int format, int width, int height) {
+                GameThread thread = GameThread.INSTANCE;
+                thread.surfaceWidth = width;
+                thread.surfaceHeight = height;
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+                Log.i("GL", "surface destroyed");
+                GameThread thread = GameThread.INSTANCE;
+                thread.viewIsActive = false;
+                thread.destroyEGLSurface();
+                // The surface is about to be freed; holding the holder would use a dead one.
+                thread.cachedSurfaceHolder = null;
+            }
+
+            @Override
+            public void surfaceRedrawNeeded(SurfaceHolder surfaceHolder) {
+                // Required by Callback2, nothing to do.
+            }
+        });
+
         setServices(new GamePlatformServices(this, getView()));
-
         GameThread.INSTANCE.start(getServices());
-
-        /*
-        GameThread.INSTANCE.onRockstarSetup(
-                Rockstar.socialClubEnvironment(),
-                Rockstar.rockstarUserID()); */
 
         getView().setup(this);
         GameThread.INSTANCE.onActivityCreated(this, getView(), !initialized);
         onActivityReady(!initialized);
-
-       // try {
-       //     SAMP.getInstance().initializeSAMP();  // the real entry point lives on SAMP
-       // } catch (UnsatisfiedLinkError e5) {
-       //     Log.e(TAG, e5.getMessage());
-       // }
-        //GameThread.INSTANCE.onRockstarGateComplete(1, true);
-       // GameThread.INSTANCE.onRockstarGateComplete(2, true);
-        //GameThread.INSTANCE.onRockstarGateComplete(3, true);
     }
 
-
-    public boolean getSupportPauseResume() {
-        return supportPauseResume;
-    }
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "[!!] onDestroy");
+        Log.i(TAG, "onDestroy");
         super.onDestroy();
         GameThread.INSTANCE.onActivityDestroyed();
         GameThread.INSTANCE.stop();
+        instance = null;
     }
 
     @Override
     public void onAttachedToWindow() {
-        Log.i(TAG, "[!!] onAttachedToWindow");
+        Log.i(TAG, "onAttachedToWindow");
         super.onAttachedToWindow();
         GameThread.INSTANCE.start(getServices());
     }
 
     @Override
     public void onDetachedFromWindow() {
-        Log.i(TAG, "[!!] onDetachedFromWindow");
+        Log.i(TAG, "onDetachedFromWindow");
         super.onDetachedFromWindow();
         GameThread.INSTANCE.stop();
     }
 
     @Override
     public void onLowMemory() {
-        Log.i(TAG, "[!!] onLowMemory");
+        Log.i(TAG, "onLowMemory");
         super.onLowMemory();
         GameThread.INSTANCE.onLowMemory();
     }
 
     @Override
     protected void onPause() {
-        Log.i(TAG, "[!!] onPause");
+        Log.i(TAG, "onPause");
         super.onPause();
         getView().onPause();
     }
 
     @Override
     protected void onResume() {
-        Log.i(TAG, "[!!] onResume");
+        Log.i(TAG, "onResume");
         super.onResume();
         hideSystemUI();
         getView().onResume();
@@ -382,22 +373,34 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-        Log.i(TAG, "[!!] onWindowFocusChanged: " + hasFocus);
+        Log.i(TAG, "onWindowFocusChanged: " + hasFocus);
         super.onWindowFocusChanged(hasFocus);
         hideSystemUI();
     }
 
-    // -----------------------------------------------------------------------
-    // Permission request
-    // -----------------------------------------------------------------------
+    // --- helpers ------------------------------------------------------------
+
+    private void hideSystemUI() {
+        getWindow().getDecorView().setSystemUiVisibility(SYSTEM_UI_FLAGS);
+    }
+
+    /** True when the engine reported itself initialized during onCreate. */
+    protected boolean hasEngineInitialized() {
+        return ranInit;
+    }
 
     public void requestPermission(String permission, PermissionCallback callback) {
-        if (permission == null) throw new NullPointerException("permission is null");
-        if (callback   == null) throw new NullPointerException("callback is null");
-        Log.i(TAG, "[!!] requestPermission: " + permission);
-        this.requestPermissionCallback = callback;
-        if (requestPermissionLauncher == null)
+        if (permission == null) {
+            throw new NullPointerException("permission is null");
+        }
+        if (callback == null) {
+            throw new NullPointerException("callback is null");
+        }
+        if (requestPermissionLauncher == null) {
             throw new IllegalStateException("requestPermissionLauncher not initialized");
+        }
+        Log.i(TAG, "requestPermission: " + permission);
+        requestPermissionCallback = callback;
         requestPermissionLauncher.launch(permission);
     }
 }

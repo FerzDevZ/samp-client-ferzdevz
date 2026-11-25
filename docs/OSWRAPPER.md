@@ -71,13 +71,44 @@ these classes, only a reimplementation of their interface.
 counts. Last measured:
 
 ```
-rewritten: 4 files, 523 lines
+rewritten: 11 files, 2413 lines
   ok    com/nvidia/devtech/NvUtil.java
   ok    com/rockstargames/oswrapper/DeviceInfo.java
+  ok    com/rockstargames/oswrapper/GameActivityBase.java
   ok    com/rockstargames/oswrapper/GameNative.java
   ok    com/rockstargames/oswrapper/GamePlatformServices.java
-derived:   25 files, 4440 lines
+  ok    com/rockstargames/oswrapper/GameView.java
+  ok    com/rockstargames/oswrapper/view/InputHandler.java
+  ok    com/rockstargames/oswrapper/view/MovieHandler.java
+  ok    com/rockstargames/oswrapper/view/PlaylistHandler.java
+  ok    com/rockstargames/oswrapper/view/SensorHandler.java
+  ok    com/rockstargames/oswrapper/view/SplashScreenHandler.java
+derived:   18 files, 2531 lines
 ```
+
+### What the fourth slice found
+
+`GameActivityBase`, `GameView` and `view/*` are the part of the wrapper our own code
+actually runs through, so this slice was read line by line instead of renamed. Four bugs
+came out of it:
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| the accelerometer keeps feeding the engine after the game is backgrounded | `enableSensors()` never set its `sensorsActive` flag, so `disableSensors()` always skipped the unregister | registration stores `registerListener`'s own return value, unregister clears it |
+| a held touch survives a pause, so the engine never sees the release | `InputHandler.onPause()` was empty | pause releases every tracked pointer through `onTouchEnd` |
+| the intro movie leaks a file descriptor every time it starts | `getAssets().openFd()` result was never closed | the descriptor is used in try-with-resources |
+| pausing the menu music restarted the track from zero | `pause()` called `MediaPlayer.stop()`, which discards the position | `pause()` keeps the position and resume seeks back to it |
+
+The rest was naming: `viewMovie.getHolder().setFormat(-3)` became `FORMAT_TRANSLUCENT`,
+`source & 16` became `SOURCE_CLASS_JOYSTICK`, the axis indices `18`, `19`, `22` became
+`AXIS_RTRIGGER`, `AXIS_THROTTLE`, `AXIS_GAS`, the seventeen magic key codes became
+`KeyEvent.KEYCODE_BUTTON_*`, and the gamepad button ids got names. `GameActivityBase` also
+lost its dead fields and its three commented-out blocks, and keeps the two storage roots and
+the engine data root as documented constants.
+
+One deliberate non-change: `GetGameBaseDirectory()` still returns the engine's `VICE`
+folder, not the SAMP `/storage/emulated/0/GTA/` folder. Two different consumers, two paths.
+Merging them is a device test, not a tidy-up, so the constant carries a comment saying so.
 
 ### Two native declarations that could never resolve
 
@@ -120,8 +151,8 @@ promise of dates.
 | 1 | `DeviceInfo`, `NvUtil` | tiny, no dependencies, and the engine reads them first | 
 | 2 | `GamePlatformServices` | done: the third class `libGame.so` names, 34 pinned callback names |
 | 3 | `GameNative` | done: 35 declarations that resolve, two dead ones removed |
-| 4 | `GameActivityBase`, `GameView`, `view/*` | next: the activity and input surface our own code extends |
-| 5 | `GameThread` (1221 lines) | the frame loop; last because everything above must be stable first |
+| 4 | `GameActivityBase`, `GameView`, `view/*` | done: the activity, the surface and the five handlers, four bugs fixed |
+| 5 | `GameThread` (1221 lines) | next: the frame loop; last because everything above must be stable first |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | Play Asset Delivery shell, replaced by our own downloader, candidate for deletion rather than rewrite |
 | 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | thin adapters, low risk |
 

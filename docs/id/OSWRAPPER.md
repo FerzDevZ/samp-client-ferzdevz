@@ -72,13 +72,45 @@ dekompilasi untuk kelas-kelas ini, hanya implementasi ulang antarmukanya.
 mencetak jumlah baris. Pengukuran terakhir:
 
 ```
-rewritten: 4 files, 523 lines
+rewritten: 11 files, 2413 lines
   ok    com/nvidia/devtech/NvUtil.java
   ok    com/rockstargames/oswrapper/DeviceInfo.java
+  ok    com/rockstargames/oswrapper/GameActivityBase.java
   ok    com/rockstargames/oswrapper/GameNative.java
   ok    com/rockstargames/oswrapper/GamePlatformServices.java
-derived:   25 files, 4440 lines
+  ok    com/rockstargames/oswrapper/GameView.java
+  ok    com/rockstargames/oswrapper/view/InputHandler.java
+  ok    com/rockstargames/oswrapper/view/MovieHandler.java
+  ok    com/rockstargames/oswrapper/view/PlaylistHandler.java
+  ok    com/rockstargames/oswrapper/view/SensorHandler.java
+  ok    com/rockstargames/oswrapper/view/SplashScreenHandler.java
+derived:   18 files, 2531 lines
 ```
+
+### Yang ditemukan iris keempat
+
+`GameActivityBase`, `GameView` dan `view/*` adalah bagian wrapper yang benar-benar dilewati
+kode kita sendiri, jadi iris ini dibaca baris per baris, bukan sekadar diganti nama. Empat
+bug keluar dari situ:
+
+| Gejala | Penyebab | Perbaikan |
+|---|---|---|
+| akselerometer tetap mengirim ke engine setelah game di background | `enableSensors()` tidak pernah mengisi flag `sensorsActive`, jadi `disableSensors()` selalu melewati unregister | hasil `registerListener` disimpan, unregister mengosongkannya |
+| sentuhan yang ditahan tetap hidup setelah pause, engine tidak pernah menerima release | `InputHandler.onPause()` kosong | pause melepas setiap pointer yang dilacak lewat `onTouchEnd` |
+| intro movie membocorkan file descriptor setiap kali mulai | hasil `getAssets().openFd()` tidak pernah ditutup | descriptor dipakai dalam try-with-resources |
+| pause musik menu mengulang lagu dari nol | `pause()` memanggil `MediaPlayer.stop()` yang membuang posisi | `pause()` menyimpan posisi, resume melakukan seek kembali |
+
+Sisanya soal penamaan: `setFormat(-3)` jadi `FORMAT_TRANSLUCENT`, `source & 16` jadi
+`SOURCE_CLASS_JOYSTICK`, indeks axis `18`, `19`, `22` jadi `AXIS_RTRIGGER`,
+`AXIS_THROTTLE`, `AXIS_GAS`, tujuh belas key code jadi `KeyEvent.KEYCODE_BUTTON_*`, dan id
+tombol gamepad diberi nama. `GameActivityBase` juga kehilangan field mati dan tiga blok
+komentar, sementara dua root penyimpanan dan root data engine tetap ada sebagai konstanta
+yang dijelaskan.
+
+Satu hal yang sengaja tidak diubah: `GetGameBaseDirectory()` tetap mengembalikan folder
+`VICE` milik engine, bukan folder SAMP `/storage/emulated/0/GTA/`. Dua konsumen berbeda,
+dua path. Menggabungkannya butuh uji di HP, bukan sekadar merapikan, jadi konstantanya
+diberi komentar yang menyatakan itu.
 
 ### Dua deklarasi native yang tidak mungkin ketemu
 
@@ -121,8 +153,8 @@ tanggal.
 | 1 | `DeviceInfo`, `NvUtil` | kecil, tanpa dependensi, dan dibaca engine paling awal |
 | 2 | `GamePlatformServices` | selesai: kelas ketiga yang disebut `libGame.so`, 34 nama callback dipatok |
 | 3 | `GameNative` | selesai: 35 deklarasi yang ketemu, dua yang mati dihapus |
-| 4 | `GameActivityBase`, `GameView`, `view/*` | permukaan activity dan input yang dipakai kode kita sendiri |
-| 5 | `GameThread` (1221 baris) | loop frame; terakhir karena semua di atas harus stabil dulu |
+| 4 | `GameActivityBase`, `GameView`, `view/*` | selesai: activity, surface dan lima handler, empat bug diperbaiki |
+| 5 | `GameThread` (1221 baris) | berikutnya: loop frame; terakhir karena semua di atas harus stabil dulu |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | cangkang Play Asset Delivery, sudah digantikan downloader sendiri, kandidat dihapus bukan ditulis ulang |
 | 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | adapter tipis, risiko rendah |
 
