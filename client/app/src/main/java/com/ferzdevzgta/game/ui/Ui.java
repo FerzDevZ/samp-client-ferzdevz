@@ -285,6 +285,7 @@ public final class Ui {
         }
         b.setTextColor(ink);
         ripple(b, round(c, RADIUS_SMALL, fill, stroke));
+        pressable(b);
         return b;
     }
 
@@ -455,10 +456,85 @@ public final class Ui {
         return bar;
     }
 
+    /**
+     * Touch feedback that does not depend on a ripple alone: a short haptic tick plus a two percent
+     * press scale. Both are switched off when the system animation scale is zero, because that
+     * setting means the user asked for less movement, not for none of the confirmation.
+     */
+    public static void pressable(View view) {
+        if (view == null) {
+            return;
+        }
+        view.setClickable(true);
+        final boolean motion = motionEnabled(view.getContext());
+        view.setOnTouchListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    if (motion) {
+                        v.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK);
+                    }
+                    v.animate().scaleX(0.985f).scaleY(0.985f).setDuration(90L).start();
+                    break;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(120L).start();
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
+        view.setOnLongClickListener(v -> {
+            if (motion) {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+            }
+            return false;
+        });
+    }
+
+    /**
+     * A card that explains why a list is empty and offers the one action that fills it. Empty
+     * states get the same care as content: a bare sentence in the middle of a card reads like a
+     * failure, a labelled action reads like a first step.
+     */
+    public static LinearLayout emptyState(Context c, int iconRes, String titleText,
+                                          String bodyText, String actionText,
+                                          View.OnClickListener action) {
+        LinearLayout card = card(c);
+        Drawable glyph = iconRes == 0 ? null : icon(c, iconRes, FAINT);
+        if (glyph != null) {
+            int size = dp(c, 22);
+            glyph.setBounds(0, 0, size, size);
+            android.widget.ImageView mark = new android.widget.ImageView(c);
+            mark.setImageDrawable(glyph);
+            mark.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            card.addView(mark);
+            gap(c, card, 10);
+        }
+        TextView head = value(c, titleText);
+        head.setTextSize(15f);
+        head.setTextColor(TEXT);
+        card.addView(head);
+        if (bodyText != null && !bodyText.isEmpty()) {
+            gap(c, card, 4);
+            card.addView(body(c, bodyText));
+        }
+        if (actionText != null && action != null) {
+            gap(c, card, 12);
+            Button go = button(c, actionText, SECONDARY);
+            go.setOnClickListener(action);
+            pressable(go);
+            card.addView(go, fill());
+        }
+        fadeIn(card, 0);
+        return card;
+    }
+
     /** Label on the left, value on the right, one line, used by the status cards. */
     public static LinearLayout statusRow(Context c, String labelText, String valueText, int toneOrZero) {
         LinearLayout row = row(c);
         row.setPadding(0, dp(c, 7), 0, dp(c, 7));
+        row.setMinimumHeight(dp(c, 48));
         if (toneOrZero != 0) {
             View dot = new View(c);
             android.graphics.drawable.GradientDrawable shape =

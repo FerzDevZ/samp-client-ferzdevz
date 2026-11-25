@@ -26,7 +26,14 @@ public class SAMP extends GTASA implements HeightProvider.HeightListener {
     }
 
 
-    private void showLoadingScreen() { }
+    private void showLoadingScreen() {
+        runOnUiThread(() -> {
+            if (mLoadingScreen != null) {
+                mLoadingScreen.setStatus(R.string.loading_status_engine);
+                mLoadingScreen.show();
+            }
+        });
+    }
 
     private void hideLoadingScreen() {
         runOnUiThread(new Runnable() {
@@ -85,6 +92,10 @@ public class SAMP extends GTASA implements HeightProvider.HeightListener {
         mAttachEdit = new AttachEdit(this);
         mLoadingScreen = new LoadingScreen(this);
         instance = this;
+
+        // The loading screen names the phase it is in. The engine owns the frame loop, so the
+        // phase is announced here and advanced by the callbacks below rather than guessed.
+        mLoadingScreen.setStatus(R.string.loading_status_data);
 
         try {
             initializeSAMP();

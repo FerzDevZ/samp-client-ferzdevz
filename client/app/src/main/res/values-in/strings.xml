@@ -101,6 +101,7 @@
     <string name="servers_nickname_hint">Maksimal 24 karakter, tanpa spasi</string>
     <string name="servers_list">Daftar server</string>
     <string name="servers_empty">Belum ada server. Tambahkan di bawah.</string>
+    <string name="servers_empty_title">Mau main di mana?</string>
     <string name="servers_add">Tambah server</string>
     <string name="servers_add_name">Nama tampilan (opsional)</string>
     <string name="servers_add_host">Host atau IP</string>
@@ -140,4 +141,12 @@
     <string name="diag_share">Bagikan log</string>
     <string name="diag_no_log">Belum ada GTA/logcat.txt</string>
     <string name="diag_open">Diagnostik</string>
+    <string name="loading_version_unknown">arm64-v8a</string>
+    <string name="loading_status_engine">Menyiapkan mesin…</string>
+    <string name="loading_status_data">Membaca data game…</string>
+    <string name="loading_status_net">Menyambung ke dunia…</string>
+    <string name="loading_slow">Ini lebih lama dari biasanya. Baris akhir GTA/logcat.txt menjelaskan sebabnya.</string>
+    <string name="loading_tip_1">Diagnostik ada di Tampilan. Ia membaca HP ini, bukan skrip build.</string>
+    <string name="loading_tip_2">Server bisa diganti tanpa menyunting settings.ini.</string>
+    <string name="loading_tip_3">Data lite cukup untuk sebagian besar HP. Data full hanya menambah audio cutscene.</string>
 </resources>

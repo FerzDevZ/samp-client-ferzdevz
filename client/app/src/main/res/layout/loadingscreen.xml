@@ -1,30 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- The screen the player sees between tapping Play and the first playable frame.
+     Identity block on the left, honest status line under it, progress and one hint at the
+     bottom. The bar is marquee, not a guessed percentage: the engine reports no byte count,
+     so a number here would be a claim we cannot support. -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/loadingRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/samp_bg">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/loadingGutterStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.08" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/loadingGutterEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.92" />
 
     <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:id="@+id/loadingMark"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toTopOf="@+id/loadingTitle"
+        app:layout_constraintStart_toStartOf="@+id/loadingGutterStart"
+        app:layout_constraintTop_toTopOf="@+id/loadingTitle"
+        app:layout_constraintVertical_bias="1"
+        app:srcCompat="@drawable/ic_splash_mark" />
+
+    <TextView
+        android:id="@+id/loadingTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginBottom="26dp"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="-0.01"
+        android:text="@string/app_name"
+        android:textColor="@color/samp_text"
+        android:textSize="19sp"
+        app:layout_constraintBottom_toTopOf="@+id/loadingStatus"
+        app:layout_constraintEnd_toEndOf="@+id/loadingGutterEnd"
+        app:layout_constraintStart_toEndOf="@+id/loadingMark" />
+
+    <TextView
+        android:id="@+id/loadingVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:text="@string/loading_version_unknown"
+        android:textColor="@color/samp_faint"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/loadingStatus"
+        app:layout_constraintStart_toEndOf="@+id/loadingMark" />
+
+    <TextView
+        android:id="@+id/loadingStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/loading_status_engine"
+        android:textColor="@color/samp_muted"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.499"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/loadingGutterEnd"
+        app:layout_constraintStart_toStartOf="@+id/loadingGutterStart"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.336"
-        app:srcCompat="@drawable/ic_launcher_foreground" />
+        app:layout_constraintVertical_bias="0.62" />
 
     <ProgressBar
-        android:id="@+id/progressBar2"
+        android:id="@+id/loadingBar"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="@dimen/_250sdp"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="14dp"
         android:indeterminate="true"
+        android:indeterminateBehavior="repeat"
+        android:indeterminateOnly="true"
+        android:progressDrawable="@drawable/loading_progress"
+        app:layout_constraintEnd_toEndOf="@+id/loadingGutterEnd"
+        app:layout_constraintStart_toStartOf="@+id/loadingGutterStart"
+        app:layout_constraintTop_toBottomOf="@+id/loadingStatus" />
+
+    <TextView
+        android:id="@+id/loadingHint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="22dp"
+        android:maxLines="2"
+        android:textColor="@color/samp_faint"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+        app:layout_constraintEnd_toEndOf="@+id/loadingGutterEnd"
+        app:layout_constraintStart_toStartOf="@+id/loadingGutterStart"
+        app:layout_constraintTop_toBottomOf="@+id/loadingBar"
+        app:layout_constraintVertical_bias="0" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

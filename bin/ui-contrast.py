@@ -15,6 +15,8 @@ import re
 import sys
 
 SOURCE = "client/app/src/main/java/com/ferzdevzgta/game/ui/Ui.java"
+# XML needs a handful of these colours before Java runs, so the copies are checked too.
+RESOURCES = "client/app/src/main/res/values/samp_colors.xml"
 
 # name: (minimum ratio, reason)
 PAIRS = {
@@ -64,14 +66,43 @@ def ratio(first, second):
     return (high + 0.05) / (low + 0.05)
 
 
+def read_xml_colours(path):
+    """The subset of the palette that XML needs before Java runs (window backgrounds, splash)."""
+    text = open(path, encoding="utf-8").read()
+    found = re.findall(r'<color name="samp_([a-z_0-9]+)">#FF([0-9A-Fa-f]{6})</color>', text)
+    if not found:
+        raise SystemExit("no colour resources found in " + path)
+    return {name.upper(): int(argb, 16) for name, argb in found}
+
+
+def check_resource_parity(palette, path):
+    """Java is the source of truth. A colour copied into XML that drifts is a screen that
+    disagrees with the design system, and nothing else would catch it."""
+    resources = read_xml_colours(path)
+    failures = 0
+    for name, argb in sorted(resources.items()):
+        if name not in palette:
+            print("  FAIL %s exists in %s but not in the design system" % (name, path))
+            failures += 1
+            continue
+        rgb = palette[name]
+        java_value = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]
+        if java_value != argb:
+            print("  FAIL %s is #%06X in XML and #%06X in Ui.java" % (name, argb, java_value))
+            failures += 1
+    return failures
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--source", default=SOURCE)
+    parser.add_argument("--resources", default=RESOURCES)
     args = parser.parse_args()
 
     palette = read_palette(args.source)
     failures = 0
+    failures += check_resource_parity(palette, args.resources)
     for (front, back), (minimum, reason) in PAIRS.items():
         if front not in palette or back not in palette:
             print("  FAIL %s on %s: colour is missing from %s" % (front, back, args.source))
@@ -88,7 +119,7 @@ def main():
     if failures:
         print("\n%d contrast failure(s)" % failures)
         return 1
-    print("%d colour pairs meet WCAG 2.2 AA" % len(PAIRS))
+    print("%d colour pairs meet WCAG 2.2 AA, XML copies agree with Ui.java" % len(PAIRS))
     return 0
 
 

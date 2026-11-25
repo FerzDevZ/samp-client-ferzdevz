@@ -191,3 +191,35 @@ so `bin/self-test.sh` covers them without a device.
 There is no separate first-run wizard on purpose: the launcher already lists the three
 requirements, and each row is the shortcut to the screen that fixes it. A wizard would repeat the
 same three actions one tap at a time.
+
+### The game loading screen
+
+`ui/LoadingScreen` is inflated from `res/layout/loadingscreen.xml` over the game surface and stays
+until the engine reports that the first frame is up. It keeps three promises:
+
+- It never invents a percentage. The engine reports no byte count, so the bar is a marquee and the
+  status line names the phase (`Preparing the engine`, `Reading game data`, `Connecting to the
+  world`). A bar that reaches 100 percent before the world is playable is a claim the player can
+  see through.
+- No timer dismisses it. Only `hide()` ends the screen, which the client calls when loading is
+  done. The previous implementation advanced a fake countdown and hid the screen after 4.5
+  seconds, which could reveal a still-black world.
+- A long wait explains itself. After twenty seconds the tip line is replaced with a sentence that
+  points at `GTA/logcat.txt`, and the bar keeps moving, so a slow load never looks frozen.
+
+One line of real tips rotates every seven seconds, off when the system animation scale is zero.
+The block is padded for a display cutout, because the game runs landscape and a camera hole would
+otherwise cover the identity block.
+
+### Touch feedback and empty states
+
+`Ui.pressable` adds a haptic tick on press and a two percent press scale, both disabled when the
+animation scale is zero. Every button created through `Ui.button` gets it, as do the launcher
+status rows, so a control that looks like a button also feels like one.
+
+`Ui.emptyState` renders an icon, a title, one sentence and the single action that fills the list.
+An empty server list is the first screen a new player meets, so it asks a question and offers the
+button instead of printing a sentence in the middle of the card.
+
+`res/values/samp_colors.xml` holds the colours that XML needs before Java runs. It is not a second
+palette: `bin/ui-contrast.py` fails when any entry disagrees with the constants in `Ui.java`.

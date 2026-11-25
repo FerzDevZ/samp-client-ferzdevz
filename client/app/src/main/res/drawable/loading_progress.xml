@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Track and moving segment for the loading bar. A hairline track plus a 40 percent segment
+     reads as work in progress at a glance, and it never claims a percentage the engine cannot
+     report. Colours match ui/Ui.java: SURFACE_2 track, ACCENT segment. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="2dp" />
+            <solid android:color="@color/samp_surface_2" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <shape android:shape="rectangle">
+            <corners android:radius="2dp" />
+            <solid android:color="@color/samp_accent" />
+        </shape>
+    </item>
+</layer-list>

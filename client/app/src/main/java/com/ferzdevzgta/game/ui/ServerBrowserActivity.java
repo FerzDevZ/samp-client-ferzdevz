@@ -183,7 +183,13 @@ public class ServerBrowserActivity extends AppCompatActivity {
         listBox.removeAllViews();
         liveSlots.clear();
         if (servers.isEmpty()) {
-            listBox.addView(Ui.body(this, getString(R.string.servers_empty)));
+            // An empty list is a first step, not a failure: the card names the one action that
+            // fills it instead of printing a sentence in the middle of the screen.
+            listBox.addView(Ui.emptyState(this, R.drawable.ic_server,
+                    getString(R.string.servers_empty_title),
+                    getString(R.string.servers_empty),
+                    getString(R.string.servers_add),
+                    v -> focusAddFields()), Ui.fill());
             return;
         }
         int index = 0;
@@ -226,6 +232,14 @@ public class ServerBrowserActivity extends AppCompatActivity {
         actions.addView(remove);
         block.addView(actions, Ui.fill());
         return block;
+    }
+
+    /** Sends the eye to the add form when the empty state is tapped, since the form is below. */
+    private void focusAddFields() {
+        if (hostField != null) {
+            hostField.requestFocus();
+            hostField.setSelection(hostField.getText().length());
+        }
     }
 
     private void addCurrentFields() {

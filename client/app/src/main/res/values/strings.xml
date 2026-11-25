@@ -102,6 +102,7 @@
     <string name="servers_nickname_hint">Up to 24 characters, no spaces</string>
     <string name="servers_list">Server list</string>
     <string name="servers_empty">No server yet. Add one below.</string>
+    <string name="servers_empty_title">Where do you want to play?</string>
     <string name="servers_add">Add a server</string>
     <string name="servers_add_name">Display name (optional)</string>
     <string name="servers_add_host">Host or IP</string>
@@ -141,4 +142,12 @@
     <string name="diag_share">Share log</string>
     <string name="diag_no_log">There is no GTA/logcat.txt yet</string>
     <string name="diag_open">Diagnostics</string>
+    <string name="loading_version_unknown">arm64-v8a</string>
+    <string name="loading_status_engine">Preparing the engine…</string>
+    <string name="loading_status_data">Reading game data…</string>
+    <string name="loading_status_net">Connecting to the world…</string>
+    <string name="loading_slow">This is taking longer than usual. The last lines of GTA/logcat.txt say why.</string>
+    <string name="loading_tip_1">Diagnostics lives in Display. It reads this phone, not a build script.</string>
+    <string name="loading_tip_2">You can change server without editing settings.ini.</string>
+    <string name="loading_tip_3">Lite data is enough for most phones. Full data only adds the cutscene audio.</string>
 </resources>

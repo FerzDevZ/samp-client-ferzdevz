@@ -191,3 +191,34 @@ supaya `bin/self-test.sh` mengujinya tanpa perangkat.
 Tidak ada wizard pertama kali, dan itu disengaja: launcher sudah menampilkan tiga syarat, dan
 tiap baris adalah jalan pintas ke layar yang memperbaikinya. Wizard hanya akan mengulang tiga
 aksi yang sama satu per satu.
+
+### Loading screen saat masuk game
+
+`ui/LoadingScreen` di-inflate dari `res/layout/loadingscreen.xml` di atas permukaan game dan
+bertahan sampai mesin melaporkan frame pertama sudah tampil. Tiga janji yang dijaga:
+
+- Tidak pernah mengarang persentase. Mesin tidak melaporkan jumlah byte, jadi bar-nya marquee dan
+  baris status menyebut fasenya (`Menyiapkan mesin`, `Membaca data game`, `Menyambung ke dunia`).
+  Bar yang mencapai 100 persen sebelum dunia bisa dimainkan adalah klaim yang kelihatan bohong.
+- Tidak ada timer yang menutupnya. Hanya `hide()` yang mengakhirinya, dipanggil klien saat
+  pemuatan selesai. Versi sebelumnya menjalankan hitung mundur palsu dan menutup layar setelah 4,5
+  detik, yang bisa memperlihatkan dunia yang masih hitam.
+- Tunggu yang lama menjelaskan diri. Setelah dua puluh detik baris tip diganti kalimat yang
+  menunjuk `GTA/logcat.txt`, dan bar tetap bergerak, jadi pemuatan lambat tidak terlihat macet.
+
+Satu baris tip nyata berganti tiap tujuh detik, mati bila skala animasi sistem nol. Blok teks
+diberi padding untuk display cutout, karena game berjalan landscape dan lubang kamera akan
+menutupi blok identitas.
+
+### Umpan balik sentuh dan empty state
+
+`Ui.pressable` menambah getaran pendek saat ditekan dan skala tekan dua persen, keduanya mati bila
+skala animasi nol. Semua tombol dari `Ui.button` mendapatkannya, begitu juga baris status di
+launcher, jadi kontrol yang terlihat seperti tombol juga terasa seperti tombol.
+
+`Ui.emptyState` menampilkan ikon, judul, satu kalimat, dan satu aksi yang mengisi daftar. Daftar
+server kosong adalah layar pertama pemain baru, jadi ia bertanya dan menawarkan tombolnya, bukan
+mencetak satu kalimat di tengah kartu.
+
+`res/values/samp_colors.xml` menyimpan warna yang dibutuhkan XML sebelum Java berjalan. Itu bukan
+palet kedua: `bin/ui-contrast.py` gagal bila ada entri yang berbeda dari konstanta di `Ui.java`.
