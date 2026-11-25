@@ -99,7 +99,7 @@ else
 fi
 
 unzip -l "$GAME_APK" | grep -q "lib/arm64-v8a/libGame.so" \
-  || die "$(basename "$GAME_APK") has no lib/arm64-v8a/libGame.so — wrong APK (arm64-v8a build required)"
+  || die "$(basename "$GAME_APK") has no lib/arm64-v8a/libGame.so: wrong APK (arm64-v8a build required)"
 GTA_PKG="$("$AAPT2" dump badging "$PKG_APK" 2>/dev/null | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
 [[ "$GTA_PKG" == "com.rockstargames.gtasa" ]] \
   || die "$(basename "$PKG_APK") is not GTA San Andreas (package '$GTA_PKG')"
@@ -109,7 +109,7 @@ echo "== inspecting framework APK =="
 FW_LIST="$(unzip -l "$FRAMEWORK")"
 grep -q "lib/arm64-v8a/libsamp.so" <<<"$FW_LIST" || die "$FRAMEWORK has no libsamp.so"
 if grep -q "lib/arm64-v8a/libGame.so" <<<"$FW_LIST"; then
-  die "$FRAMEWORK already contains libGame.so — pass a framework APK, not a full client"
+  die "$FRAMEWORK already contains libGame.so: pass a framework APK, not a full client"
 fi
 FW_PKG="$("$AAPT2" dump badging "$FRAMEWORK" 2>/dev/null | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
 [[ "$FW_PKG" == "com.ferzdevzgta.game" ]] || die "unexpected framework package: $FW_PKG"

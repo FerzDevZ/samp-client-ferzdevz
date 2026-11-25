@@ -8,7 +8,7 @@ import android.os.Build;
 import android.util.Log;
 import com.rockstargames.oswrapper.GameActivityBase;
 
-public final class MiscServices implements IMiscServices {
+public final class MiscServices {
     private static final String TAG = "MiscServices";
     private final GameActivityBase activity;
 
@@ -22,8 +22,6 @@ public final class MiscServices implements IMiscServices {
     public GameActivityBase getActivity() {
         return this.activity;
     }
-
-    @Override
     public String getAppVersion() {
         String versionName;
         try {
@@ -43,8 +41,6 @@ public final class MiscServices implements IMiscServices {
         Log.i(TAG, "[!!] getAppVersion: " + versionName);
         return versionName != null ? versionName : "unknown";
     }
-
-    @Override
     public void openLink(final String url) {
         if (url == null) return;
 
@@ -52,7 +48,6 @@ public final class MiscServices implements IMiscServices {
         try {
             final Uri uri = Uri.parse(url);
             this.activity.runOnUiThread(new Runnable() {
-                @Override
                 public void run() {
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     activity.startActivity(intent);
@@ -62,8 +57,6 @@ public final class MiscServices implements IMiscServices {
             Log.e(TAG, "[!!] openLink: invalid URL", e);
         }
     }
-
-    @Override
     public void quit() {
         Log.i(TAG, "[!!] quit");
         // داخستنی هەموو چالاکییەکانی یارییەکە و چوونە دەرەوە

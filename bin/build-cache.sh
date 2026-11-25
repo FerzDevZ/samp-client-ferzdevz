@@ -7,8 +7,8 @@
 # or an APK you dumped from your own device) and it produces the two layouts the
 # community calls "full" and "lite":
 #
-#   full  — every asset: radio, cutscene movies, textures, audio
-#   lite  — audio/ and movies/ removed: smaller download, no radio, no cutscenes
+#   full : every asset: radio, cutscene movies, textures, audio
+#   lite : audio/ and movies/ removed: smaller download, no radio, no cutscenes
 #
 # Usage
 #   bin/build-cache.sh --apk GTA.apk --obb main.8.com.rockstargames.gtasa.obb --out cache
@@ -108,7 +108,7 @@ fi
 
 file_count=$(find "$ASSETS" -type f | wc -l)
 total=$(du -sb "$ASSETS" | cut -f1)
-[[ "$file_count" -gt 0 ]] || die "staged tree is empty — wrong input?"
+[[ "$file_count" -gt 0 ]] || die "staged tree is empty, wrong input?"
 echo "  staged: $file_count files, $total bytes"
 
 # --- full --------------------------------------------------------------------
@@ -132,7 +132,7 @@ for heavy in audio movies; do
     removed=$((removed+1))
   done < <(find "$OUT/lite" -type d -name "$heavy")
 done
-[[ $removed -gt 0 ]] || echo "  WARNING: no audio/ or movies/ found — lite equals full"
+[[ $removed -gt 0 ]] || echo "  WARNING: no audio/ or movies/ found, lite equals full"
 
 # --- manifests --------------------------------------------------------------
 emit_manifest() {
@@ -175,7 +175,7 @@ emit_manifest full
 emit_manifest lite
 
 cat > "$OUT/PROVENANCE.txt" <<EOF
-SA-MP Android game cache — built $(date -u +%Y-%m-%dT%H:%M:%SZ)
+SA-MP Android game cache, built $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 Source of the assets (you must own these):
   apk: ${APK:-<none>}

@@ -71,11 +71,24 @@ these classes, only a reimplementation of their interface.
 counts. Last measured:
 
 ```
-rewritten: 2 files, 162 lines
+rewritten: 3 files, 382 lines
   ok    com/nvidia/devtech/NvUtil.java
   ok    com/rockstargames/oswrapper/DeviceInfo.java
-derived:   33 files, 4958 lines
+  ok    com/rockstargames/oswrapper/GamePlatformServices.java
+derived:   26 files, 4568 lines
 ```
+
+Two things happened in the second slice, and one of them is a deletion rather than a
+rewrite. `GamePlatformServices` was a façade over six `I*Services` interfaces whose only
+job was to mirror a C++ vtable; `strings -n 6 libGame.so | grep -cx ILanguageServices`
+returns 0 for all six, so nothing outside our own source ever mentioned them. The
+interfaces are gone, the six services keep their bodies and their names, and the engine
+still finds all 34 callback names because those are pinned.
+
+The pin list is now a gate instead of a paragraph: `tests/pins/oswrapper-pins.txt` holds
+every name measured in `libGame.so`, and `bin/wrapper-pins.sh` runs `javap` over the
+compiled classes and fails when one is missing. `bin/self-test.sh` runs it, including a
+negative case with an invented name, because a check that cannot fail is not a check.
 
 Run it yourself for the live number; the table below is the rewrite order, not a
 promise of dates.
@@ -83,8 +96,8 @@ promise of dates.
 | Order | Files | Why this order |
 |---|---|---|
 | 1 | `DeviceInfo`, `NvUtil` | tiny, no dependencies, and the engine reads them first | 
-| 2 | `GamePlatformServices` | the third class `libGame.so` names, callbacks into Java |
-| 3 | `GameNative` | 38 declarations only, no bodies to invent |
+| 2 | `GamePlatformServices` | done: the third class `libGame.so` names, 34 pinned callback names |
+| 3 | `GameNative` | next: 38 declarations only, no bodies to invent |
 | 4 | `GameActivityBase`, `GameView`, `view/*` | the activity and input surface our own code extends |
 | 5 | `GameThread` (1221 lines) | the frame loop; last because everything above must be stable first |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | Play Asset Delivery shell, replaced by our own downloader, candidate for deletion rather than rewrite |
@@ -102,7 +115,9 @@ promise of dates.
 
 4. `bin/oswrapper-audit.sh` must show the file under `rewritten`.
 5. `cd client && ./gradlew :app:assembleDebug` must stay green.
-6. Say in the commit what changed in behaviour, if anything. A rewrite that keeps
+6. `bin/wrapper-pins.sh` must pass; it reads the compiled classes, so it catches a
+   rename that the compiler happily accepts.
+7. Say in the commit what changed in behaviour, if anything. A rewrite that keeps
    behaviour has no behavioural note; a rewrite that fixes a null crash does.
 
 ## What stays unverified

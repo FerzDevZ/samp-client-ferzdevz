@@ -1,0 +1,52 @@
+# Names the engine looks up by literal string. A rename compiles fine and fails on a
+# phone, so bin/wrapper-pins.sh checks the compiled classes, not the source text.
+#
+# Methods below were measured with:  strings -n 4 libGame.so | grep -cx <name>
+# (value 1 = present, 0 = not referenced, so it is absent from this list).
+# The two public fields are not measured, they are read by Java callers and kept public
+# on purpose; they are listed so a "make it private" tidy-up fails here instead of in
+# the game.
+#
+# <class> <member>
+com.nvidia.devtech.NvUtil getAppLocalValue
+com.nvidia.devtech.NvUtil getParameter
+com.nvidia.devtech.NvUtil hasAppLocalValue
+com.nvidia.devtech.NvUtil setAppLocalValue
+com.rockstargames.oswrapper.DeviceInfo hasTouchScreen
+com.rockstargames.oswrapper.GamePlatformServices activity
+com.rockstargames.oswrapper.GamePlatformServices getAppVersion
+com.rockstargames.oswrapper.GamePlatformServices getDeviceLocale
+com.rockstargames.oswrapper.GamePlatformServices hideSplashScreen
+com.rockstargames.oswrapper.GamePlatformServices httpCancel
+com.rockstargames.oswrapper.GamePlatformServices httpGet
+com.rockstargames.oswrapper.GamePlatformServices httpHead
+com.rockstargames.oswrapper.GamePlatformServices httpPost
+com.rockstargames.oswrapper.GamePlatformServices isMoviePlaying
+com.rockstargames.oswrapper.GamePlatformServices isSplashScreenVisible
+com.rockstargames.oswrapper.GamePlatformServices openLink
+com.rockstargames.oswrapper.GamePlatformServices playMovie
+com.rockstargames.oswrapper.GamePlatformServices playlistCount
+com.rockstargames.oswrapper.GamePlatformServices playlistIsPlaying
+com.rockstargames.oswrapper.GamePlatformServices playlistOpen
+com.rockstargames.oswrapper.GamePlatformServices playlistPause
+com.rockstargames.oswrapper.GamePlatformServices playlistPlay
+com.rockstargames.oswrapper.GamePlatformServices playlistSetVolume
+com.rockstargames.oswrapper.GamePlatformServices playlistStop
+com.rockstargames.oswrapper.GamePlatformServices quit
+com.rockstargames.oswrapper.GamePlatformServices rockstarAccountDeletion
+com.rockstargames.oswrapper.GamePlatformServices rockstarFetchId
+com.rockstargames.oswrapper.GamePlatformServices rockstarInTrial
+com.rockstargames.oswrapper.GamePlatformServices rockstarRequestReview
+com.rockstargames.oswrapper.GamePlatformServices rockstarSetLocalePriority
+com.rockstargames.oswrapper.GamePlatformServices rockstarShowCloudDisabled
+com.rockstargames.oswrapper.GamePlatformServices rockstarShowGate
+com.rockstargames.oswrapper.GamePlatformServices rockstarShowInitial
+com.rockstargames.oswrapper.GamePlatformServices rockstarSignIn
+com.rockstargames.oswrapper.GamePlatformServices rockstarSignOut
+com.rockstargames.oswrapper.GamePlatformServices setMovieText
+com.rockstargames.oswrapper.GamePlatformServices setMovieTextScale
+com.rockstargames.oswrapper.GamePlatformServices setSplashImage
+com.rockstargames.oswrapper.GamePlatformServices setSplashText
+com.rockstargames.oswrapper.GamePlatformServices showSplashScreen
+com.rockstargames.oswrapper.GamePlatformServices stopMovie
+com.rockstargames.oswrapper.GamePlatformServices view

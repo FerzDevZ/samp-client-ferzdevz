@@ -79,7 +79,7 @@ if [[ $NATIVE_ONLY -eq 1 ]]; then
   echo "PASS (native only)"
   echo "  libsamp  : $SO ($(du -h "$SO" | cut -f1))"
   echo "  abi      : arm64-v8a"
-  echo "  apk      : skipped — an installable APK needs libGame.so (bin/fetch-blobs.sh)"
+  echo "  apk      : skipped: an installable APK needs libGame.so (bin/fetch-blobs.sh)"
   exit 0
 fi
 
@@ -132,10 +132,10 @@ if [[ $FRAMEWORK -eq 1 ]]; then
   FW_INDEX="$(unzip -l "$FW")"
   grep -q 'lib/arm64-v8a/libsamp.so' <<<"$FW_INDEX" || die "framework is missing libsamp.so"
   if grep -q 'lib/arm64-v8a/libGame.so' <<<"$FW_INDEX"; then
-    die "framework still contains libGame.so — it is not distributable"
+    die "framework still contains libGame.so, it is not distributable"
   fi
   ( cd "$ROOT/dist" && sha256sum "$(basename "$FW")" > "$(basename "$FW").sha256" )
-  echo "  framework: $FW ($(du -h "$FW" | cut -f1)) — no libGame.so, signed"
+  echo "  framework: $FW ($(du -h "$FW" | cut -f1)), no libGame.so, signed"
   echo "  complete : bin/patch-apk.sh --gta-apk <your GTA SA apk> --out client.apk"
 fi
 exit 0

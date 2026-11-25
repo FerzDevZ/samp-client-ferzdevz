@@ -94,7 +94,7 @@ public final class CacheDownloader {
                 progress.onFileDone(e.path, true);
             } catch (IOException ex) {
                 result.failures.add(e.path + ": " + ex.getMessage());
-                progress.onStatus("gagal: " + e.path + " — " + ex.getMessage());
+                progress.onStatus("gagal: " + e.path + ", " + ex.getMessage());
             }
         }
         return result;

@@ -1,11 +1,6 @@
+// Clean-room rewrite. Provenance, pinned names and what libGame.so expects: docs/OSWRAPPER.md.
 package com.rockstargames.oswrapper;
 
-import com.rockstargames.oswrapper.services.ILanguageServices;
-import com.rockstargames.oswrapper.services.IMiscServices;
-import com.rockstargames.oswrapper.services.IMovieServices;
-import com.rockstargames.oswrapper.services.IPlaylistServices;
-import com.rockstargames.oswrapper.services.IRockstarServices;
-import com.rockstargames.oswrapper.services.ISplashScreenServices;
 import com.rockstargames.oswrapper.services.LanguageServices;
 import com.rockstargames.oswrapper.services.MiscServices;
 import com.rockstargames.oswrapper.services.MovieServices;
@@ -13,248 +8,212 @@ import com.rockstargames.oswrapper.services.PlaylistServices;
 import com.rockstargames.oswrapper.services.RockstarServices;
 import com.rockstargames.oswrapper.services.SplashScreenServices;
 
-public final class GamePlatformServices implements
-        ILanguageServices,
-        IMovieServices,
-        IPlaylistServices,
-        IRockstarServices,
-        ISplashScreenServices,
-        IMiscServices {
+/**
+ * The Java side of the engine's platform callbacks: movies, playlists, HTTP, the splash
+ * screen, the locale and the app version.
+ *
+ * Every method name and signature below is looked up by literal name from libGame.so, so
+ * the shape of this class is fixed even though the bodies are ours. The class deliberately
+ * has no interface hierarchy: an interface here would only mirror a C++ vtable, and nothing
+ * in the binary ever mentions those interface names.
+ */
+public final class GamePlatformServices {
 
-    private final LanguageServices    languageServices;
-    private final MovieServices       movieServices;
-    private final PlaylistServices    playlistServices;
-    private final RockstarServices    rockstarServices;
-    private final SplashScreenServices splashScreenServices;
-    private final MiscServices        miscServices;
-
+    /** Read by Java callers and by the engine. Do not make private. */
     public final GameActivityBase activity;
-    public final GameView         view;
+    public final GameView view;
+
+    private final LanguageServices languageServices;
+    private final MovieServices movieServices;
+    private final PlaylistServices playlistServices;
+    private final RockstarServices rockstarServices;
+    private final SplashScreenServices splashScreenServices;
+    private final MiscServices miscServices;
 
     public GamePlatformServices(GameActivityBase activity, GameView view) {
-        if (activity == null) throw new NullPointerException("activity is null");
-        if (view == null)     throw new NullPointerException("view is null");
+        this.activity = require(activity, "activity");
+        this.view = require(view, "view");
 
-        this.activity = activity;
-        this.view     = view;
-
-        this.languageServices     = new LanguageServices(activity);
-        this.movieServices        = new MovieServices(view);
-        this.playlistServices     = new PlaylistServices(view);
-        this.rockstarServices     = new RockstarServices(activity);
-        this.splashScreenServices = new SplashScreenServices(view);
-        this.miscServices         = new MiscServices(activity);
+        this.languageServices = new LanguageServices(this.activity);
+        this.movieServices = new MovieServices(this.view);
+        this.playlistServices = new PlaylistServices(this.view);
+        this.rockstarServices = new RockstarServices(this.activity);
+        this.splashScreenServices = new SplashScreenServices(this.view);
+        this.miscServices = new MiscServices(this.activity);
     }
 
-    // -----------------------------------------------------------------------
-    // ILanguageServices
-    // -----------------------------------------------------------------------
+    /**
+     * The engine passes strings it received from the network or from a data file. A null
+     * one is a bug in the caller, so it fails loudly here instead of turning into a
+     * NullPointerException inside a collaborator, where the stack would name the wrong class.
+     */
+    private static <T> T require(T value, String name) {
+        if (value == null) {
+            throw new NullPointerException(name + " is null");
+        }
+        return value;
+    }
 
-    @Override
+    // --- locale -------------------------------------------------------------
+
     public int getDeviceLocale() {
         return languageServices.getDeviceLocale();
     }
 
-    // -----------------------------------------------------------------------
-    // IMovieServices
-    // -----------------------------------------------------------------------
+    // --- movies -------------------------------------------------------------
 
-    @Override
     public boolean isMoviePlaying() {
         return movieServices.isMoviePlaying();
     }
 
-    @Override
     public void playMovie(String filename, boolean skippable) {
-        if (filename == null) throw new NullPointerException("filename is null");
-        movieServices.playMovie(filename, skippable);
+        movieServices.playMovie(require(filename, "filename"), skippable);
     }
 
-    @Override
     public void stopMovie() {
         movieServices.stopMovie();
     }
 
-    @Override
     public void setMovieText(String text) {
-        if (text == null) throw new NullPointerException("text is null");
-        movieServices.setMovieText(text);
+        movieServices.setMovieText(require(text, "text"));
     }
 
-    @Override
     public void setMovieTextScale(int scale) {
         movieServices.setMovieTextScale(scale);
     }
 
-    // -----------------------------------------------------------------------
-    // IPlaylistServices
-    // -----------------------------------------------------------------------
+    // --- playlists ----------------------------------------------------------
 
-    @Override
     public int playlistCount() {
         return playlistServices.playlistCount();
     }
 
-    @Override
     public boolean playlistIsPlaying() {
         return playlistServices.playlistIsPlaying();
     }
 
-    @Override
     public void playlistOpen(String name) {
-        if (name == null) throw new NullPointerException("name is null");
-        playlistServices.playlistOpen(name);
+        playlistServices.playlistOpen(require(name, "name"));
     }
 
-    @Override
     public void playlistPause() {
         playlistServices.playlistPause();
     }
 
-    @Override
     public void playlistPlay() {
         playlistServices.playlistPlay();
     }
 
-    @Override
     public void playlistSetVolume(float volume) {
         playlistServices.playlistSetVolume(volume);
     }
 
-    @Override
     public void playlistStop() {
         playlistServices.playlistStop();
     }
 
-    // -----------------------------------------------------------------------
-    // IRockstarServices
-    // -----------------------------------------------------------------------
+    // --- HTTP and the Rockstar account --------------------------------------
+    // The account surface is kept because the engine calls it; it reports "signed out"
+    // and answers nothing, because this build has no Rockstar account.
 
-    @Override
     public void httpCancel(int id) {
         rockstarServices.httpCancel(id);
     }
 
-    @Override
     public void httpGet(int id, String url, String[] headerNames, String[] headerValues) {
-        if (url == null)          throw new NullPointerException("url is null");
-        if (headerNames == null)  throw new NullPointerException("headerNames is null");
-        if (headerValues == null) throw new NullPointerException("headerValues is null");
-        rockstarServices.httpGet(id, url, headerNames, headerValues);
+        rockstarServices.httpGet(
+                id,
+                require(url, "url"),
+                require(headerNames, "headerNames"),
+                require(headerValues, "headerValues"));
     }
 
-    @Override
     public void httpHead(int id, String url) {
-        if (url == null) throw new NullPointerException("url is null");
-        rockstarServices.httpHead(id, url);
+        rockstarServices.httpHead(id, require(url, "url"));
     }
 
-    @Override
-    public void httpPost(int id, String url, String[] headerNames, String[] headerValues, byte[] data) {
-        if (url == null)          throw new NullPointerException("url is null");
-        if (headerNames == null)  throw new NullPointerException("headerNames is null");
-        if (headerValues == null) throw new NullPointerException("headerValues is null");
-        if (data == null)         throw new NullPointerException("data is null");
-        rockstarServices.httpPost(id, url, headerNames, headerValues, data);
+    public void httpPost(
+            int id, String url, String[] headerNames, String[] headerValues, byte[] data) {
+        rockstarServices.httpPost(
+                id,
+                require(url, "url"),
+                require(headerNames, "headerNames"),
+                require(headerValues, "headerValues"),
+                require(data, "data"));
     }
 
-    @Override
     public void rockstarAccountDeletion() {
         rockstarServices.rockstarAccountDeletion();
     }
 
-    @Override
     public void rockstarFetchId() {
         rockstarServices.rockstarFetchId();
     }
 
-    @Override
     public boolean rockstarInTrial() {
         return rockstarServices.rockstarInTrial();
     }
 
-    @Override
     public void rockstarRequestReview() {
         rockstarServices.rockstarRequestReview();
     }
 
-    @Override
     public void rockstarSetLocalePriority(String localeTag) {
         rockstarServices.rockstarSetLocalePriority(localeTag);
     }
 
-    @Override
     public void rockstarShowCloudDisabled() {
         rockstarServices.rockstarShowCloudDisabled();
     }
 
-    @Override
     public void rockstarShowGate(int id) {
         rockstarServices.rockstarShowGate(id);
     }
 
-    @Override
     public void rockstarShowInitial() {
         rockstarServices.rockstarShowInitial();
     }
 
-    @Override
     public void rockstarSignIn() {
         rockstarServices.rockstarSignIn();
     }
 
-    @Override
     public void rockstarSignOut() {
         rockstarServices.rockstarSignOut();
     }
 
-    // -----------------------------------------------------------------------
-    // ISplashScreenServices
-    // -----------------------------------------------------------------------
+    // --- splash screen ------------------------------------------------------
 
-    @Override
     public void hideSplashScreen() {
         splashScreenServices.hideSplashScreen();
     }
 
-    @Override
     public boolean isSplashScreenVisible() {
         return splashScreenServices.isSplashScreenVisible();
     }
 
-    @Override
     public void setSplashImage(String filename) {
-        if (filename == null) throw new NullPointerException("filename is null");
-        splashScreenServices.setSplashImage(filename);
+        splashScreenServices.setSplashImage(require(filename, "filename"));
     }
 
-    @Override
     public void setSplashText(String text) {
-        if (text == null) throw new NullPointerException("text is null");
-        splashScreenServices.setSplashText(text);
+        splashScreenServices.setSplashText(require(text, "text"));
     }
 
-    @Override
     public void showSplashScreen() {
         splashScreenServices.showSplashScreen();
     }
 
-    // -----------------------------------------------------------------------
-    // IMiscServices
-    // -----------------------------------------------------------------------
+    // --- misc ---------------------------------------------------------------
 
-    @Override
     public String getAppVersion() {
         return miscServices.getAppVersion();
     }
 
-    @Override
     public void openLink(String url) {
-        if (url == null) throw new NullPointerException("url is null");
-        miscServices.openLink(url);
+        miscServices.openLink(require(url, "url"));
     }
 
-    @Override
     public void quit() {
         miscServices.quit();
     }

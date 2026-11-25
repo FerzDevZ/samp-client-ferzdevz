@@ -32,7 +32,7 @@ public final class Check {
             passed++;
         } else {
             failed++;
-            failures.add(what + " — expected <" + expected + "> got <" + actual + ">");
+            failures.add(what + ": expected <" + expected + "> got <" + actual + ">");
         }
     }
 
@@ -40,7 +40,7 @@ public final class Check {
         try {
             body.run();
             failed++;
-            failures.add(what + " — nothing was thrown");
+            failures.add(what + ": nothing was thrown");
         } catch (Exception expected) {
             passed++;
         }

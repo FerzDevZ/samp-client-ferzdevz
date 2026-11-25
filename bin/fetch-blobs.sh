@@ -2,8 +2,8 @@
 # Fetch the two binary sets that are deliberately NOT in this repo, from the
 # upstream reference tree:
 #
-#   libGame.so       — Rockstar's game library (copyrighted, not ours to ship)
-#   libbass*.so      — BASS audio (un4seen licence forbids redistribution)
+#   libGame.so       : Rockstar's game library (copyrighted, not ours to ship)
+#   libbass*.so      : BASS audio (un4seen licence forbids redistribution)
 #
 # Everything else (cpp, java, gradle, resources) is tracked in client/.
 #
@@ -54,7 +54,7 @@ done
 
 echo
 echo "blobs ready."
-echo "NOTE: libGame.so is Rockstar's binary. It stays out of git on purpose —"
+echo "NOTE: libGame.so is Rockstar's binary. It stays out of git on purpose:"
 echo "      a distributable build must obtain it from the user's own GTA SA"
 echo "      install, not from this script."
 echo "next: $ROOT/bin/android-build.sh"

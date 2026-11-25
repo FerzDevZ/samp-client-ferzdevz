@@ -8,6 +8,7 @@
 #   bin/self-test.sh cache    only the cache builder round trip
 #   bin/self-test.sh patcher  only the patcher argument contract
 #   bin/self-test.sh termux   only the on-phone patcher (needs apksigner)
+#   bin/self-test.sh pins     only the wrapper name check (needs compiled classes)
 #
 # What it does NOT prove: that the game runs. That needs a phone and a GTA install.
 set -uo pipefail
@@ -194,13 +195,40 @@ PYEOF
   rm -rf "$tmp"
 }
 
+run_pins() {
+  head_ "wrapper names the engine looks up"
+  local classes="client/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+  if [ ! -d "$classes" ]; then
+    printf '  skip  no compiled classes yet (cd client && ./gradlew :app:assembleDebug)\n'
+    return 0
+  fi
+  if ./bin/wrapper-pins.sh --classes "$classes" >"${TMPDIR:-/tmp}/pins.log" 2>&1; then
+    ok "$(tail -1 "${TMPDIR:-/tmp}/pins.log")"
+  else
+    bad "pinned name lost: $(grep -m1 missing "${TMPDIR:-/tmp}/pins.log" | tr -d ' ')"
+  fi
+
+  # the check has to fail when a name really is gone, so break one on purpose
+  local tmp
+  tmp="$(mktemp)"
+  { printf 'com.rockstargames.oswrapper.GamePlatformServices quit\n'
+    printf 'com.rockstargames.oswrapper.GamePlatformServices thisNameDoesNotExist\n'; } >"$tmp"
+  if ./bin/wrapper-pins.sh --classes "$classes" --pins "$tmp" >/dev/null 2>&1; then
+    bad "the pin check accepted a name that does not exist"
+  else
+    ok "flags an invented name"
+  fi
+  rm -f "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
   patcher) run_patcher ;;
   termux)  run_termux ;;
-  all)     run_jvm; run_cache; run_patcher; run_termux ;;
-  *)       echo "usage: $0 [all|jvm|cache|patcher|termux]" >&2; exit 2 ;;
+  pins)    run_pins ;;
+  all)     run_jvm; run_cache; run_patcher; run_termux; run_pins ;;
+  *)       echo "usage: $0 [all|jvm|cache|patcher|termux|pins]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

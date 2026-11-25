@@ -72,11 +72,25 @@ dekompilasi untuk kelas-kelas ini, hanya implementasi ulang antarmukanya.
 mencetak jumlah baris. Pengukuran terakhir:
 
 ```
-rewritten: 2 files, 162 lines
+rewritten: 3 files, 382 lines
   ok    com/nvidia/devtech/NvUtil.java
   ok    com/rockstargames/oswrapper/DeviceInfo.java
-derived:   33 files, 4958 lines
+  ok    com/rockstargames/oswrapper/GamePlatformServices.java
+derived:   26 files, 4568 lines
 ```
+
+Iris kedua berisi dua hal, dan satu di antaranya penghapusan, bukan penulisan ulang.
+`GamePlatformServices` dulu fasad di atas enam interface `I*Services` yang tugasnya cuma
+menyalin vtable C++; `strings -n 6 libGame.so | grep -cx ILanguageServices` menghasilkan
+0 untuk keenamnya, jadi tidak ada apa pun di luar source kita yang menyebutnya. Interface
+itu dihapus, enam service tetap dengan nama dan isinya, dan engine tetap menemukan
+ke-34 nama callback karena nama itulah yang dipatok.
+
+Daftar pin sekarang jadi gerbang, bukan paragraf: `tests/pins/oswrapper-pins.txt` memuat
+setiap nama yang terukur di `libGame.so`, dan `bin/wrapper-pins.sh` menjalankan `javap`
+atas class hasil kompilasi lalu gagal kalau ada yang hilang. `bin/self-test.sh`
+menjalankannya, termasuk kasus negatif dengan nama karangan, karena pemeriksaan yang
+tidak bisa gagal bukan pemeriksaan.
 
 Jalankan sendiri untuk angka terbaru; tabel di bawah adalah urutan kerja, bukan janji
 tanggal.
@@ -84,8 +98,8 @@ tanggal.
 | Urutan | File | Alasan urutan |
 |---|---|---|
 | 1 | `DeviceInfo`, `NvUtil` | kecil, tanpa dependensi, dan dibaca engine paling awal |
-| 2 | `GamePlatformServices` | kelas ketiga yang disebut `libGame.so`, callback ke Java |
-| 3 | `GameNative` | hanya 38 deklarasi, tidak ada isi yang perlu dikarang |
+| 2 | `GamePlatformServices` | selesai: kelas ketiga yang disebut `libGame.so`, 34 nama callback dipatok |
+| 3 | `GameNative` | berikutnya: hanya 38 deklarasi, tidak ada isi yang perlu dikarang |
 | 4 | `GameActivityBase`, `GameView`, `view/*` | permukaan activity dan input yang dipakai kode kita sendiri |
 | 5 | `GameThread` (1221 baris) | loop frame; terakhir karena semua di atas harus stabil dulu |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | cangkang Play Asset Delivery, sudah digantikan downloader sendiri, kandidat dihapus bukan ditulis ulang |
@@ -103,6 +117,8 @@ tanggal.
 
 4. `bin/oswrapper-audit.sh` harus menampilkan file itu di bagian `rewritten`.
 5. `cd client && ./gradlew :app:assembleDebug` harus tetap hijau.
+6. `bin/wrapper-pins.sh` harus lolos; alat itu membaca class hasil kompilasi, jadi rename
+   yang diterima compiler tetap tertangkap.
 6. Sebutkan di commit kalau ada perubahan perilaku. Penulisan ulang yang setara tidak
    perlu catatan perilaku; yang memperbaiki crash null perlu.
 
