@@ -40,8 +40,9 @@ removed. It contains no Rockstar binary, but it does contain the
 jadx. Those are a derivative of Rockstar's code, not a clean-room rewrite.
 
 That distinction matters if you publish it: removing a binary is not the same as
-replacing decompiled source. Treat the framework as something to build locally,
-and treat a clean-room rewrite of the wrapper as outstanding work. The patcher and
+replacing decompiled source. Treat the framework as something to build locally until
+[OSWRAPPER.md](OSWRAPPER.md) reports zero derived files, and even then get advice
+before publishing, because that rewrite is not a legal clean room. The patcher and
 `libsamp.so` are unaffected, they are ours.
 
 ## Names left in place

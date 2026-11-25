@@ -1,17 +1,31 @@
+// Clean-room rewrite. Provenance, pinned names and what libGame.so expects: docs/OSWRAPPER.md.
 package com.rockstargames.oswrapper;
 
 import android.app.UiModeManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Vibrator;
 import android.util.Log;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+/**
+ * Device facts that the engine reads once, at start-up.
+ *
+ * <p>The class name, the ten public fields and their types are fixed by
+ * {@code libGame.so}, which reaches them through JNI field lookup. Renaming a field
+ * breaks the engine silently, so the field block below is treated as a binary
+ * interface and not as normal code.
+ */
 public class DeviceInfo {
 
     public static final String TAG = "DeviceInfo";
+
+    private static final String CPU_MAX_FREQ = "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq";
 
     public final int cpuFrequency;
     public final String hardware;
@@ -25,46 +39,58 @@ public class DeviceInfo {
     public final String product;
 
     public DeviceInfo(Context context) {
-        if (context == null) throw new NullPointerException("context is null");
-
-        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-
-        // CPU Frequency
-        int cpuFreq = 0;
-        try {
-            File cpuFile = new File("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
-            BufferedReader reader = new BufferedReader(new FileReader(cpuFile));
-            String line = reader.readLine();
-            reader.close();
-            if (line != null) {
-                cpuFreq = Integer.parseInt(line.trim());
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to read cpufreq", e);
+        if (context == null) {
+            throw new IllegalArgumentException("context is null");
         }
-        this.cpuFrequency = cpuFreq;
 
-        // TV Device check
-        this.isTvDevice = (uiModeManager != null) && (uiModeManager.getCurrentModeType() == UiModeManager.MODE_NIGHT_NO + 3);
+        Configuration config = context.getResources().getConfiguration();
 
-        // Vibrator check
-        this.hasVibrator = (vibrator != null) && vibrator.hasVibrator();
-
-        // OS Version
+        this.cpuFrequency = readCpuMaxFrequency();
         this.osVersion = Build.VERSION.SDK_INT;
 
-        // Device info
-        this.model = Build.MODEL != null ? Build.MODEL : "";
-        this.product = Build.PRODUCT != null ? Build.PRODUCT : "";
-        this.manufacturer = Build.MANUFACTURER != null ? Build.MANUFACTURER : "";
-        this.hardware = Build.HARDWARE != null ? Build.HARDWARE : "";
+        this.model = orEmpty(Build.MODEL);
+        this.product = orEmpty(Build.PRODUCT);
+        this.manufacturer = orEmpty(Build.MANUFACTURER);
+        this.hardware = orEmpty(Build.HARDWARE);
 
-        // Screen type
-        int screenLayout = context.getResources().getConfiguration().screenLayout & 0x0F;
-        this.isPhone = screenLayout < 3;
+        this.isTvDevice = isTelevision(context);
+        this.hasVibrator = hasVibrator(context);
+        this.isPhone = (config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
+                < Configuration.SCREENLAYOUT_SIZE_LARGE;
+        this.hasTouchScreen = config.touchscreen != Configuration.TOUCHSCREEN_NOTOUCH;
+    }
 
-        // Touch screen
-        this.hasTouchScreen = context.getResources().getConfiguration().touchscreen != 1;
+    /**
+     * Highest frequency the first core reports, in kHz, or 0 when the kernel does not
+     * expose it. Several Android builds hide the file behind SELinux, so a zero here is
+     * normal and must not stop start-up.
+     */
+    private static int readCpuMaxFrequency() {
+        File file = new File(CPU_MAX_FREQ);
+        if (!file.canRead()) {
+            return 0;
+        }
+        try {
+            String raw = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8).trim();
+            return raw.isEmpty() ? 0 : Integer.parseInt(raw);
+        } catch (IOException | NumberFormatException e) {
+            Log.w(TAG, "cannot read " + CPU_MAX_FREQ + ": " + e.getMessage());
+            return 0;
+        }
+    }
+
+    private static boolean isTelevision(Context context) {
+        UiModeManager manager = context.getSystemService(UiModeManager.class);
+        return manager != null
+                && manager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+    }
+
+    private static boolean hasVibrator(Context context) {
+        Vibrator vibrator = context.getSystemService(Vibrator.class);
+        return vibrator != null && vibrator.hasVibrator();
+    }
+
+    private static String orEmpty(String value) {
+        return value == null ? "" : value;
     }
 }

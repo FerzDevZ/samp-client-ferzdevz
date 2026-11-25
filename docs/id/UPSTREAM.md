@@ -58,7 +58,23 @@ mengembalikan 0.
 | `bin/patch-apk.sh` | melengkapi APK framework dengan `libGame.so` milik pengguna |
 | `bin/android-build.sh` | gate build dengan mode `native` (CI) dan `framework` (boleh diterbitkan) |
 | `.github/workflows/ci.yml` | kompilasi dan verifikasi, gagal bila binary proprietary di-stage |
+| `bin/oswrapper-audit.sh` | menghitung file wrapper yang sudah ditulis ulang vs yang masih turunan dex |
 | `docs/` | dokumentasi ini |
+
+## Penulisan ulang wrapper
+
+`com/rockstargames/oswrapper/DeviceInfo.java` dan `com/nvidia/devtech/NvUtil.java`
+sudah bukan hasil dekompilasi. Nama, daftar argumen, dan nama field publik tidak
+berubah karena `libGame.so` mencarinya; isi, penanganan error, dan komentarnya milik
+kita. Ada dua perubahan perilaku, keduanya di jalur error:
+
+- `DeviceInfo` melempar `IllegalArgumentException` untuk context null, bukan
+  `NullPointerException`, dan membaca frekuensi CPU lewat `java.nio` dengan satu baris
+  log saat gagal;
+- `NvUtil.getParameter` mengembalikan null kalau belum ada activity, bukan melempar,
+  dan `setAppLocalValue(key, null)` menghapus entri, bukan menyimpan null.
+
+Sisa file dan urutan kerjanya: [OSWRAPPER.md](OSWRAPPER.md).
 
 ## Yang tidak dikerjakan di sini
 

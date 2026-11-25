@@ -24,6 +24,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Data game | **tidak ada di repo ini**, aplikasi mengunduhnya dari hostmu sendiri, lihat [docs/id/DATA.md](docs/id/DATA.md) |
 | Setup data di HP | **ada**, pilih varian, verifikasi SHA-256, unduh dengan resume, bagikan log |
 | APK di GitHub Release | **tidak**, APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
+| Tulis ulang wrapper | **berjalan**, 2 dari 35 file, sisanya dilaporkan `bin/oswrapper-audit.sh` |
 
 ## Mendapatkan APK yang bisa dipasang
 
@@ -79,6 +80,7 @@ English | Indonesia
 [docs/OPERATIONS.md](docs/OPERATIONS.md) | [docs/id/OPERATIONS.md](docs/id/OPERATIONS.md)
 [docs/LEGAL.md](docs/LEGAL.md) | [docs/id/LEGAL.md](docs/id/LEGAL.md)
 [docs/UPSTREAM.md](docs/UPSTREAM.md) | [docs/id/UPSTREAM.md](docs/id/UPSTREAM.md)
+[docs/OSWRAPPER.md](docs/OSWRAPPER.md) | [docs/id/OSWRAPPER.md](docs/id/OSWRAPPER.md)
 
 ## Kebutuhan
 

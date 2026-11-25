@@ -39,10 +39,10 @@ Rockstar. Tidak ada binary Rockstar di dalamnya, tapi ada class Java
 kode Rockstar, bukan hasil tulis ulang bersih.
 
 Pembedaan ini penting kalau kamu menerbitkannya: membuang binary tidak sama dengan
-mengganti source hasil dekompilasi. Perlakukan framework sebagai sesuatu yang
-dibangun lokal, dan anggap penulisan ulang wrapper secara bersih sebagai pekerjaan
-yang belum selesai. Patcher dan `libsamp.so` tidak terpengaruh, keduanya milik
-kita.
+mengganti source hasil dekompilasi. Perlakukan framework sebagai sesuatu yang dibangun
+lokal sampai [OSWRAPPER.md](OSWRAPPER.md) melaporkan nol file turunan, dan meski begitu
+minta pendapat dulu sebelum menerbitkan, karena penulisan ulang itu bukan clean room
+legal. Patcher dan `libsamp.so` tidak terpengaruh, keduanya milik kita.
 
 ## Nama yang dibiarkan
 

@@ -1,6 +1,6 @@
 # docs/
 
-Two languages, six documents each. English in `docs/`, Indonesian in `docs/id/`.
+Two languages, eight documents each. English in `docs/`, Indonesian in `docs/id/`.
 
 | Document | English | Indonesian | Answers |
 |---|---|---|---|
@@ -11,6 +11,7 @@ Two languages, six documents each. English in `docs/`, Indonesian in `docs/id/`.
 | Legal | [LEGAL.md](LEGAL.md) | [id/LEGAL.md](id/LEGAL.md) | what is tracked, what is ignored and why, why no APK is published |
 | Patcher | [PATCHER.md](PATCHER.md) | [id/PATCHER.md](id/PATCHER.md) | how an installable APK is produced from a publishable framework plus a game APK the user owns |
 | Upstream delta | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | every change against `kuzia15/SAMP-Mobile` `GTA-2.11` |
+| Wrapper surface | [OSWRAPPER.md](OSWRAPPER.md) | [id/OSWRAPPER.md](id/OSWRAPPER.md) | which names `libGame.so` pins, what is free to rewrite, how far the rewrite has got |
 
 ---
 

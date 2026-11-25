@@ -24,6 +24,7 @@ Everything below was executed on this machine, not assumed.
 | Game data | **not in this repo**, the app downloads it from your own host, see [docs/DATA.md](docs/DATA.md) |
 | On-device data setup | **yes**, variant pick, SHA-256 verify, resumable download, share log |
 | APK in a GitHub Release | **no**, it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
+| Wrapper rewrite | **in progress**, 2 of 35 files, `bin/oswrapper-audit.sh` reports the rest |
 
 ## Getting an installable APK
 
@@ -79,6 +80,7 @@ English | Indonesian
 [docs/OPERATIONS.md](docs/OPERATIONS.md) | [docs/id/OPERATIONS.md](docs/id/OPERATIONS.md)
 [docs/LEGAL.md](docs/LEGAL.md) | [docs/id/LEGAL.md](docs/id/LEGAL.md)
 [docs/UPSTREAM.md](docs/UPSTREAM.md) | [docs/id/UPSTREAM.md](docs/id/UPSTREAM.md)
+[docs/OSWRAPPER.md](docs/OSWRAPPER.md) | [docs/id/OSWRAPPER.md](docs/id/OSWRAPPER.md)
 
 ## Requirements
 

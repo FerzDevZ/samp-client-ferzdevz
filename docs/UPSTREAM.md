@@ -57,7 +57,23 @@ returns 0.
 | `bin/patch-apk.sh` | completes the framework APK with a game-owned `libGame.so` |
 | `bin/android-build.sh` | build gate with `native` (CI) and `framework` (publishable) modes |
 | `.github/workflows/ci.yml` | compile-and-verify, fails if a proprietary binary is staged |
+| `bin/oswrapper-audit.sh` | counts rewritten wrapper files against the ones still derived from the shipped dex |
 | `docs/` | this documentation |
+
+## Wrapper rewrite
+
+`com/rockstargames/oswrapper/DeviceInfo.java` and `com/nvidia/devtech/NvUtil.java`
+are reimplementations, not the decompiled originals. Names, argument lists and public
+field names are unchanged because `libGame.so` looks them up; the bodies, error
+handling and comments are ours. Behaviour changes, both on error paths:
+
+- `DeviceInfo` throws `IllegalArgumentException` for a null context instead of
+  `NullPointerException`, and reads the CPU frequency through `java.nio` with a
+  single log line on failure;
+- `NvUtil.getParameter` returns null when no activity is set instead of throwing, and
+  `setAppLocalValue(key, null)` removes the entry instead of storing null.
+
+Remaining files and the order for the rest: [OSWRAPPER.md](OSWRAPPER.md).
 
 ## Not done here
 

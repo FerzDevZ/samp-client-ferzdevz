@@ -38,6 +38,11 @@ jobs:
       - name: bin/self-test.sh
         run: ./bin/self-test.sh
 
+      # Progress, not a gate yet: the wrapper rewrite is measured on every push so
+      # a regression (a derived file reappearing) is visible in the log.
+      - name: bin/oswrapper-audit.sh
+        run: ./bin/oswrapper-audit.sh
+
   native:
     name: libsamp.so (arm64-v8a, 0 warnings)
     runs-on: ubuntu-latest
