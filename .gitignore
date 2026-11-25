@@ -45,3 +45,7 @@ dist/
 # --- scratch ----------------------------------------------------------------
 *.orig
 *.rej
+
+# --- agent skill library (re-installable, not project source) ----------------
+.agents/
+.freebuff/
