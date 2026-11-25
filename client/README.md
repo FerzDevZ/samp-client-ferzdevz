@@ -12,13 +12,13 @@ app/src/main/AndroidManifest.xml  activities, permissions
 app/src/main/java/
   com/ferzdevzgta/game/           our Java entry: SAMP, GTASA, ui/ (chat, dialogs, attach-edit)
   com/ferzdevzgta/launcher/       launcher activity, MainActivity
-  com/rockstargames/oswrapper/    game wrapper (32 files) — PINNED by libGame.so
+  com/rockstargames/oswrapper/    game wrapper (32 files), PINNED by libGame.so
   com/rockstargames/gtasa/        GameActivity, DownloaderActivity, GLES3JNIView
-  com/nvidia/devtech/             NVIDIA glue (3 files) — PINNED by libGame.so
+  com/nvidia/devtech/             NVIDIA glue (3 files), PINNED by libGame.so
 app/src/main/cpp/
   samp/                           netgame, playerpool, vehiclepool, hooks, chat, gui, voice
   opus/ bass/ raknet/ imgui/      vendored third-party
-app/src/main/jniLibs/arm64-v8a/   prebuilt .so — mostly git-ignored
+app/src/main/jniLibs/arm64-v8a/   prebuilt .so, mostly git-ignored
 app/src/main/res/                 layouts, drawables, fonts, values/strings.xml
 ```
 

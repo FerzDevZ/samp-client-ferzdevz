@@ -8,7 +8,7 @@ pull requests and manually.
 1. JDK 17 (temurin), Android SDK, NDK `26.2.11394342`, cmake `3.22.1`.
 2. Fails if a proprietary binary is tracked in git: `libGame.so`, or any
    `vendor/bass/libs/*.so`.
-3. Runs `bin/android-build.sh native` — compiles `libsamp.so` with no Rockstar
+3. Runs `bin/android-build.sh native`, compiles `libsamp.so` with no Rockstar
    file present.
 4. Asserts the output is `ELF 64-bit LSB shared object, ARM aarch64` and that it
    contains SA-MP symbols.
@@ -39,7 +39,7 @@ request, dan manual.
 1. JDK 17 (temurin), Android SDK, NDK `26.2.11394342`, cmake `3.22.1`.
 2. Gagal kalau ada binary proprietary yang ter-track di git: `libGame.so` atau
    `vendor/bass/libs/*.so`.
-3. Menjalankan `bin/android-build.sh native` — mengompilasi `libsamp.so` tanpa file
+3. Menjalankan `bin/android-build.sh native`, mengompilasi `libsamp.so` tanpa file
    Rockstar.
 4. Memastikan hasilnya `ELF 64-bit LSB shared object, ARM aarch64` dan mengandung
    simbol SA-MP.

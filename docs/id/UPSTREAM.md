@@ -15,7 +15,7 @@ Tree ini ditulis di Windows dan tidak terompilasi di Linux sama sekali.
 | `#include "RGBA.h"` → `rgba.h` | `cpp/samp/game/rgba.cpp` | sama |
 | exec bit `gradlew` | `client/gradlew` | git tidak menyimpannya; gate build yang memasang |
 | newline di akhir `gradle.properties` | `client/gradle.properties` | key terakhir tanpa newline, jadi append berikutnya menempel dan diabaikan |
-| hapus `jniLibs/arm64-v8a/libbass.so`, `libbass_ssl.so` | — | menduplikasi baris link CMake, memicu error library ganda saat link |
+| hapus `jniLibs/arm64-v8a/libbass.so`, `libbass_ssl.so` | - | menduplikasi baris link CMake, memicu error library ganda saat link |
 
 ## Rebrand
 
@@ -64,5 +64,5 @@ mengembalikan 0.
 
 - tidak ada perubahan pada netcode SA-MP, hook, chat, GUI, atau voice;
 - tidak ada ABI kedua (`armeabi-v7a`, `x86_64` tidak pernah dibangun);
-- tidak ada tanda tangan untuk build release — output `release` masih unsigned
+- tidak ada tanda tangan untuk build release, output `release` masih unsigned
   sampai kamu menambahkan keystore dan `keystore.properties`.

@@ -7,11 +7,11 @@ Baca ini sebelum mengubah nama package, simbol JNI, atau path penyimpanan.
 ```
 client/                               source klien yang di-track (fork kuzia15/SAMP-Mobile GTA-2.11)
   app/src/main/java/
-    com/ferzdevzgta/game/             entry Java milik kita (SAMP, GTASA, ui/*) — 7 file
-    com/ferzdevzgta/launcher/         activity launcher — 3 file
-    com/rockstargames/oswrapper/      wrapper game — 32 file, NAMA PACKAGE TERKUNCI
-    com/rockstargames/gtasa/          shell activity/downloader — 5 file
-    com/nvidia/devtech/               glue NVIDIA — 3 file, NAMA PACKAGE TERKUNCI
+    com/ferzdevzgta/game/             entry Java milik kita (SAMP, GTASA, ui/*), 7 file
+    com/ferzdevzgta/launcher/         activity launcher, 3 file
+    com/rockstargames/oswrapper/      wrapper game, 32 file, NAMA PACKAGE TERKUNCI
+    com/rockstargames/gtasa/          shell activity/downloader, 5 file
+    com/nvidia/devtech/               glue NVIDIA, 3 file, NAMA PACKAGE TERKUNCI
   app/src/main/cpp/
     samp/                             netcode SA-MP, hook game, chat, GUI  -> libsamp.so
     opus/ bass/ raknet/ imgui/ ...    third-party yang di-vendor
@@ -95,4 +95,4 @@ Hardcoded, tidak bisa diubah dari build:
 | `/storage/emulated/0/GTA/SAMP/fonts/` | font UI native | `samp/main.cpp:295` |
 | `/storage/emulated/0/GTA/logcat.txt` | log klien | `samp/main.cpp:397` |
 
-Tree asetnya sendiri tidak dikirim — lihat [DATA.md](DATA.md).
+Tree asetnya sendiri tidak dikirim, lihat [DATA.md](DATA.md).

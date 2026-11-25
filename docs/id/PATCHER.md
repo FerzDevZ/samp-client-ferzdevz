@@ -23,7 +23,7 @@ bin/android-build.sh framework
 # untuk perangkat mana pun
 bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
 
-# instalasi split (base.apk + split_config.*.apk) — bentuk normal dari Play Store
+# instalasi split (base.apk + split_config.*.apk), bentuk normal dari Play Store
 bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
 ```
 
@@ -34,7 +34,7 @@ Dengan `--gta-split-dir` tool menyisir semua `.apk` di direktori itu, mengambil 
 package dari file yang mendeklarasikan `com.rockstargames.gtasa` (yaitu `base.apk`)
 dan mengambil library dari file yang benar-benar memuat
 `lib/arm64-v8a/libGame.so` (biasanya `split_config.arm64_v8a.apk`). Kalau tidak ada
-file yang memuat library, ia gagal — artinya split ABI yang salah yang disalin.
+file yang memuat library, ia gagal, artinya split ABI yang salah yang disalin.
 
 ## Urutan kerjanya
 
@@ -46,7 +46,7 @@ menghasilkan APK mati berukuran 36 MB.
 2. Periksa framework: harus punya `libsamp.so` dan **tidak** punya `libGame.so`.
 3. Keluarkan `libGame.so` ke direktori sementara, pastikan isinya
    `ELF 64-bit LSB shared object, ARM aarch64`.
-4. Suntik dengan `zip -0` — disimpan, bukan dipadatkan. Library native harus bisa
+4. Suntik dengan `zip -0`, disimpan, bukan dipadatkan. Library native harus bisa
    di-mmap langsung dari APK; yang dipadatkan tidak bisa, dan aplikasi mati dengan
    `UnsatisfiedLinkError` sebelum UI muncul.
 5. `zipalign -p -f 4`: alignment halaman untuk `.so`, 4 byte untuk sisanya.

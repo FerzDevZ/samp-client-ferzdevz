@@ -7,11 +7,11 @@ Read this before changing a package name, a JNI symbol, or a storage path.
 ```
 client/                               the client, tracked source (fork of kuzia15/SAMP-Mobile GTA-2.11)
   app/src/main/java/
-    com/ferzdevzgta/game/             our Java entry (SAMP, GTASA, ui/*) — 7 files
-    com/ferzdevzgta/launcher/         launcher activity — 3 files
-    com/rockstargames/oswrapper/      game wrapper — 32 files, PACKAGE NAME IS PINNED
-    com/rockstargames/gtasa/          activity/downloader shell — 5 files
-    com/nvidia/devtech/               NVIDIA glue — 3 files, PACKAGE NAME IS PINNED
+    com/ferzdevzgta/game/             our Java entry (SAMP, GTASA, ui/*), 7 files
+    com/ferzdevzgta/launcher/         launcher activity, 3 files
+    com/rockstargames/oswrapper/      game wrapper, 32 files, PACKAGE NAME IS PINNED
+    com/rockstargames/gtasa/          activity/downloader shell, 5 files
+    com/nvidia/devtech/               NVIDIA glue, 3 files, PACKAGE NAME IS PINNED
   app/src/main/cpp/
     samp/                             SA-MP netcode, game hooks, chat, GUI  -> libsamp.so
     opus/ bass/ raknet/ imgui/ ...    vendored third-party
@@ -95,4 +95,4 @@ Hardcoded, not configurable from the build:
 | `/storage/emulated/0/GTA/SAMP/fonts/` | font used by the native UI | `samp/main.cpp:295` |
 | `/storage/emulated/0/GTA/logcat.txt` | client log | `samp/main.cpp:397` |
 
-The asset tree itself is not shipped — see [DATA.md](DATA.md).
+The asset tree itself is not shipped, see [DATA.md](DATA.md).

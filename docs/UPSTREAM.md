@@ -14,7 +14,7 @@ The tree was authored on Windows and did not compile on Linux at all.
 | `#include "RGBA.h"` → `rgba.h` | `cpp/samp/game/rgba.cpp` | same |
 | `gradlew` exec bit | `client/gradlew` | git cannot store it; the build gate sets it |
 | trailing newline in `gradle.properties` | `client/gradle.properties` | the last key had none, so the next append was glued to it and ignored |
-| deleted `jniLibs/arm64-v8a/libbass.so`, `libbass_ssl.so` | — | duplicated the CMake link line, causing a duplicate-library error at link |
+| deleted `jniLibs/arm64-v8a/libbass.so`, `libbass_ssl.so` | - | duplicated the CMake link line, causing a duplicate-library error at link |
 
 ## Rebranded
 
@@ -63,5 +63,5 @@ returns 0.
 
 - no change to the SA-MP netcode, hooks, chat, GUI or voice code;
 - no second ABI (`armeabi-v7a`, `x86_64` were never built);
-- no signature for release builds — `release` output is unsigned until you add a
+- no signature for release builds, `release` output is unsigned until you add a
   keystore and `keystore.properties`.

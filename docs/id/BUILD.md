@@ -17,7 +17,7 @@ cmake lain sering tidak.
 
 | Perintah | Menghasilkan | Butuh `libGame.so` |
 |---|---|---|
-| `bin/fetch-blobs.sh` | menyalin `libGame.so` + BASS `.so` dari reference upstream | — |
+| `bin/fetch-blobs.sh` | menyalin `libGame.so` + BASS `.so` dari reference upstream | - |
 | `bin/android-build.sh native` | `libsamp.so` saja | tidak |
 | `bin/android-build.sh` | APK debug | ya |
 | `bin/android-build.sh release` | APK release (unsigned tanpa keystore) | ya |
@@ -72,7 +72,7 @@ adb install -r dist/samp-client-0.1.0-debug.apk
 ```
 
 Terpasang belum berarti bisa dibuka. Pembukaan pertama butuh tree aset di
-`/storage/emulated/0/GTA/` — lihat [DATA.md](DATA.md).
+`/storage/emulated/0/GTA/`, lihat [DATA.md](DATA.md).
 
 ## CI
 

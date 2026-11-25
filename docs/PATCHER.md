@@ -23,7 +23,7 @@ bin/android-build.sh framework
 # single APK install
 bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
 
-# split install (base.apk + split_config.*.apk) — the normal Play Store layout
+# split install (base.apk + split_config.*.apk), the normal Play Store layout
 bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
 ```
 
@@ -34,7 +34,7 @@ With `--gta-split-dir` the tool walks every `.apk` in the directory, takes the
 package name from whichever one declares `com.rockstargames.gtasa` (that is
 `base.apk`) and the library from whichever one actually carries
 `lib/arm64-v8a/libGame.so` (normally `split_config.arm64_v8a.apk`). It fails if no
-file carries the library — that means the wrong ABI split was extracted.
+file carries the library, that means the wrong ABI split was extracted.
 
 ## What it does, in order
 
@@ -46,7 +46,7 @@ file carries the library — that means the wrong ABI split was extracted.
    `libGame.so`.
 3. Extracts `libGame.so` to a temp dir and confirms it is
    `ELF 64-bit LSB shared object, ARM aarch64`.
-4. Injects it with `zip -0` — stored, not deflated. A native library must be
+4. Injects it with `zip -0`, stored, not deflated. A native library must be
    mmap-able straight out of the APK; a deflated one is not, and the app dies with
    `UnsatisfiedLinkError` before any UI.
 5. `zipalign -p -f 4`: page alignment for `.so`, 4-byte alignment for the rest.

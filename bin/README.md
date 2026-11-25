@@ -7,9 +7,9 @@ true turns out not to be.
 |---|---|---|
 | `android-build.sh` | build `libsamp.so` and/or the APK, then inspect the artifact | yes, except in `native` mode |
 | `patch-apk.sh` | inject a game-owned `libGame.so` into the framework APK, realign, re-sign | it is the input |
-| `fetch-blobs.sh` | copy the two binary sets that cannot be tracked in git | — |
-| `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | — |
-| `self-test.sh` | prove the JVM tests, the cache round trip and the patcher refusals still pass | — |
+| `fetch-blobs.sh` | copy the two binary sets that cannot be tracked in git | - |
+| `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | - |
+| `self-test.sh` | prove the JVM tests, the cache round trip and the patcher refusals still pass | - |
 
 ## android-build.sh
 
@@ -17,7 +17,7 @@ true turns out not to be.
 bin/android-build.sh            # debug APK
 bin/android-build.sh release    # release APK (unsigned without a keystore)
 bin/android-build.sh clean      # wipe build dirs, then debug APK
-bin/android-build.sh native     # libsamp.so only — no APK, no libGame.so
+bin/android-build.sh native     # libsamp.so only, no APK, no libGame.so
 bin/android-build.sh framework  # APK minus libGame.so, re-signed -> dist/samp-client-framework.apk
 ```
 
@@ -45,12 +45,12 @@ bin/patch-apk.sh --gta-apk GTA.apk --framework dist/samp-client-framework.apk --
 
 Refuses unless the game APK declares `com.rockstargames.gtasa` and carries an arm64
 `libGame.so`, and unless the framework carries `libsamp.so` and no `libGame.so`.
-Injects with `zip -0` (stored — a deflated `.so` cannot be mmap'd), `zipalign -p -f 4`,
+Injects with `zip -0` (stored, a deflated `.so` cannot be mmap'd), `zipalign -p -f 4`,
 signs, then verifies: signature, both libraries present and `Stored`, alignment still
 valid after signing, package unchanged.
 
 Tested: PASS on a fixture game APK (injected `libGame.so` byte-identical to the
-source), and three refusals — framework that still holds the game library, APK
+source), and three refusals, framework that still holds the game library, APK
 without it, APK with the wrong package.
 
 ## fetch-blobs.sh
@@ -63,7 +63,7 @@ bin/fetch-blobs.sh --force    # refetch
 Clones the upstream `GTA-2.11` branch into a temp dir and copies out:
 `jniLibs/arm64-v8a/libGame.so` and `samp/vendor/bass/libs/<abi>/*.so`.
 
-Both are ignored by git on purpose — Rockstar's binary and a licence that forbids
+Both are ignored by git on purpose, Rockstar's binary and a licence that forbids
 redistribution. See `docs/LEGAL.md`.
 
 ## build-cache.sh
@@ -93,9 +93,9 @@ tidak benar.
 |---|---|---|
 | `android-build.sh` | build `libsamp.so` dan/atau APK, lalu periksa artifact-nya | ya, kecuali mode `native` |
 | `patch-apk.sh` | menyuntik `libGame.so` milik pengguna ke APK framework, realign, tanda tangan ulang | itu inputnya |
-| `self-test.sh` | membuktikan tes JVM, round trip cache, dan penolakan patcher masih lolos | — |
-| `fetch-blobs.sh` | menyalin dua set binary yang tidak boleh masuk git | — |
-| `build-cache.sh` | membangun dan memverifikasi tree aset `/storage/emulated/0/GTA/` | — |
+| `self-test.sh` | membuktikan tes JVM, round trip cache, dan penolakan patcher masih lolos | - |
+| `fetch-blobs.sh` | menyalin dua set binary yang tidak boleh masuk git | - |
+| `build-cache.sh` | membangun dan memverifikasi tree aset `/storage/emulated/0/GTA/` | - |
 
 ## android-build.sh
 
@@ -117,19 +117,19 @@ inkremental, semuanya 0 warning.
 
 Menolak kalau APK game tidak mendeklarasikan `com.rockstargames.gtasa` atau tidak
 membawa `libGame.so` arm64, dan menolak kalau framework tidak punya `libsamp.so`
-atau masih punya `libGame.so`. Menyuntik dengan `zip -0` (stored — `.so` yang
+atau masih punya `libGame.so`. Menyuntik dengan `zip -0` (stored, `.so` yang
 dipadatkan tidak bisa di-mmap), `zipalign -p -f 4`, tanda tangan, lalu verifikasi:
 signature, kedua library ada dan `Stored`, alignment masih valid setelah
 ditandatangani, package tidak berubah.
 
 Sudah diuji: PASS pada APK game fixture (`libGame.so` hasil suntik identik
-byte-per-byte dengan sumber), dan tiga penolakan — framework yang masih membawa
+byte-per-byte dengan sumber), dan tiga penolakan, framework yang masih membawa
 library game, APK tanpa library itu, APK dengan package salah.
 
 ## fetch-blobs.sh
 
 Idempoten. Clone branch `GTA-2.11` upstream ke direktori sementara lalu menyalin
-`libGame.so` dan `libbass*.so`. Keduanya sengaja di-ignore git — binary Rockstar
+`libGame.so` dan `libbass*.so`. Keduanya sengaja di-ignore git, binary Rockstar
 dan lisensi yang melarang redistribusi. Lihat `docs/LEGAL.md`.
 
 ## build-cache.sh

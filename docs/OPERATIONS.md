@@ -67,7 +67,7 @@ Order matters, or you ship a crash:
 4. rebuild and confirm: `nm -D --defined-only libsamp.so | grep Java_` lists the
    new names, and `aapt2 dump badging apk | grep launchable-activity` names the
    new activity;
-5. update `android:name` in `AndroidManifest.xml` — an activity name must match the
+5. update `android:name` in `AndroidManifest.xml`, an activity name must match the
    real `.java` package, never the `applicationId`.
 
 Never rename `com.rockstargames.oswrapper` or `com.nvidia.devtech`; see
@@ -75,8 +75,8 @@ Never rename `com.rockstargames.oswrapper` or `com.nvidia.devtech`; see
 
 ## Invariants worth keeping
 
-Each one was a real failure at least once. `MEMORY.md` holds the full ledger with
-the root cause of every entry; the short version:
+Each one was a real failure at least once. The list below is the short version; the
+full version is executable, in `bin/self-test.sh` and the JVM tests:
 
 - an APK gate inspects the artifact, never the build exit code;
 - an activity name in the manifest follows the Java package, not the `applicationId`;

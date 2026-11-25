@@ -16,14 +16,14 @@ Everything below was executed on this machine, not assumed.
 
 | Item | State |
 |---|---|
-| `libsamp.so` arm64-v8a from source | **yes** — 3.5 MB, 0 warnings |
-| Debug APK | **yes** — 36 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.1.0` |
-| Clean rebuild, no cache | **yes** — 2m08s, 0 warnings |
-| Telemetry | **removed** — Firebase, AppLovin, Splunk; APK 43 MB → 36 MB |
-| `libsamp.so` builds without Rockstar binary | **yes** — 10s, that is what CI runs |
-| Game data | **not in this repo** — the app downloads it from your own host, see [docs/DATA.md](docs/DATA.md) |
-| On-device data setup | **yes** — variant pick, SHA-256 verify, resumable download, share log |
-| APK in a GitHub Release | **no** — it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
+| `libsamp.so` arm64-v8a from source | **yes**, 3.5 MB, 0 warnings |
+| Debug APK | **yes**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.1.0` |
+| Clean rebuild, no cache | **yes**, 2m08s, 0 warnings |
+| Telemetry | **removed**, Firebase, AppLovin, Splunk; APK 43 MB → 37 MB |
+| `libsamp.so` builds without Rockstar binary | **yes**, 10s, that is what CI runs |
+| Game data | **not in this repo**, the app downloads it from your own host, see [docs/DATA.md](docs/DATA.md) |
+| On-device data setup | **yes**, variant pick, SHA-256 verify, resumable download, share log |
+| APK in a GitHub Release | **no**, it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
 
 ## Getting an installable APK
 
@@ -57,13 +57,13 @@ bin/android-build.sh native     # libsamp.so only, 3.5 MB, that is what CI runs
 | `bin/build-cache.sh …` | the asset tree is complete and matches a SHA-256 manifest |
 | `bin/build-cache.sh --verify` | an existing cache is byte-identical to its manifest |
 | `bin/patch-apk.sh` | the completed APK installs: both native libs stored, aligned, signature valid |
-| `bin/self-test.sh` | manifest parsing, the downloader against a local HTTP server, log rotation, the INI editor, the cache round trip and the patcher refusals — 15 checks, no device |
+| `bin/self-test.sh` | manifest parsing, the downloader against a local HTTP server, log rotation, the INI editor, the cache round trip and the patcher refusals, 15 checks, no device |
 
 ## Layout
 
 ```
-client/     the client source (1322 files) — see client/README.md
-bin/        build, blob-fetch and cache gates — see bin/README.md
+client/     the client source (1322 files), see client/README.md
+bin/        build, blob-fetch and cache gates, see bin/README.md
 docs/       architecture, build, data, legal, operations, upstream delta
 .github/    CI: compiles libsamp.so, refuses to ship proprietary binaries
 dist/       last APK built here + SHA-256, git-ignored
@@ -79,9 +79,6 @@ English | Indonesian
 [docs/OPERATIONS.md](docs/OPERATIONS.md) | [docs/id/OPERATIONS.md](docs/id/OPERATIONS.md)
 [docs/LEGAL.md](docs/LEGAL.md) | [docs/id/LEGAL.md](docs/id/LEGAL.md)
 [docs/UPSTREAM.md](docs/UPSTREAM.md) | [docs/id/UPSTREAM.md](docs/id/UPSTREAM.md)
-
-`MEMORY.md` is the invariant ledger: every non-trivial failure this project hit,
-with its root cause and the rule that prevents a repeat.
 
 ## Requirements
 

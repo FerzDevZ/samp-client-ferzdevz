@@ -65,7 +65,7 @@ Urutannya penting, kalau tidak yang dikirim adalah crash:
 4. build lalu pastikan: `nm -D --defined-only libsamp.so | grep Java_` menampilkan
    nama baru, dan `aapt2 dump badging apk | grep launchable-activity` menampilkan
    activity baru;
-5. perbarui `android:name` di `AndroidManifest.xml` — nama activity harus mengikuti
+5. perbarui `android:name` di `AndroidManifest.xml`, nama activity harus mengikuti
    package `.java` yang nyata, bukan `applicationId`.
 
 Jangan pernah me-rename `com.rockstargames.oswrapper` atau `com.nvidia.devtech`;

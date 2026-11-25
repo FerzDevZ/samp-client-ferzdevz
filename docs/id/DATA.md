@@ -45,7 +45,7 @@ atau `--dir` (tree yang sudah diekstrak).
 | `full` | semuanya: audio radio, film cutscene, tekstur, model | ~1,5–2,5 GB | radio jalan, cutscene main |
 | `lite` | folder `audio/` dan `movies/` dibuang | ~0,4–0,9 GB | tanpa radio, tanpa cutscene; gameplay dan SA-MP tidak terpengaruh |
 
-Dua ukuran itu perkiraan komunitas — tidak ada instalasi GTA SA di mesin tempat ini
+Dua ukuran itu perkiraan komunitas, tidak ada instalasi GTA SA di mesin tempat ini
 ditulis, jadi tidak diukur di sini. Tool mencetak angka asli dari file kamu dan
 menuliskannya ke manifest.
 
@@ -120,4 +120,4 @@ dihapus (bukan disimpan), dan path manifest yang keluar dari direktori tujuan
 Cara legal memberi pemain instalasi sekali klik: host cache yang **kamu bangun dari
 salinanmu sendiri** di servermu sendiri, lalu arahkan downloader klien ke sana
 (lihat *Mengunduhnya dari dalam aplikasi* di atas). Itu keputusanmu, servermu,
-risikomu — bukan sesuatu yang dilakukan repo ini.
+risikomu, bukan sesuatu yang dilakukan repo ini.

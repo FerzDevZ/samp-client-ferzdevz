@@ -6,7 +6,7 @@ Bukan nasihat hukum. Ini garis yang diambil repo ini, dan alasan tiap bagiannya.
 
 | Di-track | Kenapa boleh |
 |---|---|
-| source `client/` — 1322 file, C++ dan Java | kode klien open-source, dimodifikasi |
+| source `client/`, 1322 file, C++ dan Java | kode klien open-source, dimodifikasi |
 | `libsamp.so` hasil build kita (artifact CI) | hasil build kita, tidak butuh byte Rockstar untuk memproduksinya |
 | `bin/`, `docs/`, `.github/` | tooling dan teks |
 
@@ -41,13 +41,13 @@ kode Rockstar, bukan hasil tulis ulang bersih.
 Pembedaan ini penting kalau kamu menerbitkannya: membuang binary tidak sama dengan
 mengganti source hasil dekompilasi. Perlakukan framework sebagai sesuatu yang
 dibangun lokal, dan anggap penulisan ulang wrapper secara bersih sebagai pekerjaan
-yang belum selesai. Patcher dan `libsamp.so` tidak terpengaruh — keduanya milik
+yang belum selesai. Patcher dan `libsamp.so` tidak terpengaruh, keduanya milik
 kita.
 
 ## Nama yang dibiarkan
 
 Tiga package Java memakai nama aslinya karena binary prebuilt merujuknya lewat path
-— mengganti namanya merusak aplikasi, bukan status hak cipta:
+,  mengganti namanya merusak aplikasi, bukan status hak cipta:
 
 | Package | Bukti |
 |---|---|

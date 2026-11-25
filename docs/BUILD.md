@@ -17,7 +17,7 @@ a different cmake often does not.
 
 | Command | Produces | Needs `libGame.so` |
 |---|---|---|
-| `bin/fetch-blobs.sh` | copies `libGame.so` + BASS `.so` from the upstream reference | — |
+| `bin/fetch-blobs.sh` | copies `libGame.so` + BASS `.so` from the upstream reference | - |
 | `bin/android-build.sh native` | `libsamp.so` only | no |
 | `bin/android-build.sh` | debug APK | yes |
 | `bin/android-build.sh release` | release APK (unsigned without a keystore) | yes |
@@ -71,7 +71,7 @@ adb install -r dist/samp-client-0.1.0-debug.apk
 ```
 
 Installing is not the same as launching. First launch needs the asset tree at
-`/storage/emulated/0/GTA/` — see [DATA.md](DATA.md).
+`/storage/emulated/0/GTA/`, see [DATA.md](DATA.md).
 
 ## CI
 

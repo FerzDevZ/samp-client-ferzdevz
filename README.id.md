@@ -16,14 +16,14 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 
 | Item | Kondisi |
 |---|---|
-| `libsamp.so` arm64-v8a dari source | **ya** — 3,5 MB, 0 warning |
-| APK debug | **ya** — 36 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.1.0` |
-| Rebuild bersih tanpa cache | **ya** — 2m08s, 0 warning |
-| Telemetri | **dihapus** — Firebase, AppLovin, Splunk; APK 43 MB → 36 MB |
-| `libsamp.so` terbangun tanpa binary Rockstar | **ya** — 10s, inilah yang dijalankan CI |
-| Data game | **tidak ada di repo ini** — aplikasi mengunduhnya dari hostmu sendiri, lihat [docs/id/DATA.md](docs/id/DATA.md) |
-| Setup data di HP | **ada** — pilih varian, verifikasi SHA-256, unduh dengan resume, bagikan log |
-| APK di GitHub Release | **tidak** — APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
+| `libsamp.so` arm64-v8a dari source | **ya**, 3,5 MB, 0 warning |
+| APK debug | **ya**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.1.0` |
+| Rebuild bersih tanpa cache | **ya**, 2m08s, 0 warning |
+| Telemetri | **dihapus**, Firebase, AppLovin, Splunk; APK 43 MB → 37 MB |
+| `libsamp.so` terbangun tanpa binary Rockstar | **ya**, 10s, inilah yang dijalankan CI |
+| Data game | **tidak ada di repo ini**, aplikasi mengunduhnya dari hostmu sendiri, lihat [docs/id/DATA.md](docs/id/DATA.md) |
+| Setup data di HP | **ada**, pilih varian, verifikasi SHA-256, unduh dengan resume, bagikan log |
+| APK di GitHub Release | **tidak**, APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
 
 ## Mendapatkan APK yang bisa dipasang
 
@@ -57,13 +57,13 @@ bin/android-build.sh native     # libsamp.so saja, 3,5 MB, inilah yang dijalanka
 | `bin/build-cache.sh …` | tree aset lengkap dan cocok dengan manifest SHA-256 |
 | `bin/build-cache.sh --verify` | cache yang ada identik byte-per-byte dengan manifest-nya |
 | `bin/patch-apk.sh` | APK hasil rakitan bisa dipasang: kedua library native stored, aligned, signature valid |
-| `bin/self-test.sh` | parsing manifest, downloader terhadap server HTTP lokal, rotasi log, editor INI, round trip cache, dan penolakan patcher — 15 cek, tanpa HP |
+| `bin/self-test.sh` | parsing manifest, downloader terhadap server HTTP lokal, rotasi log, editor INI, round trip cache, dan penolakan patcher, 15 cek, tanpa HP |
 
 ## Struktur
 
 ```
-client/     source klien (1322 file) — lihat client/README.md
-bin/        gate build, fetch blob, dan cache — lihat bin/README.md
+client/     source klien (1322 file), lihat client/README.md
+bin/        gate build, fetch blob, dan cache, lihat bin/README.md
 docs/       arsitektur, build, data, legal, operasional, selisih upstream
 .github/    CI: mengompilasi libsamp.so, menolak mengirim binary proprietary
 dist/       APK terakhir yang dibangun di sini + SHA-256, di-ignore git
@@ -79,9 +79,6 @@ English | Indonesia
 [docs/OPERATIONS.md](docs/OPERATIONS.md) | [docs/id/OPERATIONS.md](docs/id/OPERATIONS.md)
 [docs/LEGAL.md](docs/LEGAL.md) | [docs/id/LEGAL.md](docs/id/LEGAL.md)
 [docs/UPSTREAM.md](docs/UPSTREAM.md) | [docs/id/UPSTREAM.md](docs/id/UPSTREAM.md)
-
-`MEMORY.md` adalah catatan invarian: setiap kegagalan non-trivial yang pernah
-terjadi di proyek ini, akar penyebabnya, dan aturan yang mencegahnya terulang.
 
 ## Kebutuhan
 

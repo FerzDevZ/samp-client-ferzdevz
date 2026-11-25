@@ -49,3 +49,6 @@ dist/
 # --- agent skill library (re-installable, not project source) ----------------
 .agents/
 .freebuff/
+
+# Per-session notes stay out of the repo
+MEMORY.md

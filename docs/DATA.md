@@ -45,7 +45,7 @@ expansion file), or `--dir` (an already-extracted tree).
 | `full` | everything: radio audio, cutscene movies, textures, models | ~1.5–2.5 GB | radio works, cutscenes play |
 | `lite` | `audio/` and `movies/` removed | ~0.4–0.9 GB | no radio, no cutscenes; gameplay and SA-MP unaffected |
 
-Both sizes are community ballpark — no GTA SA install exists on the machine this
+Both sizes are community ballpark, no GTA SA install exists on the machine this
 was written on, so they were not measured here. The tool prints the real numbers
 for your files and writes them into the manifests.
 
@@ -120,4 +120,4 @@ escape the target directory (`..`, leading `/`).
 The legal way to give players a one-tap install is to host a cache **you built
 from your own copy** on your own server and point the client's downloader at it
 (see *Downloading it in the app* above). That is your call, your server, your
-risk — not something this repo does.
+risk, not something this repo does.

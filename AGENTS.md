@@ -1,42 +1,41 @@
-# AGENTS.md — project notes for this repo
+# AGENTS.md, project notes for this repo
 
 This repo is an Android SA-MP client, not a Pawn gamemode. The skill library this
 file was written against (`.agents/skills/`) has been removed from the repo.
 
 Start here instead:
 
-- [`README.md`](README.md) — status, build, download, legal boundary
-- [`docs/README.md`](docs/README.md) — six documents, English and Indonesian
-- [`MEMORY.md`](MEMORY.md) — invariant ledger, one entry per fixed failure
-- [`docs/BUILD.md`](docs/BUILD.md) — the build gate, before touching anything
+- [`README.md`](README.md), status, build, download, legal boundary
+- [`docs/README.md`](docs/README.md), six documents, English and Indonesian
+- [`docs/BUILD.md`](docs/BUILD.md), the build gate, before touching anything
 
 The Pawn / SA-MP-server material below is kept for reference only. Nothing in it
 applies to `client/`, which is C++ and Java.
 
 ---
 
-# AGENTS.md — Freebuff-Power v13.0 · Multi-domain engineering manual
+# AGENTS.md, Freebuff-Power v13.0 · Multi-domain engineering manual
 
-This repo carries a large skill library (see `.agents/skills/`) across several domains. The deepest lane is **GTA SA-MP / open.mp 2026** (its own compile gate, TextDraw engine reference, and agent roster). The others — web, ML, security, data, mobile, systems — are **first-class lanes**, opened on demand (JIT), never bulk-loaded, and their rules never leak into Pawn or vice versa.
+This repo carries a large skill library (see `.agents/skills/`) across several domains. The deepest lane is **GTA SA-MP / open.mp 2026** (its own compile gate, TextDraw engine reference, and agent roster). The others, web, ML, security, data, mobile, systems, are **first-class lanes**, opened on demand (JIT), never bulk-loaded, and their rules never leak into Pawn or vice versa.
 
 Default stance: **detect the stack from the task and project markers first**, then load only the matching lane. Short by design; this file is read every session. Depth lives in `.agents/skills/<name>/SKILL.md`, `.agents/agents/<name>.md`, `.agents/rules/`.
 
 ## 1. Non-negotiables (every change, every stack)
 
-1. **Server-side authority** — the client is hostile. Validate jail/event/cooldown/admin and every game-state mutation on the server.
-2. **Zero stubs** — no `// TODO`, no `pass`, no `...`. Full implementation or say it is missing.
-3. **Strict typing** — no `any`, no bare `except:`, no force-unwrap `!`, no `.unwrap()` in handlers. Discriminated unions / Pydantic / Zod at every boundary.
-4. **Prepared SQL only** — `%e` binding or prepared statements. Never concatenate user input.
-5. **Measured, not guessed** — a perf claim needs a number; `OnPlayerUpdate` per tick is the usual culprit.
-6. **Log what matters** — admin actions, economy transactions, security events; never secrets or PII.
-7. **No silent failures** — propagate typed errors / RFC 7807; never swallow in empty `catch`.
+1. **Server-side authority**, the client is hostile. Validate jail/event/cooldown/admin and every game-state mutation on the server.
+2. **Zero stubs**, no `// TODO`, no `pass`, no `...`. Full implementation or say it is missing.
+3. **Strict typing**, no `any`, no bare `except:`, no force-unwrap `!`, no `.unwrap()` in handlers. Discriminated unions / Pydantic / Zod at every boundary.
+4. **Prepared SQL only**, `%e` binding or prepared statements. Never concatenate user input.
+5. **Measured, not guessed**, a perf claim needs a number; `OnPlayerUpdate` per tick is the usual culprit.
+6. **Log what matters**, admin actions, economy transactions, security events; never secrets or PII.
+7. **No silent failures**, propagate typed errors / RFC 7807; never swallow in empty `catch`.
 
 ### Pawn lane (SA-MP / open.mp) only
-8. **Dual target** — compile on open.mp *and* legacy 0.3.7, 0 warnings, `.amx` emitted. A build without the artifact is not green.
-9. **Strict tags** — `Text:`, `PlayerText:`, `Float:`, `bool:`. Never compare a `Text:` sentinel against a `PlayerText:`.
-10. **Streamer for volume** — objects, areas, pickups, actors, 3D labels beyond native limits.
-11. **Pool budget** — PlayerTD ≤ 200 live, 256 hard cap; global TD ≤ 2048. Destroy on close, death, disconnect.
-12. **YSI structure** — YSI 5 ships backslash includes (`<YSI_Data\y_foreach\...>`) that Linux `pawncc` cannot resolve. Run `bin/ysi-ensure.sh` first (sampctl get + patch + probe). Once green, use `y_commands`, `y_hooks`, `y_iterate`, `y_timers`, `y_groups` with `-i.sdk/ysi -;+`. If the probe fails, one `SetTimerEx` per player — never `for (MAX_PLAYERS)`, never `GetPlayerPoolSize` (open.mp flags it warning 234: *this function is broken*), never hand-rolled command parsing.
+8. **Dual target**, compile on open.mp *and* legacy 0.3.7, 0 warnings, `.amx` emitted. A build without the artifact is not green.
+9. **Strict tags**, `Text:`, `PlayerText:`, `Float:`, `bool:`. Never compare a `Text:` sentinel against a `PlayerText:`.
+10. **Streamer for volume**, objects, areas, pickups, actors, 3D labels beyond native limits.
+11. **Pool budget**, PlayerTD ≤ 200 live, 256 hard cap; global TD ≤ 2048. Destroy on close, death, disconnect.
+12. **YSI structure**, YSI 5 ships backslash includes (`<YSI_Data\y_foreach\...>`) that Linux `pawncc` cannot resolve. Run `bin/ysi-ensure.sh` first (sampctl get + patch + probe). Once green, use `y_commands`, `y_hooks`, `y_iterate`, `y_timers`, `y_groups` with `-i.sdk/ysi -;+`. If the probe fails, one `SetTimerEx` per player, never `for (MAX_PLAYERS)`, never `GetPlayerPoolSize` (open.mp flags it warning 234: *this function is broken*), never hand-rolled command parsing.
 
 ## 2. Route by stack (detect first, then lane)
 
@@ -52,7 +51,7 @@ Default stance: **detect the stack from the task and project markers first**, th
 
 Switch is one-way per task: load the lane's skills, drop the others. If a task touches two lanes (UCP + shared DB), own the boundary explicitly in the plan.
 
-## 3. SA-MP routing — match the input you actually have
+## 3. SA-MP routing, match the input you actually have
 
 | Input you have | Agent | Skills in order | Done means |
 |---|---|---|---|
@@ -94,22 +93,22 @@ Switch is one-way per task: load the lane's skills, drop the others. If a task t
 | E2E / load / contract tests | `@qa-automation-architect` | `e2e-testing`, `k6-spike-soak-breakpoint-testing` |
 | Data / lakehouse / analytics | `@data-engineer-pro` | `data-lakehouse-polars-iceberg`, `clickhouse-io` |
 
-## 5. DUAL-GATE — verification is executable or it did not happen
+## 5. DUAL-GATE, verification is executable or it did not happen
 
 **Gate 1.** Run the command, read the exit code, look at the output.
 
 | Stack | Command |
 |---|---|
-| Pawn (SA-MP / open.mp) | `bin/self-test.sh`, or `pawncc` on both targets with 0 warnings + `.amx`. A warning is a failure — open.mp promotes deprecated natives to warning 234 |
+| Pawn (SA-MP / open.mp) | `bin/self-test.sh`, or `pawncc` on both targets with 0 warnings + `.amx`. A warning is a failure, open.mp promotes deprecated natives to warning 234 |
 | Audit / lint | `bin/samp-audit.sh .` · `node bin/samp-lint.js` |
 | TS / Node | `npx tsc --noEmit` + test runner |
 | Python | `ruff check . && mypy . && pytest -q` |
 | Go / Rust | `go vet ./... && go test -race ./...` · `cargo clippy -- -D warnings && cargo test` |
 | Shell / IaC | `bash -n *.sh` · `terraform validate` · `docker build` |
 
-**Gate 2. Code and security — banned:** stubs; `any`, bare `except:`, force-unwrap `!`, `.unwrap()` in handlers; empty `catch`; unscoped queries (BOLA/IDOR); string-concatenated SQL; committed secrets; client-trusted game state.
+**Gate 2. Code and security, banned:** stubs; `any`, bare `except:`, force-unwrap `!`, `.unwrap()` in handlers; empty `catch`; unscoped queries (BOLA/IDOR); string-concatenated SQL; committed secrets; client-trusted game state.
 
-**Gate 2. anti-ai-slop — banned in UI and TextDraw:** violet/indigo gradient heroes and `bg-clip-text`; centered-everything and 3-equal-card rows; `transition-all` and uniform `hover:scale-105` (declare `transform`/`opacity` + `motion-reduce`); emoji as feature icons; boxed text used as layout. Required: OKLCH or `UI_*` constants, WCAG 2.2 AA ≥ 4.5:1, all 8 states (default, hover, focus-visible, active, disabled, loading, error, empty).
+**Gate 2. anti-ai-slop, banned in UI and TextDraw:** violet/indigo gradient heroes and `bg-clip-text`; centered-everything and 3-equal-card rows; `transition-all` and uniform `hover:scale-105` (declare `transform`/`opacity` + `motion-reduce`); emoji as feature icons; boxed text used as layout. Required: OKLCH or `UI_*` constants, WCAG 2.2 AA ≥ 4.5:1, all 8 states (default, hover, focus-visible, active, disabled, loading, error, empty).
 
 ## 6. Baselines 2026
 
@@ -156,13 +155,18 @@ Rounded corners: `LD_BEAT:chit` 4-corner technique. Surfaces are font-4 sprites,
 
 ## 9. Remember (Gate 3)
 
-Every non-trivial bug or gotcha fixed earns one atomic invariant in `MEMORY.md`:
+A bug is only really fixed when something executable stops it coming back. Put the
+rule in the gate, not in a diary:
 
-```markdown
-- **[YY-MM-DD · Component]**: <symptom> → **Root Cause**: <exact cause> → **Invariant Rule**: <permanent rule>.
-```
+- a behaviour rule becomes an assertion in `bin/self-test.sh` or a JVM test under
+  `tests/jvm/`;
+- a build or packaging rule becomes a check in `bin/android-build.sh` that reads the
+  artifact instead of the exit code;
+- a native-side contract, such as the `settings.ini` keys `settings.cpp` reads,
+  gets a test next to the editor that writes them.
 
-Read `MEMORY.md` at session start. Never fix the same class of bug twice.
+`bin/self-test.sh` is the whole ledger: if it does not fail when the rule is
+broken, the rule does not exist yet.
 
 ## 10. Build
 
@@ -170,7 +174,7 @@ Read `MEMORY.md` at session start. Never fix the same class of bug twice.
 pawncc -i. -i$HOME/samp-sdk/omp-stdlib -d3 -o/tmp/out.amx file.pwn                    # open.mp
 pawncc -i. -i/tmp/sampstdlib -i$HOME/samp-sdk/omp-stdlib -d3 -o/tmp/out.amx file.pwn   # legacy
 
-# YSI on Linux — install if missing, then patch and prove it
+# YSI on Linux, install if missing, then patch and prove it
 ./bin/ysi-ensure.sh                                  # sampctl get + patch + probe (0 warning)
 pawncc -i.sdk/ysi -i$HOME/.config/sampctl/packages/github.com/Zeex/amx_assembly/default \
   -i$HOME/samp-sdk/omp-stdlib -d3 '-;+' -o/tmp/out.amx file.pwn

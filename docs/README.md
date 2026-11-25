@@ -12,10 +12,6 @@ Two languages, six documents each. English in `docs/`, Indonesian in `docs/id/`.
 | Patcher | [PATCHER.md](PATCHER.md) | [id/PATCHER.md](id/PATCHER.md) | how an installable APK is produced from a publishable framework plus a game APK the user owns |
 | Upstream delta | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | every change against `kuzia15/SAMP-Mobile` `GTA-2.11` |
 
-`MEMORY.md` in the repo root is separate: it is the invariant ledger, one entry per
-non-trivial failure, each with symptom, root cause and the rule that prevents a
-repeat.
-
 ---
 
 # docs/ (Bahasa Indonesia)
@@ -32,6 +28,3 @@ di `docs/id/`.
 | Legal | [LEGAL.md](LEGAL.md) | [id/LEGAL.md](id/LEGAL.md) | apa yang di-track, apa yang di-ignore dan alasannya, kenapa APK tidak diterbitkan |
 | Patcher | [PATCHER.md](PATCHER.md) | [id/PATCHER.md](id/PATCHER.md) | cara menghasilkan APK siap pasang dari framework yang boleh diterbitkan + APK game milik pengguna |
 | Selisih upstream | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | seluruh perubahan terhadap `kuzia15/SAMP-Mobile` `GTA-2.11` |
-
-`MEMORY.md` di root repo terpisah: itu catatan invarian, satu entri per kegagalan
-non-trivial, masing-masing dengan gejala, akar penyebab, dan aturan pencegahnya.

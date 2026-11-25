@@ -7,7 +7,7 @@ part of it.
 
 | Tracked | Why it is allowed |
 |---|---|
-| `client/` source — 1322 files, C++ and Java | forked open-source client code, modified |
+| `client/` source, 1322 files, C++ and Java | forked open-source client code, modified |
 | our compiled `libsamp.so` (CI artifact) | our build output, no Rockstar bytes needed to produce it |
 | `bin/`, `docs/`, `.github/` | tooling and text |
 
@@ -42,12 +42,12 @@ jadx. Those are a derivative of Rockstar's code, not a clean-room rewrite.
 That distinction matters if you publish it: removing a binary is not the same as
 replacing decompiled source. Treat the framework as something to build locally,
 and treat a clean-room rewrite of the wrapper as outstanding work. The patcher and
-`libsamp.so` are unaffected — they are ours.
+`libsamp.so` are unaffected, they are ours.
 
 ## Names left in place
 
 Three Java packages keep their original names because a prebuilt binary refers to
-them by path — renaming them breaks the app, not the copyright status:
+them by path, renaming them breaks the app, not the copyright status:
 
 | Package | Evidence |
 |---|---|
