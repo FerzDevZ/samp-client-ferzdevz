@@ -73,6 +73,27 @@ public final class GameConfig {
         ini.write(file);
     }
 
+    /**
+     * Points the client at a server without touching the nickname or the password.
+     *
+     * A link opened from a browser or Discord arrives after the player has already typed a name,
+     * and rewriting that name from a URL would be a surprise. Only host and port move.
+     */
+    public static void select(ServerEndpoint server) throws IOException {
+        select(settingsFile(), server);
+    }
+
+    public static void select(File file, ServerEndpoint server) throws IOException {
+        if (server == null) {
+            throw new IllegalArgumentException("server is null");
+        }
+        IniFile ini = file.isFile() && file.length() > 0 ? IniFile.read(file) : IniFile.empty();
+        applyDefaults(ini);
+        ini.set("client", "host", server.host());
+        ini.set("client", "port", Integer.toString(server.port()));
+        ini.write(file);
+    }
+
     /** Reads the nickname currently saved, or null when the file has no usable one. */
     public static String readNickname() {
         return readNickname(settingsFile());

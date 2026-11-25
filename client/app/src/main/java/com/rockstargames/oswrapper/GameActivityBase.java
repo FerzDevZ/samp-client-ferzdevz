@@ -2,6 +2,12 @@
 package com.rockstargames.oswrapper;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Looper;
+import android.view.PixelCopy;
+import android.view.SurfaceView;
+import android.widget.Toast;
 import android.hardware.input.InputManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -21,12 +27,19 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.core.content.FileProvider;
+
 import com.ferzdevzgta.game.R;
+import com.ferzdevzgta.game.log.SessionGuard;
+import com.ferzdevzgta.game.media.ShotFile;
+import com.ferzdevzgta.game.servers.GameConfig;
 import com.rockstargames.oswrapper.input.GamepadInput;
 import com.nvidia.devtech.NvAPKFileHelper;
 import com.nvidia.devtech.NvUtil;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 /**
  * The activity the engine runs inside: it owns the GL surface, forwards lifecycle and
@@ -285,6 +298,8 @@ public abstract class GameActivityBase extends AppCompatActivity {
         registerPads();
 
         view = findViewById(R.id.viewGame);
+        wireShotButton();
+        beginSessionMarker();
         getWindow().setSustainedPerformanceMode(true);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -335,9 +350,101 @@ public abstract class GameActivityBase extends AppCompatActivity {
         onActivityReady(!initialized);
     }
 
+
+    /**
+     * One tap copies the surface into {@code GTA/Screenshots}.
+     *
+     * PixelCopy reads the composited surface, so what lands in the file is what the player saw,
+     * including the engine's own HUD and any TextDraw the server drew. It needs no native change,
+     * which keeps the JNI surface exactly as libGame.so expects it.
+     */
+
+    /** Leaves the marker the diagnostics screen reads when a session dies without closing. */
+    private void beginSessionMarker() {
+        try {
+            SessionGuard.begin(new File(GameConfig.SAMP_DIR), System.currentTimeMillis(),
+                    android.os.Process.myPid());
+        } catch (Exception ignored) {
+            // A read-only data folder must not stop the game from starting.
+            Log.w(TAG, "session marker skipped");
+        }
+    }
+
+    private void wireShotButton() {
+        View button = findViewById(R.id.viewShot);
+        if (button == null) {
+            return;
+        }
+        button.setOnClickListener(v -> captureShot());
+    }
+
+    private void captureShot() {
+        if (!(view instanceof SurfaceView)) {
+            return;
+        }
+        int width = view.getWidth();
+        int height = view.getHeight();
+        if (width <= 0 || height <= 0) {
+            toast(getString(R.string.shot_failed));
+            return;
+        }
+        try {
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            PixelCopy.request((SurfaceView) view, bitmap,
+                    result -> {
+                        if (result != PixelCopy.SUCCESS) {
+                            toast(getString(R.string.shot_failed));
+                            return;
+                        }
+                        saveShot(bitmap);
+                    }, new Handler(Looper.getMainLooper()));
+        } catch (Throwable refused) {
+            // A capture must never take the game down, whatever the driver returns.
+            Log.w(TAG, "screenshot skipped: " + refused.getMessage());
+            toast(getString(R.string.shot_failed));
+        }
+    }
+
+    private void saveShot(Bitmap bitmap) {
+        File folder = ShotFile.directory(new File(GameConfig.GTA_ROOT));
+        File file = new File(folder, ShotFile.name(System.currentTimeMillis()));
+        try (OutputStream out = new FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+        } catch (Exception failed) {
+            Log.w(TAG, "screenshot write failed: " + failed.getMessage());
+            toast(getString(R.string.shot_failed));
+            return;
+        }
+        toast(getString(R.string.shot_saved, file.getAbsolutePath()));
+        shareShot(file);
+    }
+
+    private void shareShot(File file) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+            Intent send = new Intent(Intent.ACTION_SEND)
+                    .setType("image/png")
+                    .putExtra(Intent.EXTRA_STREAM, uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(send, getString(R.string.shot_share)));
+        } catch (Exception noPicker) {
+            // The file already exists, so a missing share target is not worth an error dialog.
+            Log.w(TAG, "screenshot share skipped: " + noPicker.getMessage());
+        }
+    }
+
+    private void toast(String text) {
+        try {
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+        } catch (Exception ignored) {
+            Log.i(TAG, text);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy");
+        SessionGuard.clear(new File(GameConfig.SAMP_DIR));
         unregisterPads();
         super.onDestroy();
         GameThread.INSTANCE.onActivityDestroyed();

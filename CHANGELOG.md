@@ -2,6 +2,48 @@
 
 Indonesian version: [CHANGELOG.id.md](CHANGELOG.id.md).
 
+## 0.3.0
+
+Servers arrive by link, voice has a switch that can actually work, and a session that died leaves
+evidence.
+
+### Links
+
+- `samp://host:port` opens the launcher with that server already selected. The parser lives in
+  `servers/DeepLink.java` and reuses the same host and port rules as `servers.txt`, so a link and a
+  line in the list cannot disagree about what is joinable.
+- A link moves the host and port only. The nickname and password already saved stay untouched,
+  because a link opened from a chat room arrives after the player typed a name.
+- Long press a server in the browser to copy its link. That is how an address gets passed around
+  without anyone retyping digits.
+
+### Voice
+
+- The engine reads `gui/VoiceChatEnable` and only draws its voice button when that key is true, so
+  the switch is now in Settings next to the other real keys.
+- Android refuses the microphone without a runtime grant, and the switch used to be a promise the
+  app could not keep. Ticking it now asks for `RECORD_AUDIO` first, and the launcher checks again
+  before starting the game. A refused grant leaves the key off instead of leaving a dead button.
+
+### Screenshots
+
+- A 44dp camera button in the game screen copies the surface with `PixelCopy` into
+  `GTA/Screenshots/samp-<date>-<time>.png` and opens the share sheet. What lands in the file is
+  what the player saw, including engine HUD and server TextDraw, and no JNI was added.
+
+### Session marker
+
+- A native crash in `libGame.so` never reaches the Java crash handler. The game now writes
+  `SAMP/session.open` at start and deletes it on a normal close, so Diagnostics can say the last
+  session did not close on purpose. A session killed by the system looks the same from here, so the
+  text never calls it a crash.
+
+### Notes
+
+- The FPS counter was already there: `gui/fps` is read by `cpp/samp/settings.cpp` and drawn by
+  `CDebugInfo`, so it is a toggle, not a feature to write.
+- Gates: 351 JVM assertions, 25 suites, 17 contrast pairs, 38 JNI natives with 0 unclaimed exports.
+
 ## 0.2.0
 
 Pads work, settings survive a phone change, and the client can explain itself offline.

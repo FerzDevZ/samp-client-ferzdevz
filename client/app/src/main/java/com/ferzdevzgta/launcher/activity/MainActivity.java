@@ -28,8 +28,10 @@ import androidx.core.content.ContextCompat;
 import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.SAMP;
 import com.ferzdevzgta.game.log.LogRotation;
+import com.ferzdevzgta.game.servers.DeepLink;
 import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
+import com.ferzdevzgta.game.servers.ServerList;
 import com.ferzdevzgta.game.ui.Community;
 import com.ferzdevzgta.game.ui.DataSetupActivity;
 import com.ferzdevzgta.game.ui.ServerBrowserActivity;
@@ -37,6 +39,11 @@ import com.ferzdevzgta.game.ui.Ui;
 import com.ferzdevzgta.game.ui.UiSettingsActivity;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Launcher screen. Answers one question before the player commits: is this install ready to
@@ -93,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+    // Voice chat is a settings.ini key, and the engine records only when Android has already
+    // granted the microphone. Asking here means the grant lands before the game connects.
+    private final ActivityResultLauncher<String> micLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (!granted) {
+                    Toast.makeText(this, R.string.settings_voice_denied, Toast.LENGTH_LONG).show();
+                }
+                openGame();
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(buildUi());
             Ui.applyInsets(this, findViewById(android.R.id.content));
             checkAndRequestStoragePermission();
+            handleDeepLink(getIntent());
             Log.d("MainActivity", "onCreate completed successfully");
         } catch (Exception e) {
             Log.e("MainActivity", "Critical error in onCreate: " + e.getMessage(), e);
@@ -251,6 +269,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /** Reflects the three things Play depends on, so the launcher never lies about its state. */
+
+    /**
+     * A {@code samp://host:port} link opens this screen with the server already selected, so a
+     * link pasted into Discord is one tap instead of a retyped address. The link may only move
+     * the host and port: the nickname the player already typed stays as it is.
+     */
+    private void handleDeepLink(Intent intent) {
+        Uri data = intent == null ? null : intent.getData();
+        if (data == null) {
+            return;
+        }
+        ServerEndpoint target = DeepLink.parse(data.toString());
+        if (target == null) {
+            Toast.makeText(this, R.string.link_bad, Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            File file = GameConfig.serversFile();
+            List<ServerEndpoint> servers = new ArrayList<>();
+            if (file.isFile()) {
+                servers = ServerList.parse(new String(Files.readAllBytes(file.toPath()),
+                        StandardCharsets.UTF_8));
+            }
+            servers = ServerList.addOrReplace(servers, target);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.isDirectory()) {
+                parent.mkdirs();
+            }
+            Files.write(file.toPath(), ServerList.serialize(servers).getBytes(StandardCharsets.UTF_8));
+            GameConfig.select(target);
+            Toast.makeText(this, getString(R.string.link_added, target.address()),
+                    Toast.LENGTH_LONG).show();
+            refreshStatus();
+        } catch (IOException | RuntimeException e) {
+            Log.e("MainActivity", "deep link failed: " + e.getMessage());
+            Toast.makeText(this, R.string.link_write_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleDeepLink(intent);
+    }
+
     private void refreshStatus() {
         if (dataValue == null) {
             return;
@@ -388,14 +452,42 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             Log.d("MainActivity", "Starting game, target " + target.address());
-            Intent gameIntent = new Intent(MainActivity.this, SAMP.class);
-            startActivity(gameIntent);
+            if (voiceWanted() && !hasMicPermission()) {
+                micLauncher.launch(android.Manifest.permission.RECORD_AUDIO);
+                return;
+            }
+            openGame();
         } catch (Exception e) {
             Log.e("MainActivity", "Error starting game: " + e.getMessage());
             Toast.makeText(this,
                     getString(R.string.servers_write_failed, String.valueOf(e.getMessage())),
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+
+    private void openGame() {
+        startActivity(new Intent(MainActivity.this, SAMP.class));
+    }
+
+    /** True when settings.ini asks the engine to show the voice button. */
+    private boolean voiceWanted() {
+        try {
+            File file = GameConfig.settingsFile();
+            if (!file.isFile()) {
+                return false;
+            }
+            return Boolean.parseBoolean(
+                    com.ferzdevzgta.game.settings.IniFile.read(file)
+                            .get("gui", "VoiceChatEnable", "false"));
+        } catch (IOException unreadable) {
+            return false;
+        }
+    }
+
+    private boolean hasMicPermission() {
+        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     public static void hideKeyboard(Activity activity) {

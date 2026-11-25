@@ -35,6 +35,8 @@ public final class GameConfigTest {
             GameConfig.ensureSettings(ini);
             Check.ok("ensureSettings writes the file", ini.isFile() && ini.length() > 0);
 
+            // A deep link may only move host and port. The nickname typed earlier must survive,
+            // because a link opened from Discord arrives after the player already chose a name.
             IniFile read = IniFile.read(ini);
             Check.eq("placeholder host", "127.0.0.1", read.get("client", "host", ""));
             Check.eq("placeholder port", "7777", read.get("client", "port", ""));
@@ -81,6 +83,17 @@ public final class GameConfigTest {
             Files.write(ini.toPath(), "not an ini at all\n".getBytes(StandardCharsets.UTF_8));
             Check.eq("garbage nickname reads as null", null, GameConfig.readNickname(ini));
             Check.eq("garbage server reads as null", null, GameConfig.readServer(ini));
+
+            // A deep link may only move host and port. The nickname typed earlier must survive,
+            // because a link opened from Discord arrives after the player already chose a name.
+            GameConfig.save(ini, "FerzDevZ", new ServerEndpoint("Old", "1.1.1.1", 7777), "rahasia");
+            GameConfig.select(ini, new ServerEndpoint("Linked", "samp.example.com", 7778));
+            IniFile afterLink = IniFile.read(ini);
+            Check.eq("link moves host", "samp.example.com", afterLink.get("client", "host", ""));
+            Check.eq("link moves port", "7778", afterLink.get("client", "port", ""));
+            Check.eq("link keeps nickname", "FerzDevZ", afterLink.get("client", "name", ""));
+            Check.eq("link keeps password", "rahasia", afterLink.get("client", "password", ""));
+            Check.ok("link writes a complete file", afterLink.get("gui", "ChatSizeX", "").length() > 0);
 
             checkKeyParity(dir.resolve("parity.ini").toFile());
         } finally {

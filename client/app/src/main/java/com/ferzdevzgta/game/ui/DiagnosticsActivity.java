@@ -22,6 +22,7 @@ import com.ferzdevzgta.game.SAMP;
 import com.ferzdevzgta.game.data.CacheManifest;
 import com.ferzdevzgta.game.diag.Report;
 import com.ferzdevzgta.game.log.CrashHandler;
+import com.ferzdevzgta.game.log.SessionGuard;
 import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.ui.dialog.DialogManager;
@@ -104,6 +105,16 @@ public class DiagnosticsActivity extends AppCompatActivity {
         total++;
         passed += addCheck(card, R.string.diag_check_log, log.isFile(),
                 log.isFile() ? Report.bytes(log.length()) : getString(R.string.diag_missing));
+
+        // A native crash never reaches the Java handler, so the marker file is the only evidence
+        // that the previous game session did not close on purpose.
+        long unfinished = SessionGuard.unfinishedSince(new File(GameConfig.SAMP_DIR),
+                android.os.Process.myPid());
+        total++;
+        boolean sessionOk = unfinished < 0L;
+        passed += addCheck(card, R.string.diag_check_session, sessionOk,
+                sessionOk ? getString(R.string.diag_session_clean)
+                        : getString(R.string.diag_session_unfinished, timeText(unfinished)));
 
         String lastCrash = CrashHandler.lastCrash(log);
         total++;
@@ -297,6 +308,13 @@ public class DiagnosticsActivity extends AppCompatActivity {
         } catch (Exception e) {
             return getString(R.string.diag_unreadable);
         }
+    }
+
+
+    /** "11 Feb 14:22", the phone's own zone, because a start time is read by a person. */
+    private String timeText(long epochMillis) {
+        return new java.text.SimpleDateFormat("d MMM HH:mm", java.util.Locale.getDefault())
+                .format(new java.util.Date(epochMillis));
     }
 
     private void reportToDiscord() {

@@ -17,7 +17,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Item | Kondisi |
 |---|---|
 | `libsamp.so` arm64-v8a dari source | **ya**, 3,5 MB, 0 warning |
-| APK debug | **ya**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.2.0` |
+| APK debug | **ya**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.3.0` |
 | Rebuild bersih tanpa cache | **ya**, 2m08s, 0 warning |
 | Telemetri | **dihapus**, Firebase, AppLovin, Splunk; APK 43 MB → 37 MB |
 | `libsamp.so` terbangun tanpa binary Rockstar | **ya**, 10s, inilah yang dijalankan CI |
@@ -35,6 +35,10 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Gamepad | **ya**, tiga callback stik yang sudah diekspor `libGame.so` tapi belum dideklarasikan sekarang disambung, jadi stik tersambung, tersambung lagi setelah pause, dan terlihat di Diagnostik, `bin/jni-pins.py` melaporkan 0 ekspor tanpa pemakai |
 | Backup profil | **ya**, Pengaturan mengekspor satu zip berisi `settings.ini` dan `servers.txt` lalu memulihkannya di HP baru, nama entri tetap, batas 512 KiB per entri |
 | Panduan offline | **ya**, `assets/help/help.html` digambar WebView bawaan sistem, dua bahasa, tanpa menambah ukuran APK |
+| Tautan server | **ya**, `samp://host:port` membuka launcher dengan server itu terpilih, tekan lama server untuk menyalin tautannya |
+| Voice chat | **ya**, saklar `gui/VoiceChatEnable` di Pengaturan meminta mikrofon dulu, dan launcher memeriksa lagi sebelum menjalankan game |
+| Tangkapan layar | **ya**, tombol kamera di layar game menyimpan ke `GTA/Screenshots` dan membuka menu bagikan |
+| Penanda sesi | **ya**, Diagnostik memberi tahu kalau sesi terakhir tidak ditutup normal, satu-satunya jejak yang ditinggalkan crash native |
 | Catatan perubahan | **ya**, [CHANGELOG.md](CHANGELOG.md) dan [CHANGELOG.id.md](CHANGELOG.id.md) |
 
 ## Mendapatkan APK yang bisa dipasang
@@ -46,8 +50,8 @@ mesinmu dari APK game yang kamu miliki:
 ```bash
 bin/android-build.sh framework        # 1. separuh yang boleh diterbitkan -> dist/samp-client-framework.apk (28 MB)
 bin/patch-apk.sh --gta-apk GTA.apk \
-                 --out dist/samp-client-0.2.0.apk      # 2. tambah libGame.so, realign, tanda tangan ulang (37 MB)
-adb install -r dist/samp-client-0.2.0.apk              # 3. pasang
+                 --out dist/samp-client-0.3.0.apk      # 2. tambah libGame.so, realign, tanda tangan ulang (37 MB)
+adb install -r dist/samp-client-0.3.0.apk              # 3. pasang
 adb push cache/full/. /storage/emulated/0/GTA/         # 4. aset, kalau tidak aplikasi tertutup saat dibuka
 ```
 

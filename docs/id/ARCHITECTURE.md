@@ -326,3 +326,56 @@ tempat dan menduplikasinya membuat dua versi bisa berbeda.
 
 Semua ini tidak menggantikan TextDraw server. Itu data RPC yang harus digambar mesin, dan
 menerjemahkannya ke HTML adalah proyek lain dengan hasil yang tidak konsisten antar server.
+
+## Tautan yang membuka client
+
+`samp://host:port` terdaftar di activity launcher, jadi alamat yang dikirim di room chat cukup
+ditekan, tidak perlu diketik ulang. Parsernya `servers/DeepLink.java` dan murni: intent memberi
+string, parser mengembalikan `ServerEndpoint` atau null, dan suite JVM mengunci setiap kasus
+penolakan.
+
+Tautan memakai ulang `ServerEndpoint` dan tidak menulis aturan kedua, karena tautan dan baris di
+`servers.txt` harus sepakat soal alamat yang bisa dipakai. Path, fragment, atau skema lain ditolak
+langsung: port yang salah tanpa pesan lebih buruk daripada pesan bahwa tautan itu bukan server.
+
+`GameConfig.select` lalu hanya memindahkan `client.host` dan `client.port`. Nama panggilan dan
+password yang sudah ada tetap, karena tautan datang setelah pemain mengetik nama, dan tautan tidak
+boleh mengganti nama itu. Server juga ditambahkan ke `servers.txt` supaya muncul di browser nanti,
+dan tekan lama pada baris menyalin tautan yang sama keluar.
+
+## Voice: satu key plus satu izin
+
+Mesin sudah punya voice: `cpp/samp/voice/Plugin.cpp` ikut terkompilasi, dan
+`gui/samp_widgets/voicebutton.h` hanya menggambar tombolnya kalau `gui/VoiceChatEnable` true. Yang
+kurang adalah sisi Android dari janji yang sama. Saklarnya sekarang ada di Pengaturan, dan
+menyalakannya meminta `RECORD_AUDIO` lebih dulu, lalu key disimpan hanya kalau izinnya didapat.
+
+`BASS_RecordGetDeviceInfo` tidak mengembalikan perangkat selama mikrofon ditolak, jadi key yang
+ditulis tanpa izin menghasilkan tombol voice yang merekam keheningan. Launcher memeriksa izin lagi
+sebelum menjalankan game, yang menutup kasus key yang ditulis tangan di `settings.ini`.
+
+## Tangkapan layar
+
+Layar game punya tombol kamera 44dp. `PixelCopy` membaca surface yang sudah dikomposisi menjadi
+bitmap, filenya masuk ke `GTA/Screenshots/samp-<tanggal>-<jam>.png`, lalu menu bagikan terbuka.
+
+PixelCopy dipilih dibanding `glReadPixels` native karena dua alasan: yang dibaca adalah yang benar
+benar dilihat pemain, termasuk HUD dan TextDraw server, dan tidak ada titik masuk JNI baru, jadi
+permukaan beku yang diharapkan `libGame.so` tetap sama. `media/ShotFile.java` memegang aturan
+penamaan dan ditutup suite JVM.
+
+## Penanda sesi
+
+Segfault di dalam `libGame.so` mematikan proses sebelum kode Java bisa menulis log, jadi
+`log/CrashHandler.java` tidak bisa melihatnya. `log/SessionGuard.java` menulis `SAMP/session.open`
+saat layar game terbuka dan menghapusnya di `onDestroy`.
+
+Diagnostik membaca penanda itu pada peluncuran berikutnya. Penanda dari proses yang sedang berjalan
+diabaikan, karena artinya game sedang terbuka. Sesi yang dimatikan sistem terlihat sama dengan crash
+dari sini, jadi barisnya hanya bilang sesi tidak ditutup normal dan tidak mengaku tahu penyebabnya.
+
+## Penghitung frame itu saklar, bukan fitur
+
+`gui/fps` dibaca `cpp/samp/settings.cpp` dan digambar `CDebugInfo`, dan layar Pengaturan sudah
+menyalakannya. Tidak ada yang perlu menggambar penghitung kedua di Java: dua angka akan berbeda dan
+tidak ada yang bisa dipercaya.

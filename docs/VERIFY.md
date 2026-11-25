@@ -135,3 +135,17 @@ java.lang.IllegalStateException: boom
 | Settings, Export, save the zip | the file picker appears and the zip exists after saving |
 | Fresh install, Settings, Restore, pick that zip | settings come back and the server list shows the old entries |
 | Settings, Open guide | the page loads offline, language follows the app, and the two buttons reach Diagnostics and Discord |
+
+## 0.3.0 additions
+
+1. Paste `samp://<ip>:<port>` into a chat app on the phone, tap it, and check the launcher opens
+   with that server selected and a toast naming the address.
+2. Open the server browser and long press a server: the link should be on the clipboard and the
+   toast should show it.
+3. Settings, turn Voice chat on, and accept the microphone prompt. The voice button should appear in
+   game; refusing the prompt must leave the switch off, not on and dead.
+4. In game, tap the camera button. A file should appear in `GTA/Screenshots` and the share sheet
+   should open with that image.
+5. Force stop the app while in game, open Diagnostics, and check the last session row reports it did
+   not close on purpose. Close the game normally and check the row says closed on purpose.
+6. Settings, turn the FPS switch on, and confirm the engine counter appears (it was always there).

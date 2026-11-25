@@ -136,3 +136,18 @@ java.lang.IllegalStateException: boom
 | Pengaturan, Ekspor, simpan zip | pemilih file muncul dan zip-nya ada setelah disimpan |
 | Install baru, Pengaturan, Pulihkan, pilih zip itu | pengaturan kembali dan daftar server menampilkan entri lama |
 | Pengaturan, Buka panduan | halaman terbuka offline, bahasanya ikut app, dan dua tombolnya sampai ke Diagnostik dan Discord |
+
+## Tambahan 0.3.0
+
+1. Tempel `samp://<ip>:<port>` di aplikasi chat di HP, tekan, dan pastikan launcher terbuka dengan
+   server itu terpilih serta toast menyebut alamatnya.
+2. Buka browser server dan tekan lama salah satu server: tautannya harus ada di clipboard dan toast
+   menampilkannya.
+3. Pengaturan, nyalakan Voice chat, lalu terima izin mikrofon. Tombol voice harus muncul di game;
+   menolak izin harus meninggalkan saklar mati, bukan hidup tapi tidak jalan.
+4. Di dalam game, tekan tombol kamera. File harus muncul di `GTA/Screenshots` dan menu bagikan
+   terbuka dengan gambar itu.
+5. Force stop aplikasi saat di dalam game, buka Diagnostik, dan cek baris sesi terakhir melaporkan
+   tidak ditutup normal. Tutup game dengan normal dan pastikan barisnya bilang ditutup normal.
+6. Pengaturan, nyalakan saklar FPS, dan pastikan penghitung dari mesin muncul (itu sudah ada dari
+   awal).

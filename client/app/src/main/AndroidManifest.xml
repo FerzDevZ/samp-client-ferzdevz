@@ -101,10 +101,18 @@
         <activity
             android:name="com.ferzdevzgta.launcher.activity.MainActivity"
             android:theme="@style/Theme.SampLauncher"
+            android:launchMode="singleTop"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- samp://host:port opens this client and selects that server. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="samp" />
             </intent-filter>
         </activity>
 

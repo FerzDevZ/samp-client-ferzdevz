@@ -2,6 +2,49 @@
 
 Versi Inggris: [CHANGELOG.md](CHANGELOG.md).
 
+## 0.3.0
+
+Server masuk lewat tautan, voice punya saklar yang benar-benar bisa hidup, dan sesi yang mati
+meninggalkan jejak.
+
+### Tautan
+
+- `samp://host:port` membuka launcher dengan server itu sudah terpilih. Parsernya ada di
+  `servers/DeepLink.java` dan memakai aturan host dan port yang sama dengan `servers.txt`, jadi
+  tautan dan baris di daftar tidak bisa berbeda pendapat soal alamat yang bisa dipakai.
+- Tautan hanya memindahkan host dan port. Nama panggilan dan password yang sudah tersimpan tidak
+  disentuh, karena tautan dari room chat datang setelah pemain mengetik nama.
+- Tekan lama server di browser untuk menyalin tautannya. Itu cara membagikan alamat tanpa mengetik
+  ulang angka.
+
+### Voice
+
+- Mesin membaca `gui/VoiceChatEnable` dan hanya menggambar tombol voice kalau key itu true, jadi
+  saklarnya sekarang ada di Pengaturan bersama key asli lainnya.
+- Android menolak mikrofon tanpa izin runtime, dan saklar sebelumnya cuma janji yang tidak bisa
+  ditepati aplikasi. Mencentangnya sekarang meminta `RECORD_AUDIO` lebih dulu, dan launcher
+  memeriksa lagi sebelum game dijalankan. Izin ditolak berarti key tetap mati, bukan tombol mati.
+
+### Tangkapan layar
+
+- Tombol kamera 44dp di layar game menyalin surface lewat `PixelCopy` ke
+  `GTA/Screenshots/samp-<tanggal>-<jam>.png` lalu membuka menu bagikan. Isi filenya sama dengan
+  yang dilihat pemain, termasuk HUD mesin dan TextDraw dari server, dan tidak ada JNI baru.
+
+### Penanda sesi
+
+- Crash native di `libGame.so` tidak pernah sampai ke crash handler Java. Game sekarang menulis
+  `SAMP/session.open` saat mulai dan menghapusnya saat ditutup normal, jadi Diagnostik bisa
+  mengatakan sesi terakhir tidak ditutup normal. Sesi yang dimatikan sistem terlihat sama dari
+  sini, jadi teksnya tidak menyebutnya crash.
+
+### Catatan
+
+- Penghitung FPS ternyata sudah ada: `gui/fps` dibaca `cpp/samp/settings.cpp` dan digambar
+  `CDebugInfo`, jadi itu saklar, bukan fitur yang harus ditulis.
+- Gate: 351 assertion JVM, 25 suite, 17 pasangan kontras, 38 native JNI dengan 0 ekspor tanpa
+  pemakai.
+
 ## 0.2.0
 
 Stik sekarang jalan, pengaturan bisa dibawa pindah HP, dan client bisa menjelaskan dirinya sendiri

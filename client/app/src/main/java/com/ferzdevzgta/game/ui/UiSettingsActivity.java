@@ -76,6 +76,9 @@ public class UiSettingsActivity extends AppCompatActivity {
             {"gui", "hparmourtext", "false"},
             {"gui", "androidkeyboard", "false"},
             {"gui", "Dialog", "true"},
+            // Microphone recording is off by default in the engine too; the key only turns the
+            // voice button on, the runtime permission is asked for separately in save().
+            {"gui", "VoiceChatEnable", "false"},
     };
 
     private static final int[] FLAG_LABELS = {
@@ -86,11 +89,30 @@ public class UiSettingsActivity extends AppCompatActivity {
             R.string.settings_flag_hparmour,
             R.string.settings_flag_keyboard,
             R.string.settings_flag_dialog,
+            R.string.settings_flag_voice,
     };
 
     private final Map<String, EditText> numericFields = new LinkedHashMap<>();
     private final Map<String, CheckBox> flagFields = new LinkedHashMap<>();
     private IniFile ini;
+
+    // The engine only records once BASS sees a permitted microphone, and Android refuses the
+    // microphone without a runtime grant. Turning the switch on without the grant would draw a
+    // voice button that records nothing.
+    private final ActivityResultLauncher<String> micLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            granted -> {
+                voiceGranted = granted;
+                CheckBox voice = flagFields.get("gui.VoiceChatEnable");
+                if (voice != null) {
+                    voice.setChecked(granted);
+                }
+                Toast.makeText(this, getString(granted
+                        ? R.string.settings_voice_on
+                        : R.string.settings_voice_denied), Toast.LENGTH_LONG).show();
+            });
+
+    private boolean voiceGranted = false;
 
     // Export goes through the system file picker so the archive lands wherever the player keeps
     // backups, not deep inside the app's cache where nobody would find it.
@@ -319,8 +341,22 @@ public class UiSettingsActivity extends AppCompatActivity {
         flagFields.put(section + "." + key, box);
     }
 
+
+    private boolean hasMicPermission() {
+        return voiceGranted
+                || checkSelfPermission(android.Manifest.permission.RECORD_AUDIO)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED;
+    }
+
     private void save() {
         int written = 0;
+        CheckBox voiceBox = flagFields.get("gui.VoiceChatEnable");
+        if (voiceBox != null && voiceBox.isChecked() && !hasMicPermission()) {
+            // Save the switch as off and ask for the grant, instead of writing a key that cannot
+            // work and leaving the player with a dead voice button.
+            voiceBox.setChecked(false);
+            micLauncher.launch(android.Manifest.permission.RECORD_AUDIO);
+        }
         for (Map.Entry<String, EditText> e : numericFields.entrySet()) {
             String[] parts = e.getKey().split("\\.");
             String raw = e.getValue().getText().toString().trim();

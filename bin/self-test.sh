@@ -38,6 +38,7 @@ run_jvm() {
   srcs="$(find client/app/src/main/java/com/ferzdevzgta/game/data \
                 client/app/src/main/java/com/ferzdevzgta/game/diag \
                 client/app/src/main/java/com/ferzdevzgta/game/log \
+                client/app/src/main/java/com/ferzdevzgta/game/media \
                 client/app/src/main/java/com/ferzdevzgta/game/servers \
                 client/app/src/main/java/com/ferzdevzgta/game/settings \
                 client/app/src/main/java/com/ferzdevzgta/game/input/GamepadMap.java \

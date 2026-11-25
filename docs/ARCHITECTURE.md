@@ -328,3 +328,55 @@ is already built in one place, and duplicating it would let the two versions dri
 
 None of this replaces server TextDraw. That is RPC data the engine must draw, and translating it to
 HTML would be a different project with unreliable results across servers.
+
+## Links that open the client
+
+`samp://host:port` is registered on the launcher activity, so an address posted in a chat room is
+tapped instead of retyped. The parser is `servers/DeepLink.java` and it is pure: the intent gives a
+string, the parser returns a `ServerEndpoint` or null, and the JVM suite pins every refusal case.
+
+The link reuses `ServerEndpoint` instead of writing a second set of rules, because a link and a line
+in `servers.txt` must agree on what is joinable. A path, a fragment or an unknown scheme is refused
+outright: a silently wrong port is worse than a message saying the link is not a server.
+
+`GameConfig.select` then moves only `client.host` and `client.port`. The nickname and password
+already in the file stay, because a link arrives after the player typed a name, and a link should
+not be able to rename them. The server is also appended to `servers.txt` so it shows up in the
+browser later, and long pressing a row copies the same link back out.
+
+## Voice: a key plus a permission
+
+The engine already has voice: `cpp/samp/voice/Plugin.cpp` is compiled in, and
+`gui/samp_widgets/voicebutton.h` draws the button only when `gui/VoiceChatEnable` is true. What was
+missing was the Android side of the same promise. The switch now exists in Settings, and turning it
+on asks for `RECORD_AUDIO` first, then stores the key only if the grant landed.
+
+`BASS_RecordGetDeviceInfo` returns nothing while the microphone is refused, so a key written without
+the grant produces a voice button that records silence. The launcher checks the permission again
+before starting the game, which covers the case of a key written by hand in `settings.ini`.
+
+## Screenshots
+
+The game screen has a 44dp camera button. `PixelCopy` reads the composited surface into a bitmap and
+the file lands in `GTA/Screenshots/samp-<date>-<time>.png`, then the share sheet opens.
+
+PixelCopy was chosen over a native `glReadPixels` for two reasons: it reads what the player actually
+sees, HUD and server TextDraw included, and it adds no JNI entry point, so the frozen surface
+`libGame.so` expects stays exactly as it is. `media/ShotFile.java` holds the naming rule and is
+covered by the JVM suite.
+
+## The session marker
+
+A segfault inside `libGame.so` kills the process before any Java code can write a log, so
+`log/CrashHandler.java` cannot see it. `log/SessionGuard.java` writes `SAMP/session.open` when the
+game screen opens and deletes it in `onDestroy`.
+
+Diagnostics reads the marker on the next launch. A marker from the running process is ignored,
+because that means the game is open now. A session the system killed looks the same as a crash from
+here, so the row says the session did not close on purpose and never claims to know why.
+
+## The frame counter is a switch, not a feature
+
+`gui/fps` is read by `cpp/samp/settings.cpp` and drawn by `CDebugInfo`, and the Settings screen
+already toggles it. Nothing in Java should draw a second counter: two numbers would disagree and
+neither could be trusted.

@@ -168,4 +168,18 @@
     <string name="profile_import_fail">Restore failed: %1$s</string>
     <string name="settings_section_support">Support</string>
     <string name="home_bug_open">Report a bug on Discord</string>
+    <string name="link_added">Link opened. Server %1$s is selected.</string>
+    <string name="link_bad">That link is not a server address. It should look like samp://host:port</string>
+    <string name="link_write_failed">Could not save the server from that link.</string>
+    <string name="server_share_hint">Address copied: %1$s</string>
+    <string name="settings_flag_voice">Voice chat (needs microphone)</string>
+    <string name="settings_voice_on">Microphone allowed. Voice chat is on.</string>
+    <string name="settings_voice_denied">Microphone not allowed, so voice chat stays off.</string>
+    <string name="shot_button">Take a screenshot</string>
+    <string name="shot_saved">Screenshot saved to %1$s</string>
+    <string name="shot_failed">Could not take the screenshot.</string>
+    <string name="shot_share">Share screenshot</string>
+    <string name="diag_check_session">Last session</string>
+    <string name="diag_session_clean">closed on purpose</string>
+    <string name="diag_session_unfinished">did not close at %1$s</string>
 </resources>

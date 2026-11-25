@@ -16,6 +16,7 @@ import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.SAMP;
 import com.ferzdevzgta.game.net.ServerQueryClient;
 import com.ferzdevzgta.game.servers.GameConfig;
+import com.ferzdevzgta.game.servers.DeepLink;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.servers.ServerList;
 
@@ -208,6 +209,12 @@ public class ServerBrowserActivity extends AppCompatActivity {
         block.setPadding(0, Ui.dp(this, 10), 0, Ui.dp(this, 10));
 
         LinearLayout header = Ui.row(this);
+        // Long press copies the shareable samp:// link, which is how a server gets passed around
+        // a Discord room without anyone retyping digits.
+        block.setOnLongClickListener(v -> {
+            copyLink(server);
+            return true;
+        });
         LinearLayout labels = new LinearLayout(this);
         labels.setOrientation(LinearLayout.VERTICAL);
         TextView nameView = Ui.value(this, server.name());
@@ -238,6 +245,22 @@ public class ServerBrowserActivity extends AppCompatActivity {
         actions.addView(remove);
         block.addView(actions, Ui.fill());
         return block;
+    }
+
+
+    /** Puts the {@code samp://host:port} link of one server on the clipboard. */
+    private void copyLink(ServerEndpoint server) {
+        String link = DeepLink.toUri(server);
+        if (link == null) {
+            return;
+        }
+        android.content.ClipboardManager clipboard =
+                (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        if (clipboard == null) {
+            return;
+        }
+        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("samp", link));
+        Toast.makeText(this, getString(R.string.server_share_hint, link), Toast.LENGTH_SHORT).show();
     }
 
     /** Sends the eye to the add form when the empty state is tapped, since the form is below. */

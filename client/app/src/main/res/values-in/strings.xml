@@ -167,4 +167,18 @@
     <string name="profile_import_fail">Pemulihan gagal: %1$s</string>
     <string name="settings_section_support">Dukungan</string>
     <string name="home_bug_open">Lapor bug di Discord</string>
+    <string name="link_added">Tautan dibuka. Server %1$s sudah dipilih.</string>
+    <string name="link_bad">Tautan itu bukan alamat server. Bentuknya seperti samp://host:port</string>
+    <string name="link_write_failed">Gagal menyimpan server dari tautan itu.</string>
+    <string name="server_share_hint">Alamat disalin: %1$s</string>
+    <string name="settings_flag_voice">Voice chat (butuh mikrofon)</string>
+    <string name="settings_voice_on">Mikrofon diizinkan. Voice chat aktif.</string>
+    <string name="settings_voice_denied">Mikrofon tidak diizinkan, jadi voice chat tetap mati.</string>
+    <string name="shot_button">Ambil tangkapan layar</string>
+    <string name="shot_saved">Tangkapan layar disimpan di %1$s</string>
+    <string name="shot_failed">Gagal mengambil tangkapan layar.</string>
+    <string name="shot_share">Bagikan tangkapan layar</string>
+    <string name="diag_check_session">Sesi terakhir</string>
+    <string name="diag_session_clean">ditutup normal</string>
+    <string name="diag_session_unfinished">tidak ditutup normal sejak %1$s</string>
 </resources>
