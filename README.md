@@ -26,6 +26,7 @@ Everything below was executed on this machine, not assumed.
 | APK in a GitHub Release | **no**, it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
 | Wrapper rewrite | **in progress**, 20 of 21 files, only `GameThread` left, `bin/oswrapper-audit.sh` reports the rest, `bin/wrapper-pins.sh` and `bin/jni-pins.py` guard the names |
 | Patch on the phone | **yes**, `bin/patch-termux.sh` with apksigner, no SDK binaries needed |
+| Choosing a server | **yes**, `ServerBrowserActivity` writes `SAMP/settings.ini` from `SAMP/servers.txt`, no hand-editing |
 
 ## Getting an installable APK
 

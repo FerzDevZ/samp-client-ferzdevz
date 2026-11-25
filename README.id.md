@@ -26,6 +26,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | APK di GitHub Release | **tidak**, APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
 | Tulis ulang wrapper | **berjalan**, 20 dari 21 file, tinggal `GameThread`, sisanya dilaporkan `bin/oswrapper-audit.sh`, namanya dijaga `bin/wrapper-pins.sh` dan `bin/jni-pins.py` |
 | Patch di HP | **ya**, `bin/patch-termux.sh` dengan apksigner, tanpa binary SDK |
+| Memilih server | **ya**, `ServerBrowserActivity` menulis `SAMP/settings.ini` dari `SAMP/servers.txt`, tanpa edit manual |
 
 ## Mendapatkan APK yang bisa dipasang
 

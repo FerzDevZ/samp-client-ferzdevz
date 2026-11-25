@@ -71,6 +71,13 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
+            android:name="com.ferzdevzgta.game.ui.ServerBrowserActivity"
+            android:exported="false"
+            android:label="@string/servers_title"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
             android:name="com.ferzdevzgta.game.ui.UiSettingsActivity"
             android:exported="false"
             android:label="@string/settings_title"

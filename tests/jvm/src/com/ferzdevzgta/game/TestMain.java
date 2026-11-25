@@ -3,6 +3,9 @@ package com.ferzdevzgta.game;
 import com.ferzdevzgta.game.data.CacheDownloaderTest;
 import com.ferzdevzgta.game.data.CacheManifestTest;
 import com.ferzdevzgta.game.log.LogRotationTest;
+import com.ferzdevzgta.game.servers.GameConfigTest;
+import com.ferzdevzgta.game.servers.ServerEndpointTest;
+import com.ferzdevzgta.game.servers.ServerListTest;
 import com.ferzdevzgta.game.settings.IniFileTest;
 
 /**
@@ -21,6 +24,12 @@ public final class TestMain {
         LogRotationTest.run();
         System.out.println("-- IniFile");
         IniFileTest.run();
+        System.out.println("-- ServerEndpoint");
+        ServerEndpointTest.run();
+        System.out.println("-- ServerList");
+        ServerListTest.run();
+        System.out.println("-- GameConfig");
+        GameConfigTest.run();
         System.exit(Check.report());
     }
 }

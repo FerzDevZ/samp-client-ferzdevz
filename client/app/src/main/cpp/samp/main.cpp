@@ -230,6 +230,15 @@ void DoInitStuff()
 		ReadSettingFile();
 		//CServerInstance::initConnection(1);
 
+		if (pSettings->Get().szHost[0] == '\0')
+		{
+			// No server chosen yet. Connecting to an empty host would spin the RakNet client for
+			// nothing, so the loop stays offline until the player picks one.
+			Log("No server configured: set [client] host in SAMP/settings.ini");
+			bNetworkInited = true;
+			return;
+		}
+
         pNetGame = new CNetGame(
                 pSettings->Get().szHost,
                 pSettings->Get().iPort,

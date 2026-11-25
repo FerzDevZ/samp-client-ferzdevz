@@ -92,7 +92,33 @@ Hardcoded, tidak bisa diubah dari build:
 |---|---|---|
 | `/storage/emulated/0/GTA/` | aset game | `samp/main.cpp:36`, `samp/game/hooks.cpp:1385` |
 | `/storage/emulated/0/GTA/SAMP/settings.ini` | setting klien | `samp/settings.cpp:15` |
+| `/storage/emulated/0/GTA/SAMP/servers.txt` | daftar server untuk browser | `servers/GameConfig.java` |
 | `/storage/emulated/0/GTA/SAMP/fonts/` | font UI native | `samp/main.cpp:295` |
 | `/storage/emulated/0/GTA/logcat.txt` | log klien | `samp/main.cpp:397` |
 
 Tree asetnya sendiri tidak dikirim, lihat [DATA.md](DATA.md).
+
+## Memilih server
+
+Klien native membaca `[client] host`, `port`, `name` dan `password` dari
+`SAMP/settings.ini` sekali, pada frame pertama, dan tidak pernah lagi. Jadi semua yang
+menentukan koneksi harus menulis berkas itu sebelum game jalan:
+
+| Bagian | Berkas | Tugas |
+|---|---|---|
+| Layar browser | `game/ui/ServerBrowserActivity.java` | menampilkan daftar, menambah server, menyimpan nama pemain, menjalankan game |
+| Berkas daftar | `game/servers/ServerList.java` | `SAMP/servers.txt`, satu server per baris: nama tampilan, lalu `host:port`, dipisah garis vertikal |
+| Aturan alamat | `game/servers/ServerEndpoint.java` | validasi host dan port, batas nama pemain |
+| Penulis berkas | `game/servers/GameConfig.java` | membuat `settings.ini` saat instal baru, menulis `[client]` |
+
+Pemain tidak pernah mengedit ini secara manual. Dua penjaga mencegah berkas rusak
+mengakhiri sesi:
+
+1. `settings.cpp` mencatat peringatan, bukan memanggil `std::terminate()`, ketika berkas
+   tidak ada atau tidak terbaca, dan setiap key jatuh ke nilai bawaan.
+2. `main.cpp` melewati koneksi ketika `[client] host` kosong dan menuliskannya di log,
+   bukan mengarahkan RakNet ke alamat kosong.
+
+Set key yang ditulis `GameConfig` diperiksa terhadap `settings.cpp` oleh
+`GameConfigTest`, jadi menambah key di engine tanpa menambahkannya di template akan
+menggagalkan `bin/self-test.sh`.

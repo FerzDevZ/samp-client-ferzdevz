@@ -92,7 +92,32 @@ Hardcoded, not configurable from the build:
 |---|---|---|
 | `/storage/emulated/0/GTA/` | game assets | `samp/main.cpp:36`, `samp/game/hooks.cpp:1385` |
 | `/storage/emulated/0/GTA/SAMP/settings.ini` | client settings | `samp/settings.cpp:15` |
+| `/storage/emulated/0/GTA/SAMP/servers.txt` | server list for the browser | `servers/GameConfig.java` |
 | `/storage/emulated/0/GTA/SAMP/fonts/` | font used by the native UI | `samp/main.cpp:295` |
 | `/storage/emulated/0/GTA/logcat.txt` | client log | `samp/main.cpp:397` |
 
 The asset tree itself is not shipped, see [DATA.md](DATA.md).
+
+## Choosing a server
+
+The native client reads `[client] host`, `port`, `name` and `password` from
+`SAMP/settings.ini` once, on the first frame, and never again. Everything that picks a
+connection therefore writes that file before the game starts:
+
+| Piece | File | Job |
+|---|---|---|
+| Browser screen | `game/ui/ServerBrowserActivity.java` | lists servers, adds one, saves the nickname, starts the game |
+| List file | `game/servers/ServerList.java` | `SAMP/servers.txt`, one server per line: a display name, then `host:port`, separated by a vertical bar |
+| Address rules | `game/servers/ServerEndpoint.java` | host and port validation, nickname limits |
+| File writer | `game/servers/GameConfig.java` | creates `settings.ini` on a fresh install, writes `[client]` |
+
+The player never edits the ini by hand. Two guards keep a bad file from ending the run:
+
+1. `settings.cpp` logs a warning instead of calling `std::terminate()` when the file is
+   missing or unreadable, and every key falls back to its built-in default.
+2. `main.cpp` skips the connection when `[client] host` is empty and says so in the log,
+   instead of pointing RakNet at nothing.
+
+The key set written by `GameConfig` is checked against `settings.cpp` by
+`GameConfigTest`, so adding a key to the engine without adding it to the template fails
+`bin/self-test.sh`.

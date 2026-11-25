@@ -19,6 +19,8 @@ import androidx.core.content.FileProvider;
 import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.data.CacheDownloader;
 import com.ferzdevzgta.game.data.CacheManifest;
+import com.ferzdevzgta.game.servers.GameConfig;
+import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.settings.IniFile;
 
 import java.io.File;
@@ -54,6 +56,7 @@ public class DataSetupActivity extends AppCompatActivity {
     private Button fullButton;
     private Button liteButton;
     private Button syncButton;
+    private Button playButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,12 +119,16 @@ public class DataSetupActivity extends AppCompatActivity {
         LinearLayout third = new LinearLayout(this);
         third.setOrientation(LinearLayout.HORIZONTAL);
         Button logButton = Ui.button(this, getString(R.string.data_action_share_log), false);
-        Button playButton = Ui.button(this, getString(R.string.data_action_play), false);
+        Button serversButton = Ui.button(this, getString(R.string.servers_title), false);
         logButton.setLayoutParams(half);
-        playButton.setLayoutParams(half);
+        serversButton.setLayoutParams(half);
         third.addView(logButton);
-        third.addView(playButton);
+        third.addView(serversButton);
         root.addView(third);
+        Ui.gap(this, root, 8);
+
+        playButton = Ui.button(this, getString(R.string.data_action_play), true);
+        root.addView(playButton);
         Ui.gap(this, root, 14);
 
         detail = Ui.mono(this, "");
@@ -137,7 +144,21 @@ public class DataSetupActivity extends AppCompatActivity {
         settingsButton.setOnClickListener(v ->
                 startActivity(new Intent(this, UiSettingsActivity.class)));
         logButton.setOnClickListener(v -> shareLog());
+        serversButton.setOnClickListener(v ->
+                startActivity(new Intent(this, ServerBrowserActivity.class)));
         playButton.setOnClickListener(v -> {
+            try {
+                GameConfig.ensureSettings();
+            } catch (IOException failure) {
+                setStatus(getString(R.string.servers_write_failed, failure.getMessage()), Ui.ERR, 0);
+                return;
+            }
+            ServerEndpoint target = GameConfig.readServer();
+            if (target == null || "127.0.0.1".equals(target.host())) {
+                // No server chosen yet: pick one instead of booting into a dead connection.
+                startActivity(new Intent(this, ServerBrowserActivity.class));
+                return;
+            }
             startActivity(new Intent(this, com.ferzdevzgta.game.SAMP.class));
             finish();
         });

@@ -61,4 +61,24 @@
     <string name="settings_invalid">%1$s harus berupa angka</string>
     <string name="settings_no_ini">Tidak ada %1$s. Jalankan game sekali supaya filenya dibuat.</string>
     <string name="settings_note_restart">Mulai ulang game agar perubahan dipakai.</string>
+
+    <string name="servers_title">Server</string>
+    <string name="servers_intro">Pilih server tujuan lalu tekan Connect. Alamat disimpan di GTA/SAMP/settings.ini dan dibaca klien saat frame pertama.</string>
+    <string name="servers_nickname">Nama pemain</string>
+    <string name="servers_nickname_hint">Maksimal 24 karakter, tanpa spasi</string>
+    <string name="servers_list">Daftar server</string>
+    <string name="servers_empty">Belum ada server. Tambahkan di bawah.</string>
+    <string name="servers_add">Tambah server</string>
+    <string name="servers_add_name">Nama tampilan (opsional)</string>
+    <string name="servers_add_host">Host atau IP</string>
+    <string name="servers_add_port">Port (kosong = 7777)</string>
+    <string name="servers_add_action">Tambahkan ke daftar</string>
+    <string name="servers_connect">Connect</string>
+    <string name="servers_remove">Hapus</string>
+    <string name="servers_added">%1$s ditambahkan ke daftar</string>
+    <string name="servers_removed">%1$s dihapus</string>
+    <string name="servers_connecting">Menyambung ke %1$s</string>
+    <string name="servers_bad_port">Port harus berupa angka</string>
+    <string name="servers_bad_input">Alamat atau nama tidak valid</string>
+    <string name="servers_write_failed">Gagal menulis berkas: %1$s</string>
 </resources>

@@ -18,9 +18,10 @@ CSettings::CSettings()
 
 	if(reader.ParseError() < 0)
 	{
-		Log("Error: can't load %s", buff);
-		std::terminate();
-		return;
+		// The file is written by ServerBrowserActivity before the first boot. When it is missing
+		// or unreadable the engine still runs: every key below has a fallback, and an empty host
+		// means "no server chosen yet", which DoInitStuff reports instead of connecting.
+		Log("Warning: cannot load %s, using defaults", buff);
 	}
 
 	// client
@@ -28,7 +29,7 @@ CSettings::CSettings()
 	sprintf(buff, "__android_%d%d", rand() % 1000, rand() % 1000);
 	length = reader.Get("client", "name", buff).copy(m_Settings.szNickName, 24);
 	m_Settings.szNickName[length] = '\0';
-	length = reader.Get("client", "host", "141.95.234.17").copy(m_Settings.szHost, MAX_SETTINGS_STRING);
+	length = reader.Get("client", "host", "").copy(m_Settings.szHost, MAX_SETTINGS_STRING);
 	m_Settings.szHost[length] = '\0';
 	length = reader.Get("client", "password", "").copy(m_Settings.szPassword, MAX_SETTINGS_STRING);
 	m_Settings.szPassword[length] = '\0';

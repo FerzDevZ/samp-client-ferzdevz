@@ -34,6 +34,7 @@ run_jvm() {
   local srcs
   srcs="$(find client/app/src/main/java/com/ferzdevzgta/game/data \
                 client/app/src/main/java/com/ferzdevzgta/game/log \
+                client/app/src/main/java/com/ferzdevzgta/game/servers \
                 client/app/src/main/java/com/ferzdevzgta/game/settings \
                 tests/jvm/src -name '*.java')"
   if ! "$JAVAC_BIN" -Xlint:all,-serial -d "$out/classes" $srcs 2>"$out/javac.log"; then

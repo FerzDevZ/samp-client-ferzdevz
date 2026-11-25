@@ -27,7 +27,10 @@ import androidx.core.content.ContextCompat;
 import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.SAMP;
 import com.ferzdevzgta.game.log.LogRotation;
+import com.ferzdevzgta.game.servers.GameConfig;
+import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.ui.DataSetupActivity;
+import com.ferzdevzgta.game.ui.ServerBrowserActivity;
 
 import java.io.File;
 
@@ -246,13 +249,28 @@ public class MainActivity extends AppCompatActivity {
         return new File("/storage/emulated/0/GTA/data").isDirectory();
     }
 
+    /**
+     * Boots the client, after making sure a connection target exists. The native side parses
+     * settings.ini before its first frame and stops when the file is missing, so the file is
+     * created here and the browser opens when no server has been chosen yet.
+     */
     private void startGame() {
         try {
-            Log.d("MainActivity", "Starting game");
+            GameConfig.ensureSettings();
+            ServerEndpoint target = GameConfig.readServer();
+            if (target == null || "127.0.0.1".equals(target.host())) {
+                Log.d("MainActivity", "No server chosen, opening the browser");
+                startActivity(new Intent(MainActivity.this, ServerBrowserActivity.class));
+                return;
+            }
+            Log.d("MainActivity", "Starting game, target " + target.address());
             Intent gameIntent = new Intent(MainActivity.this, SAMP.class);
             startActivity(gameIntent);
         } catch (Exception e) {
             Log.e("MainActivity", "Error starting game: " + e.getMessage());
+            Toast.makeText(this,
+                    getString(R.string.servers_write_failed, String.valueOf(e.getMessage())),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
