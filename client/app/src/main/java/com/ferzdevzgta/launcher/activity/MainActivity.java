@@ -144,18 +144,24 @@ public class MainActivity extends AppCompatActivity {
         statusCard.addView(statusHead, Ui.fill());
         Ui.gap(this, statusCard, 4);
 
+        // Each requirement is also the shortcut to the screen that fixes it, so the launcher
+        // never asks the player to guess which button below belongs to which warning above.
         LinearLayout dataRow = Ui.statusRow(this, getString(R.string.home_status_data), "-", Ui.WARN);
         dataValue = Ui.statusValue(dataRow);
+        makeShortcut(dataRow, DataSetupActivity.class);
         statusCard.addView(dataRow, Ui.fill());
 
         LinearLayout serverRow = Ui.statusRow(this, getString(R.string.home_status_server), "-", Ui.WARN);
         serverValue = Ui.statusValue(serverRow);
+        makeShortcut(serverRow, ServerBrowserActivity.class);
         statusCard.addView(serverRow, Ui.fill());
 
         LinearLayout nickRow = Ui.statusRow(this, getString(R.string.home_status_nick), "-", Ui.WARN);
         nickValue = Ui.statusValue(nickRow);
+        makeShortcut(nickRow, ServerBrowserActivity.class);
         statusCard.addView(nickRow, Ui.fill());
         content.addView(statusCard, Ui.fill());
+        Ui.fadeIn(statusCard, 0);
 
         Ui.gap(this, content, 12);
         LinearLayout languageCard = Ui.card(this);
@@ -165,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         Ui.gap(this, languageCard, 10);
         languageCard.addView(Ui.label(this, getString(R.string.language_note)));
         content.addView(languageCard, Ui.fill());
+        Ui.fadeIn(languageCard, 1);
 
         Ui.gap(this, content, 20);
         content.addView(Ui.label(this, getString(R.string.home_bug_info)));
@@ -190,14 +197,14 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT, Ui.dp(this, 1)));
 
         Ui.gap(this, bar, 12);
-        startButton = Ui.button(this, getString(R.string.home_start), Ui.PRIMARY);
+        startButton = Ui.button(this, getString(R.string.home_start), Ui.PRIMARY, R.drawable.ic_play);
         startButton.setOnClickListener(v -> onStartPressed());
         bar.addView(startButton, Ui.fill());
 
         Ui.gap(this, bar, 8);
         LinearLayout row = Ui.row(this);
-        Button dataButton = Ui.button(this, getString(R.string.home_action_data), Ui.SECONDARY);
-        Button serverButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY);
+        Button dataButton = Ui.button(this, getString(R.string.home_action_data), Ui.SECONDARY, R.drawable.ic_data);
+        Button serverButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY, R.drawable.ic_server);
         dataButton.setOnClickListener(v -> startActivity(new Intent(this, DataSetupActivity.class)));
         serverButton.setOnClickListener(v -> startActivity(new Intent(this, ServerBrowserActivity.class)));
         row.addView(dataButton, Ui.weight(this, 1f, 8f));
@@ -205,10 +212,17 @@ public class MainActivity extends AppCompatActivity {
         bar.addView(row, Ui.fill());
 
         Ui.gap(this, bar, 8);
-        Button displayButton = Ui.button(this, getString(R.string.home_action_settings), Ui.GHOST);
+        Button displayButton = Ui.button(this, getString(R.string.home_action_settings), Ui.GHOST, R.drawable.ic_settings);
         displayButton.setOnClickListener(v -> startActivity(new Intent(this, UiSettingsActivity.class)));
         bar.addView(displayButton, Ui.fill());
         return bar;
+    }
+
+    /** Turns a status row into the shortcut for the screen that changes it. */
+    private void makeShortcut(LinearLayout row, Class<?> screen) {
+        row.setClickable(true);
+        row.setFocusable(true);
+        row.setOnClickListener(v -> startActivity(new Intent(this, screen)));
     }
 
     @Override

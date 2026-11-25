@@ -169,3 +169,25 @@ The launcher pins its actions in a bottom bar instead of ending the scroll with 
 primary button stays inside thumb reach and a short screen does not end in empty space. Its
 status card shows one dot per requirement, and the primary button changes label, Play or Set
 up first, instead of repeating the same three words on three different controls.
+
+### Icons, splash and diagnostics
+
+Controls are text first, with a vector glyph from `res/drawable/ic_*.xml` where one helps. The
+glyph is tinted with the label colour by `Ui.icon`, so a secondary button never comes out with a
+white icon on a light surface. The launcher icon is an adaptive vector, and `Theme.SampLauncher`
+sets `splash_window` as the window background, which removes the white flash between the tap and
+the first frame.
+
+The server screen asks every listed address for its info answer through `servers/ServerQuery`
+(pure, JVM tested) and `net/ServerQueryClient` (UDP, one thread per probe, 1200 ms timeout, the
+result posted to the main thread). A dead address costs one timeout in the background, not a
+frozen list.
+
+`ui/DiagnosticsActivity` reads the phone, not the build: app version, both native libraries with
+their sizes, the five declared JNI entry points, the data tree, the manifest, the stored target
+and the tail of `GTA/logcat.txt`, with copy and share. Its formatting rules live in `diag/Report`
+so `bin/self-test.sh` covers them without a device.
+
+There is no separate first-run wizard on purpose: the launcher already lists the three
+requirements, and each row is the shortcut to the screen that fixes it. A wizard would repeat the
+same three actions one tap at a time.

@@ -28,6 +28,8 @@ Everything below was executed on this machine, not assumed.
 | Patch on the phone | **yes**, `bin/patch-termux.sh` with apksigner, no SDK binaries needed |
 | Choosing a server | **yes**, `ServerBrowserActivity` writes `SAMP/settings.ini` from `SAMP/servers.txt`, no hand-editing |
 | Language | **yes**, Indonesian or English, chosen in the app, stored in `ui_language`, `bin/self-test.sh strings` refuses to let the two resource files drift apart |
+| Live server status | **yes**, ping and player count per listed server, one UDP query per row with a 1200 ms timeout, never on the main thread |
+| Diagnostics | **yes**, `DiagnosticsActivity` reads the phone: native libraries, the five JNI entry points, data tree, manifest, target, last 20 log lines, copy and share |
 | Launcher screen | **redesigned**, shows data, server and nickname state before you press Start, `bin/ui-contrast.py` holds the palette above WCAG AA |
 
 ## Getting an installable APK

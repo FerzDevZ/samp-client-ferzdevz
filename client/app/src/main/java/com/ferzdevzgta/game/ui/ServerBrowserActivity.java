@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.SAMP;
+import com.ferzdevzgta.game.net.ServerQueryClient;
 import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.servers.ServerList;
@@ -23,7 +24,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Picks the server this client connects to.
@@ -35,6 +38,8 @@ import java.util.List;
 public class ServerBrowserActivity extends AppCompatActivity {
 
     private final List<ServerEndpoint> servers = new ArrayList<>();
+    /** One status line per listed address, so a probe started before a reload lands nowhere. */
+    private final Map<String, TextView> liveSlots = new LinkedHashMap<>();
 
     private EditText nicknameField;
     private EditText nameField;
@@ -100,11 +105,45 @@ public class ServerBrowserActivity extends AppCompatActivity {
 
     private LinearLayout listCard() {
         LinearLayout card = Ui.card(this);
-        card.addView(Ui.section(this, getString(R.string.servers_list)));
+        LinearLayout head = Ui.row(this);
+        head.addView(Ui.section(this, getString(R.string.servers_list)), Ui.weight(this, 1f, 8f));
+        Button refresh = Ui.button(this, getString(R.string.servers_refresh), Ui.GHOST,
+                R.drawable.ic_refresh);
+        refresh.setOnClickListener(v -> probeAll());
+        head.addView(refresh);
+        card.addView(head, Ui.fill());
         listBox = new LinearLayout(this);
         listBox.setOrientation(LinearLayout.VERTICAL);
         card.addView(listBox, Ui.fill());
         return card;
+    }
+
+    /**
+     * Asks every listed server for its info answer. The socket work runs off the main thread, so
+     * a dead address costs one timeout instead of a frozen list, and each row updates on its own.
+     */
+    private void probeAll() {
+        for (Map.Entry<String, TextView> entry : liveSlots.entrySet()) {
+            entry.getValue().setText(getString(R.string.servers_probe_running));
+            entry.getValue().setTextColor(Ui.FAINT);
+        }
+        for (ServerEndpoint server : servers) {
+            TextView slot = liveSlots.get(server.address());
+            if (slot == null) {
+                continue;
+            }
+            ServerQueryClient.probe(server.host(), server.port(), answer -> {
+                if (answer.ok) {
+                    slot.setText(getString(R.string.servers_probe_ok, answer.latencyMs,
+                            answer.info.players, answer.info.maxPlayers));
+                    slot.setTextColor(answer.info.players >= answer.info.maxPlayers
+                            ? Ui.WARN : Ui.OK);
+                } else {
+                    slot.setText(getString(R.string.servers_probe_offline));
+                    slot.setTextColor(Ui.FAINT);
+                }
+            });
+        }
     }
 
     private LinearLayout addCard() {
@@ -118,7 +157,7 @@ public class ServerBrowserActivity extends AppCompatActivity {
         portField = field(card, R.string.servers_add_port, true);
 
         Ui.gap(this, card, 14);
-        Button add = Ui.button(this, getString(R.string.servers_add_action), Ui.SECONDARY);
+        Button add = Ui.button(this, getString(R.string.servers_add_action), Ui.SECONDARY, R.drawable.ic_server);
         add.setOnClickListener(v -> addCurrentFields());
         card.addView(add, Ui.fill());
         return card;
@@ -142,14 +181,19 @@ public class ServerBrowserActivity extends AppCompatActivity {
             servers.add(saved);
         }
         listBox.removeAllViews();
+        liveSlots.clear();
         if (servers.isEmpty()) {
             listBox.addView(Ui.body(this, getString(R.string.servers_empty)));
             return;
         }
+        int index = 0;
         for (ServerEndpoint server : servers) {
             boolean active = savedUsable && saved.address().equals(server.address());
-            listBox.addView(serverBlock(server, active), Ui.fill());
+            LinearLayout block = serverBlock(server, active);
+            listBox.addView(block, Ui.fill());
+            Ui.fadeIn(block, index++);
         }
+        probeAll();
     }
 
     private LinearLayout serverBlock(ServerEndpoint server, boolean active) {
@@ -162,6 +206,10 @@ public class ServerBrowserActivity extends AppCompatActivity {
         labels.setOrientation(LinearLayout.VERTICAL);
         labels.addView(Ui.value(this, server.name()));
         labels.addView(Ui.mono(this, server.address()));
+        TextView live = Ui.mono(this, getString(R.string.servers_probe_running));
+        live.setTextColor(Ui.FAINT);
+        labels.addView(live);
+        liveSlots.put(server.address(), live);
         header.addView(labels, Ui.weight(this, 1f, 8f));
         if (active) {
             header.addView(Ui.pill(this, getString(R.string.servers_current), Ui.OK));
@@ -170,7 +218,7 @@ public class ServerBrowserActivity extends AppCompatActivity {
 
         Ui.gap(this, block, 10);
         LinearLayout actions = Ui.row(this);
-        Button connect = Ui.button(this, getString(R.string.servers_connect), Ui.PRIMARY);
+        Button connect = Ui.button(this, getString(R.string.servers_connect), Ui.PRIMARY, R.drawable.ic_play);
         connect.setOnClickListener(v -> connect(server));
         actions.addView(connect, Ui.weight(this, 1f, 8f));
         Button remove = Ui.button(this, getString(R.string.servers_remove), Ui.GHOST);

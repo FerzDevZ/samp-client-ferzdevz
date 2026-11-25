@@ -22,6 +22,16 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="colorAccent">#C10000</item>
     </style>
+    <!-- Our own screens. Flat window background so the first frame of the app is the same
+         colour as the content, no white flash and no light status bar on a dark surface. -->
+    <style name="Theme.SampLauncher" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_window</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/samp_bg</item>
+        <item name="android:navigationBarColor">@color/samp_bg</item>
+        <item name="colorAccent">#3D8BFD</item>
+        <item name="android:colorAccent">#3D8BFD</item>
+    </style>
     <style name="GameActivity" parent="@style/Theme.AppCompat.NoActionBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowFullscreen">true</item>

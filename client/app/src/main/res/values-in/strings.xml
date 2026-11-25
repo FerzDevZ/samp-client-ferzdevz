@@ -115,4 +115,27 @@
     <string name="servers_bad_input">Alamat atau nama tidak valid</string>
     <string name="servers_write_failed">Gagal menulis berkas: %1$s</string>
     <string name="servers_current">Server aktif</string>
+    <string name="servers_probe_running">Memeriksa</string>
+    <string name="servers_probe_ok">%1$d ms, %2$d dari %3$d slot</string>
+    <string name="servers_probe_offline">Tidak menjawab</string>
+    <string name="servers_refresh">Segarkan</string>
+    <string name="servers_section_ping">Status langsung</string>
+    <string name="diag_title">Diagnostik</string>
+    <string name="diag_intro">Dibaca dari HP ini, bukan dari skrip build. Salin laporannya kalau layar jadi gelap.</string>
+    <string name="diag_check_app">Versi aplikasi</string>
+    <string name="diag_check_native">Pustaka native</string>
+    <string name="diag_check_jni">Titik masuk JNI</string>
+    <string name="diag_check_data">Data game</string>
+    <string name="diag_check_manifest">Manifest data</string>
+    <string name="diag_check_settings">Koneksi</string>
+    <string name="diag_check_log">Berkas log</string>
+    <string name="diag_missing">tidak ada</string>
+    <string name="diag_none">kosong</string>
+    <string name="diag_unreadable">tidak terbaca</string>
+    <string name="diag_log_title">20 baris log terakhir</string>
+    <string name="diag_copy">Salin laporan</string>
+    <string name="diag_copied">Laporan disalin</string>
+    <string name="diag_share">Bagikan log</string>
+    <string name="diag_no_log">Belum ada GTA/logcat.txt</string>
+    <string name="diag_open">Diagnostik</string>
 </resources>

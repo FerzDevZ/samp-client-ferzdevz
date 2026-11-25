@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kept in sync with ui/Ui.java BG; bin/ui-contrast.py asserts the palette, this is the
+         one colour the window background needs before Java runs. -->
+    <color name="samp_bg">#FF0B0F14</color>
+</resources>

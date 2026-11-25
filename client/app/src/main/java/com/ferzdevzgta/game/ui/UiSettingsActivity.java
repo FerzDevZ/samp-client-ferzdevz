@@ -142,19 +142,26 @@ public class UiSettingsActivity extends AppCompatActivity {
         root.addView(flags, Ui.fill());
 
         Ui.gap(this, root, 20);
-        Button save = Ui.button(this, getString(R.string.settings_save), Ui.PRIMARY);
+        Button save = Ui.button(this, getString(R.string.settings_save), Ui.PRIMARY, R.drawable.ic_check);
         save.setOnClickListener(v -> save());
         root.addView(save, Ui.fill());
 
         Ui.gap(this, root, 8);
         LinearLayout row = Ui.row(this);
         Button reset = Ui.button(this, getString(R.string.settings_reset), Ui.SECONDARY);
-        Button share = Ui.button(this, getString(R.string.data_action_share_log), Ui.SECONDARY);
+        Button share = Ui.button(this, getString(R.string.data_action_share_log), Ui.SECONDARY, R.drawable.ic_log);
         reset.setOnClickListener(v -> reset());
         share.setOnClickListener(v -> shareLog());
         row.addView(reset, Ui.weight(this, 1f, 8f));
         row.addView(share, Ui.weight(this, 1f, 0f));
         root.addView(row, Ui.fill());
+
+        Ui.gap(this, root, 14);
+        Button diagnostics = Ui.button(this, getString(R.string.diag_open), Ui.GHOST,
+                R.drawable.ic_warn);
+        diagnostics.setOnClickListener(v -> startActivity(
+                new android.content.Intent(this, DiagnosticsActivity.class)));
+        root.addView(diagnostics, Ui.fill());
 
         Ui.gap(this, root, 14);
         root.addView(Ui.label(this, getString(R.string.settings_note_restart)));

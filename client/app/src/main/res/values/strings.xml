@@ -116,4 +116,27 @@
     <string name="servers_bad_input">That address or name is not valid</string>
     <string name="servers_write_failed">Could not write the file: %1$s</string>
     <string name="servers_current">Current server</string>
+    <string name="servers_probe_running">Checking</string>
+    <string name="servers_probe_ok">%1$d ms, %2$d of %3$d slots</string>
+    <string name="servers_probe_offline">No answer</string>
+    <string name="servers_refresh">Refresh</string>
+    <string name="servers_section_ping">Live status</string>
+    <string name="diag_title">Diagnostics</string>
+    <string name="diag_intro">Read from this phone, not from a build script. Copy the report when something goes dark.</string>
+    <string name="diag_check_app">App version</string>
+    <string name="diag_check_native">Native libraries</string>
+    <string name="diag_check_jni">JNI entry points</string>
+    <string name="diag_check_data">Game data</string>
+    <string name="diag_check_manifest">Data manifest</string>
+    <string name="diag_check_settings">Connection</string>
+    <string name="diag_check_log">Log file</string>
+    <string name="diag_missing">missing</string>
+    <string name="diag_none">none</string>
+    <string name="diag_unreadable">unreadable</string>
+    <string name="diag_log_title">Last 20 log lines</string>
+    <string name="diag_copy">Copy report</string>
+    <string name="diag_copied">Report copied</string>
+    <string name="diag_share">Share log</string>
+    <string name="diag_no_log">There is no GTA/logcat.txt yet</string>
+    <string name="diag_open">Diagnostics</string>
 </resources>

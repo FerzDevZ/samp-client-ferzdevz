@@ -108,29 +108,29 @@ public class DataSetupActivity extends AppCompatActivity {
 
         // Primary action
         Ui.gap(this, root, 16);
-        syncButton = Ui.button(this, getString(R.string.data_action_sync), Ui.PRIMARY);
+        syncButton = Ui.button(this, getString(R.string.data_action_sync), Ui.PRIMARY, R.drawable.ic_download);
         root.addView(syncButton, Ui.fill());
 
         // Secondary actions, two per row so nothing is narrower than a thumb
         Ui.gap(this, root, 8);
         LinearLayout rowA = Ui.row(this);
-        Button verifyButton = Ui.button(this, getString(R.string.data_action_verify), Ui.SECONDARY);
-        Button logButton = Ui.button(this, getString(R.string.data_action_share_log), Ui.SECONDARY);
+        Button verifyButton = Ui.button(this, getString(R.string.data_action_verify), Ui.SECONDARY, R.drawable.ic_check);
+        Button logButton = Ui.button(this, getString(R.string.data_action_share_log), Ui.SECONDARY, R.drawable.ic_log);
         rowA.addView(verifyButton, Ui.weight(this, 1f, 8f));
         rowA.addView(logButton, Ui.weight(this, 1f, 0f));
         root.addView(rowA, Ui.fill());
 
         Ui.gap(this, root, 8);
         LinearLayout rowB = Ui.row(this);
-        Button serversButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY);
-        Button settingsButton = Ui.button(this, getString(R.string.home_action_settings), Ui.SECONDARY);
+        Button serversButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY, R.drawable.ic_server);
+        Button settingsButton = Ui.button(this, getString(R.string.home_action_settings), Ui.SECONDARY, R.drawable.ic_settings);
         rowB.addView(serversButton, Ui.weight(this, 1f, 8f));
         rowB.addView(settingsButton, Ui.weight(this, 1f, 0f));
         root.addView(rowB, Ui.fill());
 
         // Play
         Ui.gap(this, root, 20);
-        Button playButton = Ui.button(this, getString(R.string.data_action_play), Ui.PRIMARY);
+        Button playButton = Ui.button(this, getString(R.string.data_action_play), Ui.PRIMARY, R.drawable.ic_play);
         root.addView(playButton, Ui.fill());
 
         // Language, reachable on the first run before any data exists

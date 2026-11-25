@@ -35,6 +35,7 @@ run_jvm() {
   out="$(mktemp -d)"
   local srcs
   srcs="$(find client/app/src/main/java/com/ferzdevzgta/game/data \
+                client/app/src/main/java/com/ferzdevzgta/game/diag \
                 client/app/src/main/java/com/ferzdevzgta/game/log \
                 client/app/src/main/java/com/ferzdevzgta/game/servers \
                 client/app/src/main/java/com/ferzdevzgta/game/settings \

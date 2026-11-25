@@ -28,6 +28,8 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Patch di HP | **ya**, `bin/patch-termux.sh` dengan apksigner, tanpa binary SDK |
 | Memilih server | **ya**, `ServerBrowserActivity` menulis `SAMP/settings.ini` dari `SAMP/servers.txt`, tanpa edit manual |
 | Bahasa | **ya**, Indonesia atau Inggris, dipilih di dalam aplikasi, disimpan di `ui_language`, `bin/self-test.sh strings` menolak kalau kedua file resource berbeda |
+| Status server langsung | **ya**, ping dan jumlah pemain per server di daftar, satu query UDP per baris dengan timeout 1200 ms, tidak pernah di main thread |
+| Diagnostik | **ya**, `DiagnosticsActivity` membaca HP: pustaka native, lima titik masuk JNI, pohon data, manifest, target, 20 baris log terakhir, salin dan bagikan |
 | Layar launcher | **didesain ulang**, menampilkan status data, server dan nickname sebelum menekan Start, `bin/ui-contrast.py` menjaga palette di atas WCAG AA |
 
 ## Mendapatkan APK yang bisa dipasang

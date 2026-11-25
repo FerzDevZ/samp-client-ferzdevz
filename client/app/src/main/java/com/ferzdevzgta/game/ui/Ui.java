@@ -3,8 +3,10 @@ package com.ferzdevzgta.game.ui;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.provider.Settings;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
@@ -16,6 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.ferzdevzgta.game.R;
 
@@ -281,6 +286,69 @@ public final class Ui {
         b.setTextColor(ink);
         ripple(b, round(c, RADIUS_SMALL, fill, stroke));
         return b;
+    }
+
+    /**
+     * Same button, with an icon before the label. The icon is tinted with the label colour, so a
+     * secondary button never ends up with a white glyph on a light surface.
+     */
+    public static Button button(Context c, String value, int kind, int iconRes) {
+        Button b = button(c, value, kind);
+        Drawable glyph = icon(c, iconRes, b.getCurrentTextColor());
+        if (glyph != null) {
+            int size = dp(c, 18);
+            glyph.setBounds(0, 0, size, size);
+            b.setCompoundDrawables(glyph, null, null, null);
+            b.setCompoundDrawablePadding(dp(c, 8));
+        }
+        return b;
+    }
+
+    /** A drawable from resources, tinted. Returns null instead of throwing on a bad id. */
+    public static Drawable icon(Context c, int resId, int tint) {
+        Drawable raw = ContextCompat.getDrawable(c, resId);
+        if (raw == null) {
+            return null;
+        }
+        Drawable tinted = DrawableCompat.wrap(raw.mutate());
+        DrawableCompat.setTint(tinted, tint);
+        return tinted;
+    }
+
+    /**
+     * True when the system animation scale is above zero. Transitions are decoration: with the
+     * scale at zero nothing here waits on an animation to finish.
+     */
+    public static boolean motionEnabled(Context c) {
+        try {
+            return Settings.Global.getFloat(c.getContentResolver(),
+                    Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f;
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    /**
+     * Fades a view in from slightly below, so a screen assembles instead of appearing at once.
+     * The stagger is capped at eight items so a long list does not animate for a second.
+     */
+    public static void fadeIn(View view, int index) {
+        if (view == null) {
+            return;
+        }
+        if (!motionEnabled(view.getContext())) {
+            view.setAlpha(1f);
+            return;
+        }
+        float lift = dp(view.getContext(), 6);
+        view.setAlpha(0f);
+        view.setTranslationY(lift);
+        view.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(Math.min(index, 8) * 24L)
+                .setDuration(160L)
+                .start();
     }
 
     /**

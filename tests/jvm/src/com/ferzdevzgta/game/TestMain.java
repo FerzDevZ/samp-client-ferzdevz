@@ -4,7 +4,9 @@ import com.ferzdevzgta.game.data.CacheDownloaderTest;
 import com.ferzdevzgta.game.data.CacheManifestTest;
 import com.ferzdevzgta.game.log.LogRotationTest;
 import com.ferzdevzgta.game.servers.GameConfigTest;
+import com.ferzdevzgta.game.diag.ReportTest;
 import com.ferzdevzgta.game.servers.ServerEndpointTest;
+import com.ferzdevzgta.game.servers.ServerQueryTest;
 import com.ferzdevzgta.game.servers.ServerListTest;
 import com.ferzdevzgta.game.settings.IniFileTest;
 import com.ferzdevzgta.game.ui.LanguageTest;
@@ -27,6 +29,8 @@ public final class TestMain {
         IniFileTest.run();
         System.out.println("-- ServerEndpoint");
         ServerEndpointTest.run();
+        ReportTest.run();
+        ServerQueryTest.run();
         System.out.println("-- ServerList");
         ServerListTest.run();
         System.out.println("-- GameConfig");

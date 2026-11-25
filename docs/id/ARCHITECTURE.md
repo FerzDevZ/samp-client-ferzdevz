@@ -170,3 +170,24 @@ Launcher menaruh tombol aksinya di bilah bawah, bukan di ujung scroll, jadi tomb
 tetap terjangkau jempol dan layar pendek tidak berakhir dengan ruang kosong. Kartu statusnya
 menampilkan satu titik per syarat, dan tombol utamanya berganti label, Mainkan atau Siapkan
 dulu, bukan mengulang tiga kata yang sama di tiga kontrol berbeda.
+
+### Ikon, splash dan diagnostik
+
+Kontrol tetap mengutamakan teks, dengan satu ikon vektor dari `res/drawable/ic_*.xml` bila
+membantu. Ikonnya diwarnai mengikuti warna label lewat `Ui.icon`, jadi tombol sekunder tidak
+pernah muncul dengan ikon putih di permukaan terang. Ikon peluncur adalah vektor adaptif, dan
+`Theme.SampLauncher` memakai `splash_window` sebagai window background, yang menghilangkan kilatan
+putih antara ketukan dan frame pertama.
+
+Layar server menanyakan info ke setiap alamat lewat `servers/ServerQuery` (murni, diuji di JVM)
+dan `net/ServerQueryClient` (UDP, satu thread per probe, timeout 1200 ms, hasil dikirim ke main
+thread). Alamat mati hanya memakan satu timeout di latar belakang, bukan membekukan daftar.
+
+`ui/DiagnosticsActivity` membaca HP, bukan skrip build: versi aplikasi, dua pustaka native beserta
+ukurannya, lima titik masuk JNI yang dideklarasikan, pohon data, manifest, target tersimpan dan
+ekor `GTA/logcat.txt`, lengkap dengan salin dan bagikan. Aturan formatnya ada di `diag/Report`
+supaya `bin/self-test.sh` mengujinya tanpa perangkat.
+
+Tidak ada wizard pertama kali, dan itu disengaja: launcher sudah menampilkan tiga syarat, dan
+tiap baris adalah jalan pintas ke layar yang memperbaikinya. Wizard hanya akan mengulang tiga
+aksi yang sama satu per satu.
