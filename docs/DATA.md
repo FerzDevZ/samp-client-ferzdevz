@@ -81,9 +81,11 @@ transferring a single Rockstar file.
 
 ## Downloading it in the app
 
-The upstream `DownloaderActivity` uses Play Asset Delivery, which does nothing
-for a sideloaded APK. Instead, a sideloaded build opens `DataSetupActivity` when
-`/storage/emulated/0/GTA/data` is missing:
+The upstream `DownloaderActivity` used Play Asset Delivery, which does nothing for a
+sideloaded APK. That activity and the `com.google.android.play:asset-delivery` dependency
+are gone: 824 lines of Java, two layouts, four strings and a manifest entry, with no
+`com/google/android/play/core` class left in the dex. In their place, a sideloaded build
+opens `DataSetupActivity` when `/storage/emulated/0/GTA/data` is missing:
 
 | Step | What happens |
 |---|---|

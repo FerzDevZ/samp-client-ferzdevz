@@ -153,7 +153,7 @@ promise of dates.
 | 3 | `GameNative` | done: 35 declarations that resolve, two dead ones removed |
 | 4 | `GameActivityBase`, `GameView`, `view/*` | done: the activity, the surface and the five handlers, four bugs fixed |
 | 5 | `GameThread` (1221 lines) | next: the frame loop; last because everything above must be stable first |
-| 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | Play Asset Delivery shell, replaced by our own downloader, candidate for deletion rather than rewrite |
+| 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem`, `DownloaderPackConfig`, `DownloaderPackType`, `DownloaderActivity` | done, deleted: the Play Asset Delivery shell our own downloader replaced, 824 lines and the `asset-delivery` dependency removed |
 | 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | thin adapters, low risk |
 
 ## Adding a rewrite

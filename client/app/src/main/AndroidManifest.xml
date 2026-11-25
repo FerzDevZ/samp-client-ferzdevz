@@ -90,14 +90,6 @@
 
         <activity
             android:theme="@style/GameActivity"
-            android:name="com.rockstargames.gtasa.DownloaderActivity"
-            android:exported="true"
-            android:screenOrientation="userLandscape"
-            android:resizeableActivity="false">
-        </activity>
-
-        <activity
-            android:theme="@style/GameActivity"
             android:name="com.rockstargames.gtasa.GameActivity"
             android:launchMode="singleTask"
             android:screenOrientation="userLandscape"

@@ -155,7 +155,7 @@ tanggal.
 | 3 | `GameNative` | selesai: 35 deklarasi yang ketemu, dua yang mati dihapus |
 | 4 | `GameActivityBase`, `GameView`, `view/*` | selesai: activity, surface dan lima handler, empat bug diperbaiki |
 | 5 | `GameThread` (1221 baris) | berikutnya: loop frame; terakhir karena semua di atas harus stabil dulu |
-| 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | cangkang Play Asset Delivery, sudah digantikan downloader sendiri, kandidat dihapus bukan ditulis ulang |
+| 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem`, `DownloaderPackConfig`, `DownloaderPackType`, `DownloaderActivity` | selesai, dihapus: cangkang Play Asset Delivery yang sudah digantikan downloader sendiri, 824 baris dan dependensi `asset-delivery` hilang |
 | 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | adapter tipis, risiko rendah |
 
 ## Cara menambah satu penulisan ulang

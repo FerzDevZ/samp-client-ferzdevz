@@ -81,9 +81,11 @@ Rockstar pun.
 
 ## Mengunduhnya dari dalam aplikasi
 
-`DownloaderActivity` bawaan memakai Play Asset Delivery, yang tidak berbuat apa pun
-pada APK hasil sideload. Sebagai gantinya, build sideload membuka
-`DataSetupActivity` saat `/storage/emulated/0/GTA/data` belum ada:
+`DownloaderActivity` bawaan memakai Play Asset Delivery, yang tidak berbuat apa pun pada
+APK hasil sideload. Activity itu dan dependensi `com.google.android.play:asset-delivery`
+sudah dihapus: 824 baris Java, dua layout, empat string, dan satu entri manifest, tanpa
+satu pun kelas `com/google/android/play/core` tersisa di dex. Sebagai gantinya, build
+sideload membuka `DataSetupActivity` saat `/storage/emulated/0/GTA/data` belum ada:
 
 | Langkah | Yang terjadi |
 |---|---|
