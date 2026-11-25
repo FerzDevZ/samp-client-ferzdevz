@@ -323,7 +323,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
         onActivityReady(!initialized);
 
        // try {
-       //     GameNative.initializeSAMP();
+       //     SAMP.getInstance().initializeSAMP();  // the real entry point lives on SAMP
        // } catch (UnsatisfiedLinkError e5) {
        //     Log.e(TAG, e5.getMessage());
        // }

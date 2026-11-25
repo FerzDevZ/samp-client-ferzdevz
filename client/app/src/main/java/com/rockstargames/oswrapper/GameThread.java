@@ -687,7 +687,10 @@ public final class GameThread {
 
             /* JADX INFO: renamed from: invoke, reason: avoid collision after fix types in other method */
             public final void invoke2() {
-                GameNative.implOnGamepadCountChanged(count);
+                // No engine call here: libGame.so exports no handler for a changed controller
+                // count, and the one this code used to call was never implemented, so it
+                // threw UnsatisfiedLinkError. Connecting a gamepad already reaches the engine
+                // through implOnGamepadAxesChanged and implOnGamepadButtonDown.
             }
         });
 

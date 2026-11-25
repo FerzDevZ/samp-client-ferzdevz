@@ -24,7 +24,7 @@ Everything below was executed on this machine, not assumed.
 | Game data | **not in this repo**, the app downloads it from your own host, see [docs/DATA.md](docs/DATA.md) |
 | On-device data setup | **yes**, variant pick, SHA-256 verify, resumable download, share log |
 | APK in a GitHub Release | **no**, it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
-| Wrapper rewrite | **in progress**, 3 of 29 files, `bin/oswrapper-audit.sh` reports the rest, `bin/wrapper-pins.sh` guards the names |
+| Wrapper rewrite | **in progress**, 4 of 29 files, `bin/oswrapper-audit.sh` reports the rest, `bin/wrapper-pins.sh` and `bin/jni-pins.py` guard the names |
 | Patch on the phone | **yes**, `bin/patch-termux.sh` with apksigner, no SDK binaries needed |
 
 ## Getting an installable APK

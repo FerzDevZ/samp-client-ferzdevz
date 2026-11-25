@@ -71,12 +71,34 @@ these classes, only a reimplementation of their interface.
 counts. Last measured:
 
 ```
-rewritten: 3 files, 382 lines
+rewritten: 4 files, 523 lines
   ok    com/nvidia/devtech/NvUtil.java
   ok    com/rockstargames/oswrapper/DeviceInfo.java
+  ok    com/rockstargames/oswrapper/GameNative.java
   ok    com/rockstargames/oswrapper/GamePlatformServices.java
-derived:   26 files, 4568 lines
+derived:   25 files, 4440 lines
 ```
+
+### Two native declarations that could never resolve
+
+Declaring a `native` method does not fail until the method is called, so the third slice
+started with a comparison instead of a rewrite: `bin/jni-pins.py` reads every `native`
+declaration under the wrapper and every `Java_...` symbol `libGame.so` exports, then fails
+on a declaration with no symbol. It found two:
+
+| Declaration | Called from | Reality |
+|---|---|---|
+| `GameNative.initializeSAMP()` | only a commented-out line in `GameActivityBase` | no symbol anywhere; the real entry point is `SAMP.initializeSAMP` in libsamp.so |
+| `GameNative.implOnGamepadCountChanged(int)` | `GameThread.onGamepadCountChanged` | no symbol; libGame.so exports `implOnGamepadConnected`, `implOnGamepadDisconnected` and `implOnGamepadResume` instead |
+
+Both are gone. The gamepad call site keeps its log line and explains why it no longer
+calls anything: connecting a controller already reaches the engine through
+`implOnGamepadAxesChanged` and `implOnGamepadButtonDown`. The three unclaimed exports are
+reported as dead code, not as failures, because nothing in Java references them.
+
+The check runs in `bin/self-test.sh` with a negative case, and it is the reason this
+section exists: both bugs were invisible to the compiler and would have waited for a phone
+to hit that path.
 
 Two things happened in the second slice, and one of them is a deletion rather than a
 rewrite. `GamePlatformServices` was a façade over six `I*Services` interfaces whose only
@@ -97,8 +119,8 @@ promise of dates.
 |---|---|---|
 | 1 | `DeviceInfo`, `NvUtil` | tiny, no dependencies, and the engine reads them first | 
 | 2 | `GamePlatformServices` | done: the third class `libGame.so` names, 34 pinned callback names |
-| 3 | `GameNative` | next: 38 declarations only, no bodies to invent |
-| 4 | `GameActivityBase`, `GameView`, `view/*` | the activity and input surface our own code extends |
+| 3 | `GameNative` | done: 35 declarations that resolve, two dead ones removed |
+| 4 | `GameActivityBase`, `GameView`, `view/*` | next: the activity and input surface our own code extends |
 | 5 | `GameThread` (1221 lines) | the frame loop; last because everything above must be stable first |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | Play Asset Delivery shell, replaced by our own downloader, candidate for deletion rather than rewrite |
 | 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | thin adapters, low risk |

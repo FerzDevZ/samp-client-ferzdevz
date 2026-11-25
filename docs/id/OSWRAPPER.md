@@ -72,12 +72,33 @@ dekompilasi untuk kelas-kelas ini, hanya implementasi ulang antarmukanya.
 mencetak jumlah baris. Pengukuran terakhir:
 
 ```
-rewritten: 3 files, 382 lines
+rewritten: 4 files, 523 lines
   ok    com/nvidia/devtech/NvUtil.java
   ok    com/rockstargames/oswrapper/DeviceInfo.java
+  ok    com/rockstargames/oswrapper/GameNative.java
   ok    com/rockstargames/oswrapper/GamePlatformServices.java
-derived:   26 files, 4568 lines
+derived:   25 files, 4440 lines
 ```
+
+### Dua deklarasi native yang tidak mungkin ketemu
+
+Deklarasi `native` tidak gagal sampai method-nya dipanggil, jadi iris ketiga dimulai
+dengan perbandingan, bukan penulisan ulang: `bin/jni-pins.py` membaca semua deklarasi
+`native` di wrapper dan semua simbol `Java_...` yang diekspor `libGame.so`, lalu gagal
+kalau ada deklarasi tanpa simbol. Hasilnya dua:
+
+| Deklarasi | Dipanggil dari | Kenyataan |
+|---|---|---|
+| `GameNative.initializeSAMP()` | hanya baris komentar di `GameActivityBase` | tidak ada simbolnya di mana pun; entry point asli ada di `SAMP.initializeSAMP` dalam libsamp.so |
+| `GameNative.implOnGamepadCountChanged(int)` | `GameThread.onGamepadCountChanged` | tidak ada simbolnya; `libGame.so` justru mengekspor `implOnGamepadConnected`, `implOnGamepadDisconnected`, `implOnGamepadResume` |
+
+Keduanya sudah dihapus. Titik panggilan gamepad tetap menyimpan baris log dan menjelaskan
+kenapa tidak memanggil apa pun lagi: mencolok controller sudah sampai ke engine lewat
+`implOnGamepadAxesChanged` dan `implOnGamepadButtonDown`. Tiga ekspor yang tidak dipakai
+dilaporkan sebagai kode mati, bukan kegagalan, karena tidak ada yang merujuknya dari Java.
+
+Pemeriksaan ini jalan di `bin/self-test.sh` dengan kasus negatif, dan itulah alasan bagian
+ini ada: kedua bug tidak terlihat oleh compiler dan akan menunggu HP menyentuh jalur itu.
 
 Iris kedua berisi dua hal, dan satu di antaranya penghapusan, bukan penulisan ulang.
 `GamePlatformServices` dulu fasad di atas enam interface `I*Services` yang tugasnya cuma
@@ -99,7 +120,7 @@ tanggal.
 |---|---|---|
 | 1 | `DeviceInfo`, `NvUtil` | kecil, tanpa dependensi, dan dibaca engine paling awal |
 | 2 | `GamePlatformServices` | selesai: kelas ketiga yang disebut `libGame.so`, 34 nama callback dipatok |
-| 3 | `GameNative` | berikutnya: hanya 38 deklarasi, tidak ada isi yang perlu dikarang |
+| 3 | `GameNative` | selesai: 35 deklarasi yang ketemu, dua yang mati dihapus |
 | 4 | `GameActivityBase`, `GameView`, `view/*` | permukaan activity dan input yang dipakai kode kita sendiri |
 | 5 | `GameThread` (1221 baris) | loop frame; terakhir karena semua di atas harus stabil dulu |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem` | cangkang Play Asset Delivery, sudah digantikan downloader sendiri, kandidat dihapus bukan ditulis ulang |

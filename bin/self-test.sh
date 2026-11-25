@@ -9,6 +9,7 @@
 #   bin/self-test.sh patcher  only the patcher argument contract
 #   bin/self-test.sh termux   only the on-phone patcher (needs apksigner)
 #   bin/self-test.sh pins     only the wrapper name check (needs compiled classes)
+#   bin/self-test.sh jni      only the native-vs-symbol check (needs libGame.so)
 #
 # What it does NOT prove: that the game runs. That needs a phone and a GTA install.
 set -uo pipefail
@@ -221,14 +222,43 @@ run_pins() {
   rm -f "$tmp"
 }
 
+run_jni() {
+  head_ "natives against the library symbols"
+  local so="client/app/src/main/jniLibs/arm64-v8a/libGame.so"
+  local src="client/app/src/main/java/com/rockstargames/oswrapper"
+  if [ ! -f "$so" ] || ! command -v nm >/dev/null 2>&1; then
+    printf '  skip  needs libGame.so and nm (bin/fetch-blobs.sh)\n'
+    return 0
+  fi
+  if ./bin/jni-pins.py --library "$so" --source "$src" >"${TMPDIR:-/tmp}/jni.log" 2>&1; then
+    ok "$(grep -m1 'declared natives all resolve' "${TMPDIR:-/tmp}/jni.log" | tr -s ' ')"
+  else
+    bad "a declared native has no symbol: $(grep -m1 'GameNative.java' "${TMPDIR:-/tmp}/jni.log" | tr -s ' ')"
+  fi
+
+  # a declaration with no symbol has to fail, so try one on purpose
+  local tmp
+  tmp="$(mktemp -d)"
+  mkdir -p "$tmp/com/rockstargames/oswrapper"
+  printf 'package com.rockstargames.oswrapper;\npublic class Invented {\n    public static native void notThere(int x);\n}\n' \
+    >"$tmp/com/rockstargames/oswrapper/Invented.java"
+  if ./bin/jni-pins.py --library "$so" --source "$tmp" >/dev/null 2>&1; then
+    bad "the native check accepted a method with no symbol"
+  else
+    ok "flags a native with no symbol"
+  fi
+  rm -rf "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
   patcher) run_patcher ;;
   termux)  run_termux ;;
   pins)    run_pins ;;
-  all)     run_jvm; run_cache; run_patcher; run_termux; run_pins ;;
-  *)       echo "usage: $0 [all|jvm|cache|patcher|termux|pins]" >&2; exit 2 ;;
+  jni)     run_jni ;;
+  all)     run_jvm; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
+  *)       echo "usage: $0 [all|jvm|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
