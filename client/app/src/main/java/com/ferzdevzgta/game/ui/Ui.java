@@ -357,7 +357,6 @@ public final class Ui {
         field.setMinHeight(dp(c, 50));
         field.setPadding(dp(c, 14), dp(c, 12), dp(c, 14), dp(c, 12));
         field.setBackground(round(c, RADIUS_SMALL, SURFACE_2, STROKE));
-        field.setTextCursorDrawable(null);
         field.setSelectAllOnFocus(false);
         return field;
     }
