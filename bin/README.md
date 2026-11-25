@@ -11,6 +11,7 @@ true turns out not to be.
 | `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | - |
 | `self-test.sh` | prove the JVM tests, the cache round trip and the patcher refusals still pass | - |
 | `patch-termux.sh` | same job on a phone: `zip -0`, `apksigner --lib-page-alignment`, no SDK binaries | it is the input |
+| `serve-apk.sh` | stages the newest APK and serves it over HTTP, printing the Tailscale and LAN URLs plus the sha256 | the built APK |
 | `apk-verify.py` | read the zip structures and prove the library is stored, aligned, intact; no SDK needed | - |
 | `wrapper-pins.sh` | `javap` the compiled wrapper and fail when a name `libGame.so` looks up is gone | `tests/pins/oswrapper-pins.txt` |
 | `jni-pins.py` | match `native` declarations against the symbols a library exports, both directions | `libGame.so` |
@@ -100,6 +101,7 @@ tidak benar.
 | `patch-apk.sh` | menyuntik `libGame.so` milik pengguna ke APK framework, realign, tanda tangan ulang | itu inputnya |
 | `self-test.sh` | membuktikan tes JVM, round trip cache, dan penolakan patcher masih lolos | - |
 | `patch-termux.sh` | kerja yang sama di HP: `zip -0`, `apksigner --lib-page-alignment`, tanpa binary SDK | itu inputnya |
+| `serve-apk.sh` | menyalin APK terbaru lalu menyajikannya lewat HTTP, mencetak URL Tailscale dan LAN beserta sha256 | APK hasil build |
 | `apk-verify.py` | membaca struktur zip dan membuktikan library stored, aligned, utuh; tanpa SDK | - |
 | `wrapper-pins.sh` | `javap` wrapper hasil kompilasi, gagal kalau ada nama yang dicari `libGame.so` hilang | `tests/pins/oswrapper-pins.txt` |
 | `jni-pins.py` | mencocokkan deklarasi `native` dengan simbol yang diekspor library, dua arah | `libGame.so` |
