@@ -8,6 +8,7 @@
 #include "uisettings.h"
 
 #include "widget.h"
+#include "hudeditor.h"
 #include "widgets/layout.h"
 #include "widgets/label.h"
 #include "widgets/button.h"

@@ -20,6 +20,9 @@ true turns out not to be.
 | `wrapper-pins.sh` | `javap` the compiled wrapper and fail when a name `libGame.so` looks up is gone | `tests/pins/oswrapper-pins.txt` |
 | `jni-pins.py` | match `native` declarations against the symbols a library exports, both directions | `libGame.so` |
 | `oswrapper-audit.sh` | count rewritten vs still derived wrapper files, `--strict` fails while any remain | - |
+| `hud-check.py` | prove the in-game HUD editor has an entry point, loads before the first frame, draws inside the frame and saves to its own `[hud]` section | - |
+| `build-termux.sh` | the phone entry point: check tools, fetch the framework, refuse a stale one, then call `patch-termux.sh` | it is the input |
+| `artconfig.py` | check a 0.3.DL server's `models/artconfig.txt` and write a model manifest with sizes and sha256 | - |
 
 ## android-build.sh
 
@@ -116,6 +119,9 @@ tidak benar.
 | `oswrapper-audit.sh` | menghitung file wrapper yang sudah ditulis ulang vs masih turunan, `--strict` gagal selama masih ada | - |
 | `fetch-blobs.sh` | menyalin dua set binary yang tidak boleh masuk git | - |
 | `build-cache.sh` | membangun dan memverifikasi tree aset `/storage/emulated/0/GTA/` | - |
+| `hud-check.py` | membuktikan editor HUD di dalam game punya tombol pembuka, dimuat sebelum frame pertama, digambar di dalam frame, dan menyimpan ke section `[hud]` miliknya sendiri | - |
+| `build-termux.sh` | pintu masuk di HP: periksa tool, ambil framework, tolak yang kedaluwarsa, lalu panggil `patch-termux.sh` | itu inputnya |
+| `artconfig.py` | memeriksa `models/artconfig.txt` server 0.3.DL dan menulis manifest model dengan ukuran serta sha256 | - |
 
 ## android-build.sh
 

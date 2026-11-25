@@ -149,3 +149,18 @@ java.lang.IllegalStateException: boom
 5. Force stop the app while in game, open Diagnostics, and check the last session row reports it did
    not close on purpose. Close the game normally and check the row says closed on purpose.
 6. Settings, turn the FPS switch on, and confirm the engine counter appears (it was always there).
+
+## 0.4.0 additions
+
+1. In game, open the button panel (`>>`) and tap `HUD`. The chat box, the button panel and the voice
+   button should all become visible with an orange outline and a label on each.
+2. Drag the chat box to the top right, tap `Simpan`, and the editor should close. Exit the game,
+   open it again, and the chat box should be where you left it: the position comes from `[hud]` in
+   `settings.ini`.
+3. Tap `HUD` again, drag a widget off the edge of the screen, and check it stops at the border instead
+   of disappearing.
+4. Tap `Reset` and confirm every widget returns to its default spot.
+5. While the editor is open, tap the chat box: the keyboard must not open behind it.
+6. Run `bin/artconfig.py models/artconfig.txt --models models --check` against a 0.3.DL server's
+   `models` folder. It should list the entries and refuse a broken line. Note that the client still
+   draws the base models for those ids: the engine side of 0.3.DL is not implemented.

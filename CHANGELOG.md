@@ -2,6 +2,53 @@
 
 Indonesian version: [CHANGELOG.id.md](CHANGELOG.id.md).
 
+## 0.4.0
+
+The widgets you look at all game can be moved by hand, a 0.3.DL server's model list can be checked
+before anyone joins, and the phone has one command to build instead of two to remember.
+
+### HUD editor
+
+- A `HUD` button in the in-game button panel opens an editor for the chat box, the button panel and
+  the voice button. Drag one, tap `Simpan`, and it stays there: `gui/hudeditor.cpp` writes `[hud]` in
+  `settings.ini` and `HudEditor::Load` applies it before the first frame.
+- Positions are stored in the coordinate space the widgets already use, so no 640x480 conversion was
+  invented for this.
+- The editor writes its own section and never `[gui]`. A bug in it cannot change chat size, font or
+  the FPS switch, and `bin/hud-check.py` fails the build if the editor ever names the gui section.
+- One thing this fixed: `gui/ChatPosX`, `gui/VoiceChatPosX` and `gui/SpawnScreenPosX` were parsed by
+  `settings.cpp` and then never read by anything, so writing them changed nothing. The new keys are
+  the ones that work.
+
+### 0.3.DL model lists
+
+- `bin/artconfig.py` reads a server's `models/artconfig.txt` and refuses what a server accepts at
+  startup and then loses a model over: skin ids outside 20000..30000, object ids outside
+  -30000..-1000, a stock-skin base outside 0..311, a repeated id, a file missing from `models/`, a
+  name with `../`, a line without its semicolon.
+- `--manifest` writes the inventory a cache needs: sha256 and size for both files per entry, with the
+  total counted per unique file because several skins usually share one texture.
+- The client cannot draw these models yet. Nothing in the engine knows about custom model ids or the
+  0.3.DL download handshake. [docs/DL.md](docs/DL.md) says exactly which three pieces are missing and
+  in what order they have to be built.
+
+### One command on the phone
+
+- `bin/build-termux.sh` is the entry point in Termux: it reports which tools are present, can fetch
+  the framework APK from a URL, refuses a framework that is older than the source tree it sits next
+  to, then calls `bin/patch-termux.sh`.
+- The staleness check is the part that matters. A patched APK built from an old framework looks fine
+  and runs the old UI, and nothing during a patch would have noticed.
+- Measured with a synthetic GTA split on this machine: exit 0, `PASS`, package
+  `com.ferzdevzgta.game`, `libGame.so` stored at an offset that is a multiple of 4096.
+
+### Gates
+
+`bin/self-test.sh all` covers the two new checks: `hud` (entry point, load order, frame order, own
+ini section, plus a negative case that writes `[gui]`) and `artconfig` (a good file plus seven
+refusals). `CMakeLists.txt` now uses `CONFIGURE_DEPENDS`, so a new native file compiles without
+deleting the CMake cache first.
+
 ## 0.3.0
 
 Servers arrive by link, voice has a switch that can actually work, and a session that died leaves

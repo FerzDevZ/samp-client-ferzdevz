@@ -171,6 +171,9 @@ public class UiSettingsActivity extends AppCompatActivity {
         for (int i = 0; i < NUMERIC.length; i++) {
             addNumeric(numbers, NUMERIC[i][0], NUMERIC[i][1], NUMERIC[i][2], NUMERIC_LABELS[i]);
         }
+        // The chat box and the button panel are dragged in the game, not here: this screen has no
+        // way to show what the player is looking at, so it points at the button that does.
+        numbers.addView(Ui.label(this, getString(R.string.settings_hud_note)), Ui.fill(10, this));
         root.addView(numbers, Ui.fill());
 
         Ui.gap(this, root, 12);

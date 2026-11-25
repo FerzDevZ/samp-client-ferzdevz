@@ -379,3 +379,30 @@ dari sini, jadi barisnya hanya bilang sesi tidak ditutup normal dan tidak mengak
 `gui/fps` dibaca `cpp/samp/settings.cpp` dan digambar `CDebugInfo`, dan layar Pengaturan sudah
 menyalakannya. Tidak ada yang perlu menggambar penghitung kedua di Java: dua angka akan berbeda dan
 tidak ada yang bisa dipercaya.
+
+## Editor HUD
+
+Engine sudah membawa kelas adjustable HUD untuk tombol sentuh GTA, tapi semua isinya hook yang
+dikomentari dan tidak ada yang memanggilnya. Widget SA-MP yang digambar client ini sendiri adalah
+kotak chat, panel tombol dan tombol voice, dan sebelumnya tidak ada yang bisa dipindah: `gui/ChatPosX`,
+`gui/VoiceChatPosX` dan `gui/SpawnScreenPosX` dibaca `settings.cpp` lalu tidak pernah dipakai, jadi
+menulis key itu tidak mengubah apa pun.
+
+`gui/hudeditor.cpp` adalah editornya untuk tiga widget itu. Tombol `HUD` di panel tombol membukanya,
+widget dipaksa tampil selama editor terbuka, dan geseran langsung menulis posisi baru ke widget.
+`Simpan` menulis key `[hud]` lalu menutup, `Reset` mengembalikan posisi bawaan.
+
+Tiga aturan yang membuatnya layak dikirim:
+
+1. Editor menulis section sendiri, `[hud]`. Tidak pernah menyentuh `[gui]`, jadi bug di editor tidak
+   bisa mengubah ukuran chat, font atau saklar FPS. `bin/hud-check.py` gagal kalau editor menyebut
+   section gui.
+2. `HudEditor::Load()` jalan di akhir `UI::initialize()`, sebelum frame pertama, jadi game terbuka di
+   posisi terakhir pemain. `HudEditor::Draw()` jalan di dalam `UI::drawList()`, di dalam frame ImGui,
+   karena handle-nya item ImGui, bukan kotak di draw list.
+3. Selama editor terbuka, `UI::OnTouchEvent` hanya menyerahkan sentuhan ke ImGui. Kalau sentuhan yang
+   sama diteruskan ke kotak chat, keyboard akan terbuka di belakang editor.
+
+Posisi disimpan sebagai `x,y` biasa di ruang koordinat yang sudah dipakai widget, jadi editor tidak
+butuh konversi 640x480 ke layar. `ParsePair` dan `FormatPair` memakai format yang sama, dan geseran
+dibatasi ke ukuran layar supaya widget tidak bisa ditaruh di luar tampilan.

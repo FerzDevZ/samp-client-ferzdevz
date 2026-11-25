@@ -2,6 +2,54 @@
 
 Versi Inggris: [CHANGELOG.md](CHANGELOG.md).
 
+## 0.4.0
+
+Widget yang kamu lihat sepanjang game bisa digeser sendiri, daftar model server 0.3.DL bisa diperiksa
+sebelum ada yang masuk, dan di HP ada satu perintah build, bukan dua yang harus diingat.
+
+### Editor HUD
+
+- Tombol `HUD` di panel tombol dalam game membuka editor untuk kotak chat, panel tombol dan tombol
+  voice. Geser salah satu, tekan `Simpan`, dan posisinya bertahan: `gui/hudeditor.cpp` menulis `[hud]`
+  di `settings.ini` dan `HudEditor::Load` menerapkannya sebelum frame pertama.
+- Posisi disimpan di ruang koordinat yang sudah dipakai widget, jadi tidak ada konversi 640x480 yang
+  diciptakan untuk ini.
+- Editor menulis section sendiri, tidak pernah `[gui]`. Bug di dalamnya tidak bisa mengubah ukuran
+  chat, font atau saklar FPS, dan `bin/hud-check.py` menggagalkan build kalau editor menyebut section
+  gui.
+- Satu hal yang ikut diperbaiki: `gui/ChatPosX`, `gui/VoiceChatPosX` dan `gui/SpawnScreenPosX` dibaca
+  `settings.cpp` lalu tidak pernah dipakai, jadi menulis key itu tidak mengubah apa pun. Key baru yang
+  dipakai sekarang adalah yang benar-benar diterapkan.
+
+### Daftar model 0.3.DL
+
+- `bin/artconfig.py` membaca `models/artconfig.txt` milik server dan menolak yang diterima server saat
+  start lalu modelnya hilang: id skin di luar 20000..30000, id object di luar -30000..-1000, base skin
+  bawaan di luar 0..311, id dobel, file yang tidak ada di `models/`, nama dengan `../`, baris tanpa
+  titik koma.
+- `--manifest` menulis inventaris yang dibutuhkan cache: sha256 dan ukuran kedua file per entri,
+  dengan total dihitung per file unik karena beberapa skin biasanya memakai satu tekstur.
+- Client belum bisa menggambar model ini. Tidak ada bagian engine yang tahu tentang id model kustom
+  atau handshake unduhan 0.3.DL. [docs/id/DL.md](docs/id/DL.md) menyebut tiga bagian yang belum ada
+  dan urutan pengerjaannya.
+
+### Satu perintah di HP
+
+- `bin/build-termux.sh` adalah pintu masuk di Termux: melaporkan tool yang ada, bisa mengunduh
+  framework APK dari URL, menolak framework yang lebih tua dari source di sebelahnya, lalu memanggil
+  `bin/patch-termux.sh`.
+- Pemeriksaan umur file itu bagian yang penting. APK hasil patch dari framework lama terlihat normal
+  dan menjalankan UI lama, dan tidak ada langkah patch yang akan menyadarinya.
+- Diukur dengan split GTA buatan di mesin ini: exit 0, `PASS`, package `com.ferzdevzgta.game`,
+  `libGame.so` tersimpan di offset kelipatan 4096.
+
+### Gate
+
+`bin/self-test.sh all` mencakup dua pemeriksaan baru: `hud` (tombol pembuka, urutan load, urutan frame,
+section ini sendiri, plus kasus negatif yang menulis `[gui]`) dan `artconfig` (file benar plus tujuh
+penolakan). `CMakeLists.txt` sekarang memakai `CONFIGURE_DEPENDS`, jadi file native baru ikut
+dikompilasi tanpa menghapus cache CMake lebih dulu.
+
 ## 0.3.0
 
 Server masuk lewat tautan, voice punya saklar yang benar-benar bisa hidup, dan sesi yang mati

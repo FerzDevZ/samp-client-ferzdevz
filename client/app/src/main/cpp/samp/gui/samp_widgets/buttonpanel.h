@@ -8,6 +8,7 @@ public:
     void performLayout() override;
 
     CButton* m_bH;
+    CButton* m_bHud;
     OButton* m_bOpen;
     Button* m_bTab;
     Button* m_bAlt;

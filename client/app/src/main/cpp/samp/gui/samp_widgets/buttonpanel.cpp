@@ -5,6 +5,7 @@
 #include "net/localplayer.h"
 #include "net/netgame.h"
 #include "playertablist.h"
+#include "gui/hudeditor.h"
 #include "net/localplayer.h"
 
 extern UI* pUI;
@@ -26,6 +27,11 @@ ButtonPanel::ButtonPanel()
 	CButton* m_bEsc = new CButton("ESC", UISettings::fontSize() / 2);
     CButton* m_bSV = new CButton("SV", UISettings::fontSize() / 2);
 	m_bH = new CButton("H", UISettings::fontSize() / 2);
+	m_bHud = new CButton("HUD", UISettings::fontSize() / 2);
+	m_bHud->setCallback([]()
+	{
+		HudEditor::Toggle();
+	});
 	CButton* m_bY = new CButton("Y", UISettings::fontSize() / 2);
 	CButton* m_bN = new CButton("N", UISettings::fontSize() / 2);
 	CButton* m_bF = new CButton("F", UISettings::fontSize() / 2);
@@ -102,6 +108,7 @@ ButtonPanel::ButtonPanel()
 	//this->addChild(m_bFOOD);
 	//if (Server == 21) this->addChild(m_bGPS);
 	this->addChild(m_b2);
+	this->addChild(m_bHud);
 	this->addChild(m_bOpen);
 
 

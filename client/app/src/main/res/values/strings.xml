@@ -78,6 +78,7 @@
     <string name="settings_saved">%1$d values saved</string>
     <string name="settings_invalid">%1$s must be a number</string>
     <string name="settings_no_ini">%1$s is missing. Run the game once so the file is created.</string>
+    <string name="settings_hud_note">Move the chat box, the button panel and the voice button in the game: open the button panel and tap HUD.</string>
     <string name="settings_note_restart">Restart the game so the changes are used.</string>
     <string name="settings_field_chat_x">Chat X position</string>
     <string name="settings_field_chat_y">Chat Y position</string>

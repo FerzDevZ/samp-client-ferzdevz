@@ -380,3 +380,30 @@ here, so the row says the session did not close on purpose and never claims to k
 `gui/fps` is read by `cpp/samp/settings.cpp` and drawn by `CDebugInfo`, and the Settings screen
 already toggles it. Nothing in Java should draw a second counter: two numbers would disagree and
 neither could be trusted.
+
+## The HUD editor
+
+The engine ships an adjustable-HUD class for GTA touch buttons, but every body in it is a commented
+out hook and nothing calls it. The SA-MP widgets this client draws itself are the chat box, the
+button panel and the voice button, and none of them could be moved: `gui/ChatPosX`,
+`gui/VoiceChatPosX` and `gui/SpawnScreenPosX` are parsed by `settings.cpp` and then never read, so
+writing them changed nothing.
+
+`gui/hudeditor.cpp` is the editor for those three. A `HUD` button in the button panel opens it, the
+widgets turn visible while it is open, and a drag writes the new position straight into the widget.
+`Simpan` writes `[hud]` keys and closes, `Reset` puts the built-in positions back.
+
+Three rules make it safe to ship:
+
+1. It writes its own `[hud]` section. It never touches `[gui]`, so a bug in the editor cannot change
+   chat size, font or the FPS switch. `bin/hud-check.py` fails the build if the editor names the gui
+   section.
+2. `HudEditor::Load()` runs at the end of `UI::initialize()`, before the first frame, so the game
+   opens where the player left it. `HudEditor::Draw()` runs inside `UI::drawList()`, inside the ImGui
+   frame, because the handles are ImGui items rather than rectangles on a draw list.
+3. While the editor is open, `UI::OnTouchEvent` gives the touch to ImGui only. Handing the same
+   touch to the chat box would open the keyboard behind the editor.
+
+Positions are stored as plain `x,y` in the same coordinate space the widgets already use, so the
+editor needs no 640x480-to-screen conversion. `ParsePair` and `FormatPair` share the format, and a
+drag is clamped to the display so a widget cannot be parked off screen.

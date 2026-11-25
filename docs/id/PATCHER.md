@@ -93,6 +93,21 @@ sendiri, atau salinan `dist/samp-client-framework.apk`, karena framework belum
 diterbitkan (lihat [LEGAL.md](LEGAL.md) dan [OSWRAPPER.md](OSWRAPPER.md)). Termux
 menghapus PC dari langkah patch, bukan dari langkah build framework.
 
+`bin/build-termux.sh` adalah satu perintah yang dijalankan, bukan mengingat-ingat hal di atas.
+Script ini melaporkan tool mana yang ada, mengunduh framework kalau kamu beri URL, menolak
+framework yang lebih tua dari source di sebelahnya, lalu memanggil `bin/patch-termux.sh`.
+
+```bash
+bin/build-termux.sh --from-url http://100.85.253.77:8000/samp-client-framework.apk \
+  --gta-apk ~/storage/downloads/GTA.apk --out ~/samp-client.apk
+bin/build-termux.sh --check-only
+```
+
+Pemeriksaan umur file ada karena APK hasil patch dari framework yang lebih tua dari perubahan Java
+terakhir terlihat baik-baik saja dan menjalankan UI lama. Pakai `--force` kalau perbedaannya memang
+tidak penting. Diukur di mesin ini dengan framework asli dan split GTA buatan: exit 0, `PASS`,
+package `com.ferzdevzgta.game`, `libGame.so` tersimpan di offset kelipatan 4096.
+
 ## Pengujian yang dijalankan
 
 | Kasus | Harus | Hasil |
@@ -101,6 +116,9 @@ menghapus PC dari langkah patch, bukan dari langkah build framework.
 | framework yang masih membawa `libGame.so` | tolak | `FAIL: … already contains libGame.so` |
 | APK tanpa `libGame.so` | tolak | `FAIL: … has no lib/arm64-v8a/libGame.so` |
 | APK dengan package salah | tolak | `FAIL: … is not GTA San Andreas (package 'com.ferzdevzgta.game')` |
+| `build-termux.sh` hanya cek | laporan | 0 tool hilang, "pc needed: none" |
+| `build-termux.sh` dengan framework lebih tua dari source | tolak | `FAIL: client/app/src/main/... is newer than the framework APK` |
+| `build-termux.sh --force` + split GTA buatan | PASS | exit 0, `PASS`, 36 MB, offset library kelipatan 4096 |
 
 ## Batasan
 

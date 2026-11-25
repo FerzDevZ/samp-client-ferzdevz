@@ -151,3 +151,16 @@ java.lang.IllegalStateException: boom
    tidak ditutup normal. Tutup game dengan normal dan pastikan barisnya bilang ditutup normal.
 6. Pengaturan, nyalakan saklar FPS, dan pastikan penghitung dari mesin muncul (itu sudah ada dari
    awal).
+
+## Tambahan 0.4.0
+
+1. Di dalam game, buka panel tombol (`>>`) lalu tekan `HUD`. Kotak chat, panel tombol dan tombol voice
+   harus muncul dengan garis oranye dan label masing-masing.
+2. Geser kotak chat ke kanan atas, tekan `Simpan`, editor harus menutup. Keluar dari game, buka lagi,
+   dan kotak chat harus tetap di posisi terakhir: posisinya dibaca dari `[hud]` di `settings.ini`.
+3. Tekan `HUD` lagi, geser satu widget keluar layar, dan pastikan berhenti di tepi, bukan menghilang.
+4. Tekan `Reset` dan pastikan semua widget kembali ke posisi bawaannya.
+5. Selama editor terbuka, tekan kotak chat: keyboard tidak boleh terbuka di belakangnya.
+6. Jalankan `bin/artconfig.py models/artconfig.txt --models models --check` pada folder `models` server
+   0.3.DL. Harus menampilkan daftar entri dan menolak baris yang rusak. Catatan: client masih
+   menggambar model bawaan untuk id tersebut, sisi engine 0.3.DL belum diimplementasikan.

@@ -77,6 +77,7 @@
     <string name="settings_saved">%1$d nilai disimpan</string>
     <string name="settings_invalid">%1$s harus berupa angka</string>
     <string name="settings_no_ini">Tidak ada %1$s. Jalankan game sekali supaya filenya dibuat.</string>
+    <string name="settings_hud_note">Geser kotak chat, panel tombol dan tombol voice langsung di dalam game: buka panel tombol lalu tekan HUD.</string>
     <string name="settings_note_restart">Mulai ulang game agar perubahan dipakai.</string>
     <string name="settings_field_chat_x">Posisi X chat</string>
     <string name="settings_field_chat_y">Posisi Y chat</string>

@@ -2,6 +2,7 @@
 #include "../game/game.h"
 #include "../net/netgame.h"
 #include "gui.h"
+#include "hudeditor.h"
 #include "../playertags.h"
 #include "../net/playerbubblepool.h"
 #include "../CDebugInfo.h"
@@ -103,6 +104,10 @@ bool UI::initialize()
 
     m_debugInfo = new CDebugInfo();
 
+    // Positions chosen in the in-game editor apply before the first frame, so a launched game
+    // already looks like the one the player arranged.
+    HudEditor::Load();
+
     return true;
 }
 
@@ -140,6 +145,9 @@ void UI::drawList()
     if (pPlayerTags) pPlayerTags->Render(renderer());
 
     draw(renderer());
+
+    // Inside the frame on purpose: the editor is made of ImGui handles, not draw-list rectangles.
+    HudEditor::Draw();
 }
 
 void UI::touchEvent(const ImVec2& pos, TouchType type)
@@ -169,6 +177,27 @@ enum eTouchType
 bool UI::OnTouchEvent(int type, bool multi, int x, int y)
 {
     ImGuiIO& io = ImGui::GetIO();
+
+    // The editor is a full-screen drag surface. Handing the same touch to the chat box would open
+    // the keyboard behind it, so the widgets only see touches when the editor is closed.
+    if (HudEditor::Visible()) {
+        switch (type) {
+            case TOUCH_PUSH:
+                io.MousePos = ImVec2(x, y);
+                io.MouseDown[0] = true;
+                break;
+            case TOUCH_POP:
+                io.MouseDown[0] = false;
+                m_bNeedClearMousePos = true;
+                break;
+            case TOUCH_MOVE:
+                io.MousePos = ImVec2(x, y);
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
 
     VoiceButton* vbutton = pUI->voicebutton();
     switch (type)

@@ -17,7 +17,7 @@ Everything below was executed on this machine, not assumed.
 | Item | State |
 |---|---|
 | `libsamp.so` arm64-v8a from source | **yes**, 3.5 MB, 0 warnings |
-| Debug APK | **yes**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.3.0` |
+| Debug APK | **yes**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.4.0` |
 | Clean rebuild, no cache | **yes**, 2m08s, 0 warnings |
 | Telemetry | **removed**, Firebase, AppLovin, Splunk; APK 43 MB → 37 MB |
 | `libsamp.so` builds without Rockstar binary | **yes**, 10s, that is what CI runs |
@@ -39,6 +39,8 @@ Everything below was executed on this machine, not assumed.
 | Voice chat | **yes**, `gui/VoiceChatEnable` switch in Settings asks for the microphone first, and the launcher checks again before starting |
 | Screenshots | **yes**, camera button in the game screen saves to `GTA/Screenshots` and opens the share sheet |
 | Session marker | **yes**, Diagnostics says when the last session did not close on purpose, which is the only signal a native crash leaves |
+| HUD editor | **yes**, the in-game button panel opens a drag editor for the chat box, the button panel and the voice button, saved to `[hud]` in `settings.ini` |
+| 0.3.DL model lists | **checker only**, `bin/artconfig.py` validates `artconfig.txt` and writes a manifest; the client cannot draw custom models yet, see [docs/DL.md](docs/DL.md) |
 | Changelog | **yes**, [CHANGELOG.md](CHANGELOG.md) and [CHANGELOG.id.md](CHANGELOG.id.md) |
 
 ## Getting an installable APK
@@ -50,8 +52,8 @@ machine from a game APK you own:
 ```bash
 bin/android-build.sh framework        # 1. publishable half -> dist/samp-client-framework.apk (28 MB)
 bin/patch-apk.sh --gta-apk GTA.apk \
-                 --out dist/samp-client-0.3.0.apk      # 2. add libGame.so, realign, re-sign (37 MB)
-adb install -r dist/samp-client-0.3.0.apk              # 3. install
+                 --out dist/samp-client-0.4.0.apk      # 2. add libGame.so, realign, re-sign (37 MB)
+adb install -r dist/samp-client-0.4.0.apk              # 3. install
 adb push cache/full/. /storage/emulated/0/GTA/         # 4. assets, or the app closes on launch
 ```
 

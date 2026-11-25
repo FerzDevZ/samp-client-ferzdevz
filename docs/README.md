@@ -1,6 +1,6 @@
 # docs/
 
-Two languages, nine documents each, plus the changelog at the repository root. English in `docs/`, Indonesian in `docs/id/`.
+Two languages, ten documents each, plus the changelog at the repository root. English in `docs/`, Indonesian in `docs/id/`.
 
 | Document | English | Indonesian | Answers |
 |---|---|---|---|
@@ -13,13 +13,14 @@ Two languages, nine documents each, plus the changelog at the repository root. E
 | Upstream delta | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | every change against `kuzia15/SAMP-Mobile` `GTA-2.11` |
 | Device verification | [VERIFY.md](VERIFY.md) | [id/VERIFY.md](id/VERIFY.md) | what to press on a real phone, what each screen must show, and what to capture when it does not |
 | Wrapper surface | [OSWRAPPER.md](OSWRAPPER.md) | [id/OSWRAPPER.md](id/OSWRAPPER.md) | which names `libGame.so` pins, what is free to rewrite, how far the rewrite has got |
+| 0.3.DL models | [DL.md](DL.md) | [id/DL.md](id/DL.md) | what `artconfig.txt` accepts, what the checker refuses, and which parts of 0.3.DL custom models this client still cannot do |
 | Changelog | [CHANGELOG.md](../CHANGELOG.md) | [CHANGELOG.id.md](../CHANGELOG.id.md) | what changed in each version and which gate proves it |
 
 ---
 
 # docs/ (Bahasa Indonesia)
 
-Dua bahasa, sembilan dokumen masing-masing, plus catatan perubahan di akar repo. Bahasa Inggris di `docs/`, bahasa Indonesia
+Dua bahasa, sepuluh dokumen masing-masing, plus catatan perubahan di akar repo. Bahasa Inggris di `docs/`, bahasa Indonesia
 di `docs/id/`.
 
 | Dokumen | English | Indonesia | Menjawab |
@@ -32,3 +33,4 @@ di `docs/id/`.
 | Patcher | [PATCHER.md](PATCHER.md) | [id/PATCHER.md](id/PATCHER.md) | cara menghasilkan APK siap pasang dari framework yang boleh diterbitkan + APK game milik pengguna |
 | Selisih upstream | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | seluruh perubahan terhadap `kuzia15/SAMP-Mobile` `GTA-2.11` |
 | Verifikasi perangkat | [VERIFY.md](VERIFY.md) | [id/VERIFY.md](id/VERIFY.md) | apa yang ditekan di HP asli, apa yang harus muncul di tiap layar, dan apa yang dikumpulkan kalau tidak |
+| Model 0.3.DL | [DL.md](DL.md) | [id/DL.md](id/DL.md) | apa yang diterima `artconfig.txt`, apa yang ditolak pemeriksanya, dan bagian mana dari model kustom 0.3.DL yang belum bisa dilakukan client ini |

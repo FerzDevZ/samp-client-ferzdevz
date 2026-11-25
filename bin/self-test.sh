@@ -371,6 +371,78 @@ run_guide() {
   rm -rf "$tmp"
 }
 
+run_hud() {
+  head_ "in-game hud editor"
+  if python3 bin/hud-check.py >"${TMPDIR:-/tmp}/hud.log" 2>&1; then
+    ok "entry point, load order, frame order, own ini section"
+  else
+    bad "$(cat "${TMPDIR:-/tmp}/hud.log")"
+  fi
+
+  # The editor must not be able to write an engine key. Break that and the gate has to say so.
+  local tmp
+  tmp="$(mktemp -d)"
+  mkdir -p "$tmp/client/app/src/main/cpp/samp/gui/samp_widgets" "$tmp/docs/id"
+  cp client/app/src/main/cpp/samp/gui/hudeditor.cpp "$tmp/client/app/src/main/cpp/samp/gui/"
+  cp client/app/src/main/cpp/samp/gui/hudeditor.h "$tmp/client/app/src/main/cpp/samp/gui/"
+  cp client/app/src/main/cpp/samp/gui/gui.cpp "$tmp/client/app/src/main/cpp/samp/gui/"
+  cp client/app/src/main/cpp/samp/gui/gui.h "$tmp/client/app/src/main/cpp/samp/gui/"
+  cp client/app/src/main/cpp/samp/gui/samp_widgets/buttonpanel.cpp "$tmp/client/app/src/main/cpp/samp/gui/samp_widgets/"
+  cp client/app/src/main/cpp/samp/settings.cpp "$tmp/client/app/src/main/cpp/samp/"
+  cp docs/ARCHITECTURE.md "$tmp/docs/"
+  cp docs/id/ARCHITECTURE.md "$tmp/docs/id/"
+  printf '\nini.SetValue("gui", "ChatPosX", "1");\n' >>"$tmp/client/app/src/main/cpp/samp/gui/hudeditor.cpp"
+  if HUD_CHECK_ROOT="$tmp" python3 bin/hud-check.py >/dev/null 2>&1; then
+    bad "the hud check accepted an editor that writes [gui]"
+  else
+    ok "refuses an editor that writes an engine key"
+  fi
+  rm -rf "$tmp"
+}
+
+run_artconfig() {
+  head_ "0.3.DL artconfig"
+  local tmp
+  tmp="$(mktemp -d)"
+  mkdir -p "$tmp/models"
+  printf 'dff' >"$tmp/models/cop.dff"
+  printf 'txd' >"$tmp/models/cop.txd"
+  cat >"$tmp/models/artconfig.txt" <<'INI'
+AddCharModel(280, 25000, "cop.dff", "cop.txd");
+AddSimpleModel(-1, 19379, -2000, "cop.dff", "cop.txd");
+INI
+  if python3 bin/artconfig.py "$tmp/models/artconfig.txt" --models "$tmp/models" --check \
+       --manifest "$tmp/models.json" >"$tmp/log" 2>&1; then
+    ok "$(head -1 "$tmp/log") plus a manifest"
+  else
+    bad "$(cat "$tmp/log")"
+  fi
+  python3 -c "import json,sys; d=json.load(open('$tmp/models.json')); sys.exit(0 if d['count']==2 and d['total_bytes']==6 else 1)" \
+    && ok "manifest counts both files" || bad "manifest counts are wrong"
+
+  # Each of these is a mistake that a real server accepts at startup and then loses a model over.
+  expect_bad() {
+    local label="$1" line="$2"
+    cp "$tmp/models/artconfig.txt" "$tmp/models/artconfig.txt.bak"
+    printf '%s\n' "$line" >>"$tmp/models/artconfig.txt"
+    if python3 bin/artconfig.py "$tmp/models/artconfig.txt" --models "$tmp/models" --check >/dev/null 2>&1; then
+      bad "accepted $label"
+    else
+      ok "refuses $label"
+    fi
+    mv "$tmp/models/artconfig.txt.bak" "$tmp/models/artconfig.txt"
+  }
+
+  expect_bad "a skin id below 20000" 'AddCharModel(1, 19999, "cop.dff", "cop.txd");'
+  expect_bad "an object id above -1000" 'AddSimpleModel(-1, 19379, 2000, "cop.dff", "cop.txd");'
+  expect_bad "a repeated id" 'AddCharModel(1, 25000, "cop.dff", "cop.txd");'
+  expect_bad "a file that is not in models" 'AddCharModel(1, 26000, "ghost.dff", "cop.txd");'
+  expect_bad "a name that climbs out of models" 'AddCharModel(1, 27000, "../settings.ini.dff", "cop.txd");'
+  expect_bad "a line with no semicolon" 'AddCharModel(1, 28000, "cop.dff", "cop.txd")'
+
+  rm -rf "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
@@ -382,8 +454,10 @@ case "${1:-all}" in
   icons)   run_icons ;;
   contrast) run_contrast ;;
   guide)   run_guide ;;
-  all)     run_jvm; run_strings; run_contrast; run_icons; run_guide; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
-  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|guide|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
+  hud)     run_hud ;;
+  artconfig) run_artconfig ;;
+  all)     run_jvm; run_strings; run_contrast; run_icons; run_guide; run_hud; run_artconfig; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
+  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|guide|hud|artconfig|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

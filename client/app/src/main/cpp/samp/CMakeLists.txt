@@ -11,7 +11,8 @@ elseif(${ANDROID_ABI} STREQUAL "arm64-v8a")
     set(GLOSSHOOK_ABI "ARM64")
 endif()
 
-file(GLOB_RECURSE SOURCES
+# CONFIGURE_DEPENDS so a new file under this tree is compiled without deleting the cache by hand.
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_LIST_DIR}/*.c*
         ${CMAKE_CURRENT_LIST_DIR}/**/*.c*
         ${CMAKE_CURRENT_LIST_DIR}/**/**/*.c*
