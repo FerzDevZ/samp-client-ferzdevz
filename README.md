@@ -25,6 +25,7 @@ Everything below was executed on this machine, not assumed.
 | On-device data setup | **yes**, variant pick, SHA-256 verify, resumable download, share log |
 | APK in a GitHub Release | **no**, it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
 | Wrapper rewrite | **in progress**, 2 of 35 files, `bin/oswrapper-audit.sh` reports the rest |
+| Patch on the phone | **yes**, `bin/patch-termux.sh` with apksigner, no SDK binaries needed |
 
 ## Getting an installable APK
 
@@ -38,6 +39,13 @@ bin/patch-apk.sh --gta-apk GTA.apk \
                  --out dist/samp-client-0.1.0.apk      # 2. add libGame.so, realign, re-sign (37 MB)
 adb install -r dist/samp-client-0.1.0.apk              # 3. install
 adb push cache/full/. /storage/emulated/0/GTA/         # 4. assets, or the app closes on launch
+```
+
+No PC in the loop, patching on the phone itself:
+
+```bash
+pkg install openjdk-21 apksigner zip unzip python     # Termux, once
+bin/patch-termux.sh --gta-apk ~/storage/downloads/GTA.apk --out ~/samp-client.apk
 ```
 
 Full flow, measured timings and the four refusal cases: [docs/PATCHER.md](docs/PATCHER.md).

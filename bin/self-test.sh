@@ -7,6 +7,7 @@
 #   bin/self-test.sh jvm      only the JVM unit tests
 #   bin/self-test.sh cache    only the cache builder round trip
 #   bin/self-test.sh patcher  only the patcher argument contract
+#   bin/self-test.sh termux   only the on-phone patcher (needs apksigner)
 #
 # What it does NOT prove: that the game runs. That needs a phone and a GTA install.
 set -uo pipefail
@@ -138,12 +139,68 @@ run_patcher() {
   rm -rf "$tmp"
 }
 
+run_termux() {
+  head_ "on-phone patcher"
+  if ! command -v apksigner >/dev/null 2>&1; then
+    printf '  skip  apksigner not on PATH, so the signing path is not covered here\n'
+    return 0
+  fi
+  local tmp
+  tmp="$(mktemp -d)"
+
+  # Synthetic halves: a framework without a game library, and a "game" APK that has
+  # one. Neither is a real GTA install, they only carry the paths the patcher looks for.
+  python3 - "$tmp" <<'PYEOF'
+import sys, zipfile
+tmp = sys.argv[1]
+manifest = b"\x03\x00\x08\x00" + b"com.ferzdevzgta.game" + b"\x00" * 16
+elf = b"\x7fELF\x02\x01\x01" + b"\x00" * 11 + b"\xb7\x00" + b"\x00" * 4096
+with zipfile.ZipFile(tmp + "/framework.apk", "w", zipfile.ZIP_STORED) as z:
+    z.writestr("AndroidManifest.xml", manifest)
+    z.writestr("lib/arm64-v8a/libsamp.so", elf)
+with zipfile.ZipFile(tmp + "/game.apk", "w", zipfile.ZIP_STORED) as z:
+    z.writestr("AndroidManifest.xml", manifest)
+    z.writestr("lib/arm64-v8a/libGame.so", elf * 3)
+PYEOF
+
+  if ./bin/patch-termux.sh --gta-apk "$tmp/game.apk" --framework "$tmp/framework.apk" \
+      --out "$tmp/out.apk" >"$tmp/patch.log" 2>&1; then
+    ok "patched a synthetic framework with apksigner"
+  else
+    bad "patching failed: $(tail -2 "$tmp/patch.log" | tr '\n' ' ')"
+  fi
+  if [ -f "$tmp/out.apk" ]; then
+    if python3 bin/apk-verify.py --apk "$tmp/out.apk" --so <(unzip -p "$tmp/game.apk" lib/arm64-v8a/libGame.so) \
+        --expect-package com.ferzdevzgta.game >"$tmp/verify.log" 2>&1; then
+      ok "verified: stored, 4096 aligned, bytes intact"
+    else
+      bad "verification failed: $(tail -1 "$tmp/verify.log")"
+    fi
+  fi
+
+  if ./bin/patch-termux.sh --gta-apk "$tmp/game.apk" --framework "$tmp/out.apk" \
+      --out "$tmp/x.apk" >"$tmp/refuse.log" 2>&1; then
+    bad "accepted a framework that already contains the game library"
+  else
+    ok "refused: finished APK passed as framework"
+  fi
+  if ./bin/patch-termux.sh --gta-apk "$tmp/framework.apk" --framework "$tmp/framework.apk" \
+      --out "$tmp/x.apk" >"$tmp/refuse2.log" 2>&1; then
+    bad "accepted a game APK without the game library"
+  else
+    ok "refused: game APK without libGame.so"
+  fi
+
+  rm -rf "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
   patcher) run_patcher ;;
-  all)     run_jvm; run_cache; run_patcher ;;
-  *)       echo "usage: $0 [all|jvm|cache|patcher]" >&2; exit 2 ;;
+  termux)  run_termux ;;
+  all)     run_jvm; run_cache; run_patcher; run_termux ;;
+  *)       echo "usage: $0 [all|jvm|cache|patcher|termux]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

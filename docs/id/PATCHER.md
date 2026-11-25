@@ -59,6 +59,40 @@ menghasilkan APK mati berukuran 36 MB.
 Terukur di mesin ini: framework 28 MB, hasil patch 37 MB, sekitar 20 detik setelah
 framework-nya ada.
 
+## Di HP (Termux)
+
+`bin/patch-termux.sh` mengerjakan hal yang sama tanpa PC. Alasannya: hasilnya dipakai
+di HP, dan `zipalign` serta `aapt2` adalah binary Android SDK x86-64 yang tidak bisa
+jalan di perangkat aarch64.
+
+```bash
+pkg install openjdk-21 apksigner zip unzip python     # sekali saja
+
+bin/patch-termux.sh --gta-apk ~/storage/downloads/GTA.apk
+bin/patch-termux.sh --gta-split-dir ~/gta-split --out ~/samp-client.apk
+```
+
+Yang menggantikan tiap langkah khusus PC:
+
+| Langkah di PC | Di HP |
+|---|---|
+| suntik `zip -0` | `zip -0 -X` yang sama, stored |
+| `zipalign -p -f 4` | `apksigner --lib-page-alignment 4096` meratakan library saat menandatangani |
+| `apksigner verify`, `aapt2 dump badging` | `apksigner verify` plus `bin/apk-verify.py` yang membaca struktur zip sendiri |
+
+`bin/apk-verify.py` membuka local header `lib/arm64-v8a/libGame.so` dan memastikan
+metode kompresinya 0, offset datanya kelipatan 4096, isinya sama dengan file yang
+disuntikkan, dan nama package ada di APK. Tidak butuh SDK.
+
+Terukur: framework 28 MB masuk, 36 MB keluar. Hasilnya diperiksa di mesin yang punya
+SDK asli: `zipalign -c -p 4` lolos, `apksigner verify` lolos, `aapt2 dump badging`
+melaporkan `com.ferzdevzgta.game`.
+
+APK framework tetap harus datang dari suatu tempat. Hari ini itu mesin build kamu
+sendiri, atau salinan `dist/samp-client-framework.apk`, karena framework belum
+diterbitkan (lihat [LEGAL.md](LEGAL.md) dan [OSWRAPPER.md](OSWRAPPER.md)). Termux
+menghapus PC dari langkah patch, bukan dari langkah build framework.
+
 ## Pengujian yang dijalankan
 
 | Kasus | Harus | Hasil |
@@ -72,8 +106,9 @@ framework-nya ada.
 
 - **Hanya arm64-v8a.** APK game harus membawa `libGame.so` arm64; kalau hanya ada
   `armeabi-v7a`, alat ini menolak daripada menghasilkan APK rusak.
-- **Hanya base APK.** Instalasi split (`base.apk` + `config.arm64_v8a.apk`) butuh
-  split ABI-nya; gabungkan base dan split config arm64, lalu berikan base-nya.
+- **Instalasi split.** Berikan `--gta-split-dir` berisi `base.apk` dan split
+  config-nya. Package dan library dicari berdasarkan isi, jadi base APK yang memuat
+  manifest dan split ABI yang memuat `libGame.so` adalah kombinasi yang didukung.
 - **Aset terpisah.** APK tetap membaca `/storage/emulated/0/GTA/`; bangun tree itu
   dengan `bin/build-cache.sh` dari instalasi game yang sama.
 - **Tanpa obfuscation, tanpa rename.** Kalau APK pengguna menamai library-nya lain

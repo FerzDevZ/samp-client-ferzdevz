@@ -25,6 +25,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Setup data di HP | **ada**, pilih varian, verifikasi SHA-256, unduh dengan resume, bagikan log |
 | APK di GitHub Release | **tidak**, APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
 | Tulis ulang wrapper | **berjalan**, 2 dari 35 file, sisanya dilaporkan `bin/oswrapper-audit.sh` |
+| Patch di HP | **ya**, `bin/patch-termux.sh` dengan apksigner, tanpa binary SDK |
 
 ## Mendapatkan APK yang bisa dipasang
 
@@ -38,6 +39,13 @@ bin/patch-apk.sh --gta-apk GTA.apk \
                  --out dist/samp-client-0.1.0.apk      # 2. tambah libGame.so, realign, tanda tangan ulang (37 MB)
 adb install -r dist/samp-client-0.1.0.apk              # 3. pasang
 adb push cache/full/. /storage/emulated/0/GTA/         # 4. aset, kalau tidak aplikasi tertutup saat dibuka
+```
+
+Tanpa PC, patching langsung di HP:
+
+```bash
+pkg install openjdk-21 apksigner zip unzip python     # Termux, sekali saja
+bin/patch-termux.sh --gta-apk ~/storage/downloads/GTA.apk --out ~/samp-client.apk
 ```
 
 Alur lengkap, waktu terukur, dan empat kasus penolakan: [docs/id/PATCHER.md](docs/id/PATCHER.md).

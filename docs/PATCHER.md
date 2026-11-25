@@ -59,6 +59,41 @@ file carries the library, that means the wrong ABI split was extracted.
 Measured on this machine: framework 28 MB, patched output 37 MB, end to end in
 about 20 s once the framework exists.
 
+## On the phone (Termux)
+
+`bin/patch-termux.sh` does the same job without a PC. It exists because the phone is
+where the result is needed and because `zipalign` and `aapt2` are x86-64 Android SDK
+binaries that cannot run on an aarch64 device.
+
+```bash
+pkg install openjdk-21 apksigner zip unzip python     # once
+
+bin/patch-termux.sh --gta-apk ~/storage/downloads/GTA.apk
+bin/patch-termux.sh --gta-split-dir ~/gta-split --out ~/samp-client.apk
+```
+
+What replaces each PC-only step:
+
+| PC step | On the phone |
+|---|---|
+| `zip -0` injection | same `zip -0 -X`, stored |
+| `zipalign -p -f 4` | `apksigner --lib-page-alignment 4096` page aligns the libraries while signing |
+| `apksigner verify`, `aapt2 dump badging` | `apksigner verify` plus `bin/apk-verify.py`, which reads the zip structures itself |
+
+`bin/apk-verify.py` opens the local header of `lib/arm64-v8a/libGame.so` and asserts
+that the compression method is 0, that the data offset is a multiple of 4096, that the
+bytes match the file that was inserted, and that the package name is in the APK. It
+needs no SDK.
+
+Measured: framework 28 MB in, 36 MB out. The output was checked on a machine with the
+real SDK: `zipalign -c -p 4` passes, `apksigner verify` passes, `aapt2 dump badging`
+reports `com.ferzdevzgta.game`.
+
+The framework APK still has to come from somewhere. Today that is your own build
+machine, or a copy of `dist/samp-client-framework.apk`, because the framework is not
+published yet (see [LEGAL.md](LEGAL.md) and [OSWRAPPER.md](OSWRAPPER.md)). Termux
+removes the PC from the patching step, not from the framework build.
+
 ## Verifications that were run
 
 | Case | Expected | Result |
@@ -72,8 +107,10 @@ about 20 s once the framework exists.
 
 - **arm64-v8a only.** The game APK must carry an arm64 `libGame.so`; if it ships
   only `armeabi-v7a`, the tool refuses rather than producing a broken APK.
-- **Base APK only.** Split installs (`base.apk` + `config.arm64_v8a.apk`) need the
-  ABI split; bundle the base plus the arm64 config split and pass the base.
+- **Split installs.** Pass `--gta-split-dir` with the directory that holds
+  `base.apk` and the config splits. The package and the library are resolved by
+  content, so a base APK with the manifest and an ABI split with `libGame.so` is a
+  supported combination.
 - **Assets are separate.** The APK still expects `/storage/emulated/0/GTA/`; build
   that tree with `bin/build-cache.sh` from the same game install.
 - **No obfuscation, no rename.** If the user's APK has a differently named

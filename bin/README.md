@@ -10,6 +10,8 @@ true turns out not to be.
 | `fetch-blobs.sh` | copy the two binary sets that cannot be tracked in git | - |
 | `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | - |
 | `self-test.sh` | prove the JVM tests, the cache round trip and the patcher refusals still pass | - |
+| `patch-termux.sh` | same job on a phone: `zip -0`, `apksigner --lib-page-alignment`, no SDK binaries | it is the input |
+| `apk-verify.py` | read the zip structures and prove the library is stored, aligned, intact; no SDK needed | - |
 | `oswrapper-audit.sh` | count rewritten vs still derived wrapper files, `--strict` fails while any remain | - |
 
 ## android-build.sh
@@ -95,6 +97,8 @@ tidak benar.
 | `android-build.sh` | build `libsamp.so` dan/atau APK, lalu periksa artifact-nya | ya, kecuali mode `native` |
 | `patch-apk.sh` | menyuntik `libGame.so` milik pengguna ke APK framework, realign, tanda tangan ulang | itu inputnya |
 | `self-test.sh` | membuktikan tes JVM, round trip cache, dan penolakan patcher masih lolos | - |
+| `patch-termux.sh` | kerja yang sama di HP: `zip -0`, `apksigner --lib-page-alignment`, tanpa binary SDK | itu inputnya |
+| `apk-verify.py` | membaca struktur zip dan membuktikan library stored, aligned, utuh; tanpa SDK | - |
 | `oswrapper-audit.sh` | menghitung file wrapper yang sudah ditulis ulang vs masih turunan, `--strict` gagal selama masih ada | - |
 | `fetch-blobs.sh` | menyalin dua set binary yang tidak boleh masuk git | - |
 | `build-cache.sh` | membangun dan memverifikasi tree aset `/storage/emulated/0/GTA/` | - |
