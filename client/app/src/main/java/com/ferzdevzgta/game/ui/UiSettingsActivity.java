@@ -89,6 +89,7 @@ public class UiSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Ui.paintWindow(this);
         setContentView(buildUi());
+        Ui.applyInsets(this, findViewById(android.R.id.content));
     }
 
     private ScrollView buildUi() {

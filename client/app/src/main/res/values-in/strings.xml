@@ -7,12 +7,14 @@
     <string name="language_title">Bahasa</string>
     <string name="language_in">Indonesia</string>
     <string name="language_en">English</string>
-    <string name="language_note">Hanya mengganti bahasa layar aplikasi. Di dalam game tetap memakai bahasanya sendiri.</string>
+    <string name="language_note">Hanya layar aplikasi. Game memakai bahasanya sendiri.</string>
 
     <string name="home_eyebrow">Klien Android</string>
     <string name="home_start">Mainkan</string>
-    <string name="home_start_hint">Membuka klien dengan server yang tersimpan</string>
-    <string name="home_status_title">Siap dimainkan</string>
+    <string name="home_start_setup">Siapkan dulu</string>
+    <string name="home_summary_ready">Siap</string>
+    <string name="home_summary_not_ready">Belum siap</string>
+    <string name="home_status_title">Status klien</string>
     <string name="home_status_data">Data game</string>
     <string name="home_status_data_ok">Terpasang</string>
     <string name="home_status_data_missing">Belum terpasang</string>
@@ -23,8 +25,7 @@
     <string name="home_action_data">Data game</string>
     <string name="home_action_server">Server</string>
     <string name="home_action_settings">Tampilan</string>
-    <string name="home_bug_info">Menemukan bug? Laporkan, akan saya perbaiki.</string>
-    <string name="home_authors">terima kasih bkuzn dan afobazl</string>
+    <string name="home_bug_info">Menemukan bug? Kirim lognya, akan saya periksa.</string>
 
     <string name="perm_storage_required">Akses penyimpanan diperlukan agar game bisa jalan.</string>
     <string name="perm_all_files_required">Aplikasi butuh akses penuh ke penyimpanan.</string>

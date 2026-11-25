@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,13 +38,15 @@ import com.ferzdevzgta.game.ui.UiSettingsActivity;
 import java.io.File;
 
 /**
- * Launcher screen: shows what the client would do right now (data present, server chosen,
- * nickname) instead of an empty screen with one button, and offers the language switch on
- * first run.
+ * Launcher screen. Answers one question before the player commits: is this install ready to
+ * play, and if not, which of the three requirements is missing. The action bar is pinned to the
+ * bottom so the thumb reaches it on a phone and short screens do not leave dead space.
  */
 public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private Button startButton;
+    private TextView summary;
+    private LinearLayout summarySlot;
     private TextView dataValue;
     private TextView serverValue;
     private TextView nickValue;
@@ -107,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             setContentView(buildUi());
+            Ui.applyInsets(this, findViewById(android.R.id.content));
             checkAndRequestStoragePermission();
             Log.d("MainActivity", "onCreate completed successfully");
         } catch (Exception e) {
@@ -116,72 +120,95 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private View buildUi() {
-        LinearLayout root = Ui.column(this);
+        LinearLayout shell = new LinearLayout(this);
+        shell.setOrientation(LinearLayout.VERTICAL);
+        shell.setBackgroundColor(Ui.BG);
 
-        root.addView(Ui.eyebrow(this, getString(R.string.home_eyebrow)));
-        Ui.gap(this, root, 8);
-        root.addView(Ui.title(this, getString(R.string.client_name)));
-        Ui.gap(this, root, 4);
-        root.addView(Ui.subtitle(this, getString(R.string.samp_ver)));
+        // ---------------------------------------------------------------- content
+        LinearLayout content = Ui.column(this);
 
-        // What the next Start does, in three lines, instead of an empty middle.
-        Ui.gap(this, root, 24);
+        content.addView(Ui.eyebrow(this, getString(R.string.home_eyebrow)));
+        Ui.gap(this, content, 8);
+        content.addView(Ui.title(this, getString(R.string.app_name)));
+        Ui.gap(this, content, 4);
+        content.addView(Ui.subtitle(this, getString(R.string.samp_ver)));
+
+        Ui.gap(this, content, 22);
         LinearLayout statusCard = Ui.card(this);
-        statusCard.addView(Ui.section(this, getString(R.string.home_status_title)));
-        LinearLayout dataRow = Ui.statusRow(this, getString(R.string.home_status_data), "", 0);
-        dataValue = (TextView) dataRow.getChildAt(1);
-        statusCard.addView(dataRow, Ui.fill());
-        LinearLayout serverRow = Ui.statusRow(this, getString(R.string.home_status_server), "", 0);
-        serverValue = (TextView) serverRow.getChildAt(1);
-        statusCard.addView(serverRow, Ui.fill());
-        LinearLayout nickRow = Ui.statusRow(this, getString(R.string.home_status_nick), "", 0);
-        nickValue = (TextView) nickRow.getChildAt(1);
-        statusCard.addView(nickRow, Ui.fill());
-        root.addView(statusCard, Ui.fill());
+        LinearLayout statusHead = Ui.row(this);
+        statusHead.addView(Ui.section(this, getString(R.string.home_status_title)),
+                Ui.weight(this, 1f, 8f));
+        summarySlot = new LinearLayout(this);
+        summarySlot.setOrientation(LinearLayout.HORIZONTAL);
+        statusHead.addView(summarySlot);
+        statusCard.addView(statusHead, Ui.fill());
+        Ui.gap(this, statusCard, 4);
 
-        // Actions
-        Ui.gap(this, root, 20);
+        LinearLayout dataRow = Ui.statusRow(this, getString(R.string.home_status_data), "-", Ui.WARN);
+        dataValue = Ui.statusValue(dataRow);
+        statusCard.addView(dataRow, Ui.fill());
+
+        LinearLayout serverRow = Ui.statusRow(this, getString(R.string.home_status_server), "-", Ui.WARN);
+        serverValue = Ui.statusValue(serverRow);
+        statusCard.addView(serverRow, Ui.fill());
+
+        LinearLayout nickRow = Ui.statusRow(this, getString(R.string.home_status_nick), "-", Ui.WARN);
+        nickValue = Ui.statusValue(nickRow);
+        statusCard.addView(nickRow, Ui.fill());
+        content.addView(statusCard, Ui.fill());
+
+        Ui.gap(this, content, 12);
+        LinearLayout languageCard = Ui.card(this);
+        languageCard.addView(Ui.section(this, getString(R.string.language_title)));
+        Ui.gap(this, languageCard, 10);
+        languageCard.addView(Ui.languageSwitch(this), Ui.fill());
+        Ui.gap(this, languageCard, 10);
+        languageCard.addView(Ui.label(this, getString(R.string.language_note)));
+        content.addView(languageCard, Ui.fill());
+
+        Ui.gap(this, content, 20);
+        content.addView(Ui.label(this, getString(R.string.home_bug_info)));
+
+        ScrollView scroll = Ui.scroll(this, content);
+        shell.addView(scroll, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        // ------------------------------------------------------------ action bar
+        shell.addView(actionBar(), Ui.fill());
+        return shell;
+    }
+
+    private View actionBar() {
+        LinearLayout bar = new LinearLayout(this);
+        bar.setOrientation(LinearLayout.VERTICAL);
+        bar.setBackgroundColor(Ui.BG);
+        int pad = Ui.dp(this, 20);
+        bar.setPadding(pad, Ui.dp(this, 12), pad, Ui.dp(this, 16));
+
+        View line = Ui.divider(this);
+        bar.addView(line, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, Ui.dp(this, 1)));
+
+        Ui.gap(this, bar, 12);
         startButton = Ui.button(this, getString(R.string.home_start), Ui.PRIMARY);
         startButton.setOnClickListener(v -> onStartPressed());
-        root.addView(startButton, Ui.fill());
-        Ui.gap(this, root, 6);
-        root.addView(Ui.label(this, getString(R.string.home_start_hint)));
+        bar.addView(startButton, Ui.fill());
 
-        Ui.gap(this, root, 16);
-        LinearLayout rowA = Ui.row(this);
+        Ui.gap(this, bar, 8);
+        LinearLayout row = Ui.row(this);
         Button dataButton = Ui.button(this, getString(R.string.home_action_data), Ui.SECONDARY);
         Button serverButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY);
         dataButton.setOnClickListener(v -> startActivity(new Intent(this, DataSetupActivity.class)));
         serverButton.setOnClickListener(v -> startActivity(new Intent(this, ServerBrowserActivity.class)));
-        rowA.addView(dataButton, Ui.weight(this, 1f, 8f));
-        rowA.addView(serverButton, Ui.weight(this, 1f, 0f));
-        root.addView(rowA, Ui.fill());
+        row.addView(dataButton, Ui.weight(this, 1f, 8f));
+        row.addView(serverButton, Ui.weight(this, 1f, 0f));
+        bar.addView(row, Ui.fill());
 
-        Ui.gap(this, root, 8);
-        Button displayButton = Ui.button(this, getString(R.string.home_action_settings), Ui.SECONDARY);
+        Ui.gap(this, bar, 8);
+        Button displayButton = Ui.button(this, getString(R.string.home_action_settings), Ui.GHOST);
         displayButton.setOnClickListener(v -> startActivity(new Intent(this, UiSettingsActivity.class)));
-        root.addView(displayButton, Ui.fill());
-
-        // Language
-        Ui.gap(this, root, 24);
-        LinearLayout languageCard = Ui.card(this);
-        languageCard.addView(Ui.section(this, getString(R.string.language_title)));
-        languageCard.addView(Ui.languageSwitch(this), Ui.fill());
-        Ui.gap(this, languageCard, 10);
-        languageCard.addView(Ui.label(this, getString(R.string.language_note)));
-        root.addView(languageCard, Ui.fill());
-
-        // Credits
-        Ui.gap(this, root, 24);
-        TextView bug = Ui.label(this, getString(R.string.home_bug_info));
-        root.addView(bug);
-        Ui.gap(this, root, 4);
-        TextView credits = Ui.label(this, getString(R.string.home_authors));
-        credits.setTextColor(Ui.ACCENT);
-        credits.setOnClickListener(v -> openTelegram());
-        root.addView(credits);
-
-        return Ui.scroll(this, root);
+        bar.addView(displayButton, Ui.fill());
+        return bar;
     }
 
     @Override
@@ -190,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         refreshStatus();
     }
 
-    /** Reflects the three things Start depends on, so the launcher never lies. */
+    /** Reflects the three things Play depends on, so the launcher never lies about its state. */
     private void refreshStatus() {
         if (dataValue == null) {
             return;
@@ -211,15 +238,14 @@ public class MainActivity extends AppCompatActivity {
         nickValue.setText(nickSet ? nick : getString(R.string.home_status_nick_none));
         nickValue.setTextColor(nickSet ? Ui.TEXT : Ui.WARN);
 
-        startButton.setText(dataPresent ? getString(R.string.home_start)
-                : getString(R.string.home_action_data));
-    }
-
-    private void openTelegram() {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/kuzia15")));
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error opening tg: " + e.getMessage());
+        boolean ready = dataPresent && serverChosen;
+        startButton.setText(ready ? getString(R.string.home_start)
+                : getString(R.string.home_start_setup));
+        if (summarySlot != null) {
+            summarySlot.removeAllViews();
+            summarySlot.addView(Ui.pill(this,
+                    getString(ready ? R.string.home_summary_ready : R.string.home_summary_not_ready),
+                    ready ? Ui.OK : Ui.WARN));
         }
     }
 

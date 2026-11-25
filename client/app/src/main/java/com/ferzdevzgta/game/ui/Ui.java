@@ -390,7 +390,18 @@ public final class Ui {
     /** Label on the left, value on the right, one line, used by the status cards. */
     public static LinearLayout statusRow(Context c, String labelText, String valueText, int toneOrZero) {
         LinearLayout row = row(c);
-        row.setPadding(0, dp(c, 6), 0, dp(c, 6));
+        row.setPadding(0, dp(c, 7), 0, dp(c, 7));
+        if (toneOrZero != 0) {
+            View dot = new View(c);
+            android.graphics.drawable.GradientDrawable shape =
+                    new android.graphics.drawable.GradientDrawable();
+            shape.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            shape.setColor(toneOrZero);
+            dot.setBackground(shape);
+            LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(c, 8), dp(c, 8));
+            dotParams.setMargins(0, 0, dp(c, 10), 0);
+            row.addView(dot, dotParams);
+        }
         TextView key = label(c, labelText);
         row.addView(key, new LinearLayout.LayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -406,6 +417,39 @@ public final class Ui {
         if (view != null) {
             view.setText(value);
         }
+    }
+
+    /**
+     * Keeps content out of the system bars. Android 15 forces every app that targets SDK 35 or
+     * newer to draw edge to edge, so without this the first line of a screen sits under the
+     * clock and the last button under the gesture bar.
+     */
+    public static void applyInsets(android.app.Activity activity, View root) {
+        final int baseLeft = root.getPaddingLeft();
+        final int baseTop = root.getPaddingTop();
+        final int baseRight = root.getPaddingRight();
+        final int baseBottom = root.getPaddingBottom();
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(root, (view, insets) -> {
+            androidx.core.graphics.Insets bars =
+                    insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()
+                            | androidx.core.view.WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(baseLeft + bars.left, baseTop + bars.top,
+                    baseRight + bars.right, baseBottom + bars.bottom);
+            return insets;
+        });
+        android.view.View decor = activity.getWindow().getDecorView();
+        androidx.core.view.ViewCompat.requestApplyInsets(decor);
+    }
+
+    /** The value view of a status row, whatever else the row grows in front of it. */
+    public static TextView statusValue(LinearLayout row) {
+        for (int i = row.getChildCount() - 1; i >= 0; i--) {
+            View child = row.getChildAt(i);
+            if (child instanceof TextView) {
+                return (TextView) child;
+            }
+        }
+        return null;
     }
 
     /**

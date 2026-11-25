@@ -8,12 +8,14 @@
     <string name="language_title">Language</string>
     <string name="language_in">Indonesian</string>
     <string name="language_en">English</string>
-    <string name="language_note">Changes the app screens only. The game itself keeps its own language.</string>
+    <string name="language_note">App screens only. The game keeps its own language.</string>
 
     <string name="home_eyebrow">Android client</string>
-    <string name="home_start">Start</string>
-    <string name="home_start_hint">Opens the client with the saved server</string>
-    <string name="home_status_title">Ready to play</string>
+    <string name="home_start">Play</string>
+    <string name="home_start_setup">Set up first</string>
+    <string name="home_summary_ready">Ready</string>
+    <string name="home_summary_not_ready">Not ready</string>
+    <string name="home_status_title">Client status</string>
     <string name="home_status_data">Game data</string>
     <string name="home_status_data_ok">Installed</string>
     <string name="home_status_data_missing">Not installed</string>
@@ -24,8 +26,7 @@
     <string name="home_action_data">Game data</string>
     <string name="home_action_server">Server</string>
     <string name="home_action_settings">Display</string>
-    <string name="home_bug_info">Found a bug? Report it, and I will fix it.</string>
-    <string name="home_authors">thanks to bkuzn and afobazl</string>
+    <string name="home_bug_info">Found a bug? Send the log and I will look.</string>
 
     <string name="perm_storage_required">Storage access is required for the game to run.</string>
     <string name="perm_all_files_required">The app needs full storage access.</string>

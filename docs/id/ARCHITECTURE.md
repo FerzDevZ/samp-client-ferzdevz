@@ -159,3 +159,14 @@ Warna hanya ada di satu tempat, `ui/Ui.java`, dan `bin/ui-contrast.py` membaca b
 lalu menghitung rasio WCAG 2.2 AA untuk tujuh belas pasangan yang benar-benar dipakai
 layar. Warna hint yang terlalu gelap akan gagal di pemeriksaan itu, bukan menjadi tidak
 terbaca di HP.
+
+Aplikasi menargetkan SDK 36, dan Android 15 menggambar aplikasi seperti ini sampai ke tepi
+layar: jendela memanjang ke bawah jam dan navigation bar, mau temanya meminta atau tidak.
+Setiap layar memanggil `Ui.applyInsets` pada content view, yang menambahkan inset system bar
+dan cutout ke padding yang sudah ada. Tanpa itu, baris pertama sebuah layar menimpa status
+bar, persis jenis tumpang tindih yang tidak punya error kompilasi.
+
+Launcher menaruh tombol aksinya di bilah bawah, bukan di ujung scroll, jadi tombol utama
+tetap terjangkau jempol dan layar pendek tidak berakhir dengan ruang kosong. Kartu statusnya
+menampilkan satu titik per syarat, dan tombol utamanya berganti label, Mainkan atau Siapkan
+dulu, bukan mengulang tiga kata yang sama di tiga kontrol berbeda.

@@ -158,3 +158,14 @@ launcher UI are translated separately, and `language_note` says so on screen.
 Colours live in one place, `ui/Ui.java`, and `bin/ui-contrast.py` reads that file and
 computes WCAG 2.2 AA ratios for the seventeen pairs the screens actually use. A darker hint
 colour fails that check instead of becoming unreadable on a phone.
+
+The app targets SDK 36, and Android 15 draws every such app edge to edge: the window extends
+under the clock and the gesture bar whether the theme asks for it or not. Each screen calls
+`Ui.applyInsets` on its content view, which adds the system bar and cutout insets to the
+existing padding. Without it the first line of a screen sits on top of the status bar, which
+is exactly the kind of overlap that has no compile error.
+
+The launcher pins its actions in a bottom bar instead of ending the scroll with them, so the
+primary button stays inside thumb reach and a short screen does not end in empty space. Its
+status card shows one dot per requirement, and the primary button changes label, Play or Set
+up first, instead of repeating the same three words on three different controls.
