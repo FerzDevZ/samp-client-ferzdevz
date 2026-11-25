@@ -97,3 +97,4 @@ binary Rockstar. Lihat [LEGAL.md](LEGAL.md).
 | properti gradle diabaikan diam-diam | baris terakhir `gradle.properties` tanpa newline | gate menambah newline lebih dulu |
 | `./gradlew: Permission denied` | git tidak menyimpan exec bit | gate melakukan chmod |
 | build "lulus" tapi APK tanpa native lib | exit code gradle bukan bukti | gate memeriksa isi APK |
+| APK terpasang lalu crash saat `dlopen` `libGame.so` | AGP menulis `extractNativeLibs="false"` tetapi library-nya tidak di offset halaman, jadi loader memetakannya di alignment salah | setiap APK yang diselesaikan script ini lewat `zipalign -p 4` lalu ditandatangani ulang dengan key patcher, dan `bin/apk-verify.py` membuktikan offset-nya |

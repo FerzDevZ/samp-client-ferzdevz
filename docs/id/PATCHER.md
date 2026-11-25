@@ -104,8 +104,11 @@ bin/build-termux.sh --check-only
 ```
 
 Pemeriksaan umur file ada karena APK hasil patch dari framework yang lebih tua dari perubahan Java
-terakhir terlihat baik-baik saja dan menjalankan UI lama. Pakai `--force` kalau perbedaannya memang
-tidak penting. Diukur di mesin ini dengan framework asli dan split GTA buatan: exit 0, `PASS`,
+terakhir terlihat baik-baik saja dan menjalankan UI lama. `bin/android-build.sh framework` mencatat
+fingerprint source tree ke `dist/samp-client-framework.apk.src`, dan script ini membandingkan isi,
+bukan timestamp: `git checkout` menulis ulang semua mtime, jadi perbandingan jam akan menyebut
+framework baru sebagai kedaluwarsa tepat setelah pindah branch. Pakai `--force` kalau perbedaannya
+memang tidak penting. Diukur di mesin ini dengan framework asli dan split GTA buatan: exit 0, `PASS`,
 package `com.ferzdevzgta.game`, `libGame.so` tersimpan di offset kelipatan 4096.
 
 ## Pengujian yang dijalankan
@@ -116,8 +119,8 @@ package `com.ferzdevzgta.game`, `libGame.so` tersimpan di offset kelipatan 4096.
 | framework yang masih membawa `libGame.so` | tolak | `FAIL: … already contains libGame.so` |
 | APK tanpa `libGame.so` | tolak | `FAIL: … has no lib/arm64-v8a/libGame.so` |
 | APK dengan package salah | tolak | `FAIL: … is not GTA San Andreas (package 'com.ferzdevzgta.game')` |
-| `build-termux.sh` hanya cek | laporan | 0 tool hilang, "pc needed: none" |
-| `build-termux.sh` dengan framework lebih tua dari source | tolak | `FAIL: client/app/src/main/... is newer than the framework APK` |
+| `build-termux.sh` hanya cek | laporan | fingerprint cocok, "pc needed: none" |
+| `build-termux.sh` dengan framework dari tree lain | tolak | `FAIL: the source tree changed since this framework was built` |
 | `build-termux.sh --force` + split GTA buatan | PASS | exit 0, `PASS`, 36 MB, offset library kelipatan 4096 |
 
 ## Batasan

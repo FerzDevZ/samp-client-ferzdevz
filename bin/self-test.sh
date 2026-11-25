@@ -147,6 +147,18 @@ run_patcher() {
   expects_fail "empty split dir" --gta-split-dir "$tmp/empty" --out "$tmp/x.apk"
   expects_fail "no --out" --gta-split-dir "$tmp/empty"
 
+  # apk-verify must report a missing entry as a failure, not die with a Python traceback: the
+  # framework APK has no libGame.so on purpose and the build asks about it.
+  if python3 ./bin/apk-verify.py --apk "$ROOT/dist/samp-client-framework.apk" >"$tmp/v.log" 2>&1; then
+    bad "apk-verify accepted a framework with no libGame.so"
+  elif grep -qi "traceback" "$tmp/v.log"; then
+    bad "apk-verify crashed instead of reporting the missing entry"
+  elif grep -q "is missing from" "$tmp/v.log"; then
+    ok "apk-verify reports a missing entry as a failure"
+  else
+    bad "apk-verify said something unexpected: $(head -1 "$tmp/v.log")"
+  fi
+
   rm -rf "$tmp"
 }
 
@@ -443,6 +455,67 @@ INI
   rm -rf "$tmp"
 }
 
+run_staleness() {
+  head_ "stale framework guard"
+  local tmp
+  tmp="$(mktemp -d)"
+  mkdir -p "$tmp/src/com/x" "$tmp/dist"
+  printf 'class A {}\n' >"$tmp/src/com/x/A.java"
+  printf 'not a real apk\n' >"$tmp/dist/framework.apk"
+
+  fingerprint() {
+    ( cd "$1" && find . -type f \( -name '*.java' -o -name '*.xml' -o -name '*.html' \
+        -o -name '*.cpp' -o -name '*.h' -o -name '*.c' -o -name '*.gradle' -o -name '*.kts' \) \
+        -not -path './build/*' -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1 )
+  }
+
+  run() { SAMP_SRC="$tmp/src" ./bin/build-termux.sh --framework "$tmp/dist/framework.apk" --check-only; }
+
+  fingerprint "$tmp/src" >"$tmp/dist/framework.apk.src"
+  if run >"$tmp/log" 2>&1; then
+    ok "accepts a framework whose fingerprint matches the tree"
+  else
+    bad "refused a matching framework: $(tail -2 "$tmp/log" | tr '\n' ' ')"
+  fi
+
+  # Content changed, clock did not: the case a timestamp cannot see.
+  printf 'class A { int b; }\n' >"$tmp/src/com/x/A.java"
+  touch -r "$tmp/dist/framework.apk" "$tmp/src/com/x/A.java"
+  if run >"$tmp/log" 2>&1; then
+    bad "accepted a changed tree when the clock agreed"
+  else
+    grep -q 'source tree changed' "$tmp/log" && ok "refuses a changed tree even when no mtime is newer" \
+      || bad "refused for the wrong reason: $(tail -2 "$tmp/log" | tr '\n' ' ')"
+  fi
+
+  # Clock moved, content did not: the case a git checkout produces on every branch switch.
+  fingerprint "$tmp/src" >"$tmp/dist/framework.apk.src"
+  touch "$tmp/src/com/x/A.java"
+  if run >"$tmp/log" 2>&1; then
+    ok "accepts a touched file that did not change"
+  else
+    bad "refused an unchanged tree after touch: $(tail -2 "$tmp/log" | tr '\n' ' ')"
+  fi
+
+  # No sidecar at all: an older framework, fall back to the clock and refuse.
+  rm -f "$tmp/dist/framework.apk.src"
+  if run >"$tmp/log" 2>&1; then
+    bad "accepted a framework with no fingerprint and older sources"
+  else
+    grep -q 'no .src fingerprint' "$tmp/log" && ok "refuses an unprovable framework by time" \
+      || bad "refused for the wrong reason: $(tail -2 "$tmp/log" | tr '\n' ' ')"
+  fi
+
+  if SAMP_SRC="$tmp/src" ./bin/build-termux.sh --framework "$tmp/dist/framework.apk" --check-only --force \
+       >"$tmp/log" 2>&1; then
+    ok "--force skips the guard"
+  else
+    bad "--force did not skip the guard: $(tail -2 "$tmp/log" | tr '\n' ' ')"
+  fi
+
+  rm -rf "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
@@ -456,8 +529,9 @@ case "${1:-all}" in
   guide)   run_guide ;;
   hud)     run_hud ;;
   artconfig) run_artconfig ;;
-  all)     run_jvm; run_strings; run_contrast; run_icons; run_guide; run_hud; run_artconfig; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
-  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|guide|hud|artconfig|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
+  staleness) run_staleness ;;
+  all)     run_jvm; run_strings; run_contrast; run_icons; run_guide; run_hud; run_artconfig; run_staleness; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
+  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|guide|hud|artconfig|staleness|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

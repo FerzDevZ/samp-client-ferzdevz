@@ -23,6 +23,9 @@
 #   --out PATH         where the finished APK goes
 #   --force            patch even when the framework is older than the source
 #   --check-only       report, change nothing
+
+# Environment:
+#   SAMP_SRC           source tree to compare against the framework (default: client/app/src/main)
 #
 # Exit codes: 0 built and verified, 1 bad input, stale framework or failed verification.
 set -euo pipefail
@@ -35,7 +38,8 @@ SPLIT_DIR=""
 OUT="$ROOT/dist/samp-client.apk"
 FORCE=0
 CHECK_ONLY=0
-SRC="$ROOT/client/app/src/main"
+# SAMP_SRC exists for the staleness test and for building against a copy of the tree.
+SRC="${SAMP_SRC:-$ROOT/client/app/src/main}"
 
 die() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 log() { printf '  %s\n' "$*"; }
@@ -82,15 +86,35 @@ fi
 log "framework: $FRAMEWORK ($(wc -c <"$FRAMEWORK" | tr -d ' ') bytes)"
 
 # A framework built before the last edit ships the old UI with a new library inside, and nothing
-# during the patch would notice. Compare times and refuse, unless the caller says otherwise.
+# during the patch would notice. Compare content, not clocks: a git checkout rewrites every mtime, so
+# a time comparison would call a fresh framework stale right after switching branches.
+src-fingerprint() {
+  ( cd "$1" && find . -type f \( -name '*.java' -o -name '*.xml' -o -name '*.html' \
+      -o -name '*.cpp' -o -name '*.h' -o -name '*.c' -o -name '*.gradle' -o -name '*.kts' \) \
+      -not -path './build/*' -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1 )
+}
+
 if [ "$FORCE" -eq 0 ]; then
-  newest="$(find "$SRC" -type f \( -name '*.java' -o -name '*.xml' -o -name '*.html' -o -name '*.cpp' -o -name '*.h' \) -newer "$FRAMEWORK" -print -quit 2>/dev/null || true)"
-  if [ -n "$newest" ]; then
-    printf 'FAIL: %s is newer than the framework APK\n' "${newest#$ROOT/}" >&2
-    printf '  build the framework again (bin/android-build.sh framework), or pass --force\n' >&2
-    exit 1
+  now="$(src-fingerprint "$SRC")"
+  if [ -f "$FRAMEWORK.src" ]; then
+    built="$(tr -d '[:space:]' <"$FRAMEWORK.src")"
+    if [ "$now" != "$built" ]; then
+      printf 'FAIL: the source tree changed since this framework was built\n' >&2
+      printf '  framework built from %s\n  tree is now        %s\n' "${built:0:16}" "${now:0:16}" >&2
+      printf '  build the framework again (bin/android-build.sh framework), or pass --force\n' >&2
+      exit 1
+    fi
+    log "framework was built from this exact source tree (${now:0:16})"
+  else
+    # No sidecar: an older framework, or one copied without it. Fall back to the clock.
+    newest="$(find "$SRC" -type f \( -name '*.java' -o -name '*.xml' -o -name '*.html' -o -name '*.cpp' -o -name '*.h' \) -newer "$FRAMEWORK" -print -quit 2>/dev/null || true)"
+    if [ -n "$newest" ]; then
+      printf 'FAIL: %s is newer than the framework APK, and it has no .src fingerprint\n' "${newest#$ROOT/}" >&2
+      printf '  build the framework again (bin/android-build.sh framework), or pass --force\n' >&2
+      exit 1
+    fi
+    log "framework is newer than every source file (no fingerprint to compare)"
   fi
-  log "framework is newer than every source file"
 fi
 
 if [ "$CHECK_ONLY" -eq 1 ]; then

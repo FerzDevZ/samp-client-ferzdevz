@@ -38,7 +38,9 @@ before anyone joins, and the phone has one command to build instead of two to re
   the framework APK from a URL, refuses a framework that is older than the source tree it sits next
   to, then calls `bin/patch-termux.sh`.
 - The staleness check is the part that matters. A patched APK built from an old framework looks fine
-  and runs the old UI, and nothing during a patch would have noticed.
+  and runs the old UI, and nothing during a patch would have noticed. It compares a fingerprint of the
+  source tree, not timestamps, because `git checkout` rewrites every mtime and would make a fresh
+  framework look stale right after a branch switch.
 - Measured with a synthetic GTA split on this machine: exit 0, `PASS`, package
   `com.ferzdevzgta.game`, `libGame.so` stored at an offset that is a multiple of 4096.
 

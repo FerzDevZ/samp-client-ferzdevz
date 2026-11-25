@@ -96,3 +96,4 @@ Rockstar's binary. See [LEGAL.md](LEGAL.md).
 | gradle property silently ignored | last line of `gradle.properties` has no newline and the next append glues to it | the gate appends a newline first |
 | `./gradlew: Permission denied` | git stores no exec bit for it | the gate chmods it |
 | build "passes" but APK has no native libs | gradle exit code is not evidence | the gate inspects the APK |
+| APK installs then crashes on `dlopen` of `libGame.so` | AGP wrote `extractNativeLibs="false"` but left the library at a non-page offset, so the loader mmaps it at a bad alignment | every APK this script finishes is `zipalign -p 4` plus re-signed with the patcher key, and `bin/apk-verify.py` proves the offset |

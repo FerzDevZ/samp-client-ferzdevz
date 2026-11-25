@@ -96,7 +96,7 @@ removes the PC from the patching step, not from the framework build.
 
 `bin/build-termux.sh` is the one command to run instead of remembering that. It reports
 which tools are present, fetches the framework when you give it a URL, refuses a framework
-that is older than the source tree next to it, and then calls `bin/patch-termux.sh`.
+that was built from a different source tree than the one next to it, and then calls `bin/patch-termux.sh`.
 
 ```bash
 bin/build-termux.sh --from-url http://100.85.253.77:8000/samp-client-framework.apk \
@@ -105,8 +105,11 @@ bin/build-termux.sh --check-only
 ```
 
 The staleness check exists because a patched APK built from a framework older than your
-last Java change looks fine and runs the old UI. Pass `--force` when you know the
-difference does not matter. Measured on this machine with the real framework and a
+last Java change looks fine and runs the old UI. `bin/android-build.sh framework` records a
+fingerprint of the source tree inside `dist/samp-client-framework.apk.src`, and this script
+compares content, not timestamps: `git checkout` rewrites every mtime, so a clock comparison
+would call a fresh framework stale right after switching branches. Pass `--force` when you
+know the difference does not matter. Measured on this machine with the real framework and a
 synthetic GTA split: exit 0, `PASS`, package `com.ferzdevzgta.game`, `libGame.so` stored at
 an offset that is a multiple of 4096.
 
@@ -119,7 +122,7 @@ an offset that is a multiple of 4096.
 | APK without `libGame.so` | refuse | `FAIL: … has no lib/arm64-v8a/libGame.so` |
 | APK with the wrong package | refuse | `FAIL: … is not GTA San Andreas (package 'com.ferzdevzgta.game')` |
 | `build-termux.sh --check-only` | a report | 0 missing tools, "pc needed: none" |
-| `build-termux.sh` with a framework older than the source | refuse | `FAIL: client/app/src/main/... is newer than the framework APK` |
+| `build-termux.sh` with a framework built from another tree | refuse | `FAIL: the source tree changed since this framework was built` |
 | `build-termux.sh --force` with a synthetic GTA split | PASS | exit 0, `PASS`, 36 MB, library offset a multiple of 4096 |
 
 ## Limits

@@ -39,7 +39,9 @@ def check(apk, entry, so, align, expect_package):
     with zipfile.ZipFile(apk) as archive:
         names = archive.namelist()
         if entry not in names:
-            return ["%s is missing from %s" % (entry, apk)]
+            # Same shape as the success path, so the caller never has to guess how many values came
+            # back. A missing entry is a failure, not a crash.
+            return ["%s is missing from %s" % (entry, apk)], 0, -1
         info = archive.getinfo(entry)
         payload = archive.read(entry)
 

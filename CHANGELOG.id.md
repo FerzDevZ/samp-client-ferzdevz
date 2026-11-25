@@ -39,7 +39,9 @@ sebelum ada yang masuk, dan di HP ada satu perintah build, bukan dua yang harus 
   framework APK dari URL, menolak framework yang lebih tua dari source di sebelahnya, lalu memanggil
   `bin/patch-termux.sh`.
 - Pemeriksaan umur file itu bagian yang penting. APK hasil patch dari framework lama terlihat normal
-  dan menjalankan UI lama, dan tidak ada langkah patch yang akan menyadarinya.
+  dan menjalankan UI lama, dan tidak ada langkah patch yang akan menyadarinya. Yang dibandingkan
+  adalah fingerprint source tree, bukan timestamp, karena `git checkout` menulis ulang semua mtime dan
+  akan membuat framework baru terlihat kedaluwarsa tepat setelah pindah branch.
 - Diukur dengan split GTA buatan di mesin ini: exit 0, `PASS`, package `com.ferzdevzgta.game`,
   `libGame.so` tersimpan di offset kelipatan 4096.
 

@@ -38,6 +38,59 @@ esac
 
 die() { echo "FAIL: $*" >&2; exit 1; }
 
+# One hash for every input that ends up inside the APK: Java, resources, assets, native sources.
+# Used to answer "was this framework built from the tree in front of me" without trusting clocks.
+src-fingerprint() {
+  ( cd "$1" && find . -type f \( -name '*.java' -o -name '*.xml' -o -name '*.html' \
+      -o -name '*.cpp' -o -name '*.h' -o -name '*.c' -o -name '*.gradle' -o -name '*.kts' \) \
+      -not -path './build/*' -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1 )
+}
+
+
+# --- shared tail: page-align and sign --------------------------------------
+# AGP writes extractNativeLibs=false, which makes Android mmap lib/arm64-v8a/*.so straight out of
+# the APK. That only works when every stored library starts on a 4096 boundary, and gradle's own
+# packaging does not guarantee it: a fresh assembleDebug can leave libGame.so at offset % 4096 != 0,
+# which installs and then fails at load time. So every APK this script hands back is zipaligned and
+# re-signed with the local patcher key, exactly like bin/patch-apk.sh does.
+patcher_key() {
+  BT="$(ls -d "$ANDROID_HOME"/build-tools/* 2>/dev/null | sort -V | tail -1)"
+  [[ -x "$BT/zipalign" && -x "$BT/apksigner" ]] || die "no zipalign/apksigner in $BT"
+  KSDIR="${PATCHER_KEYSTORE_DIR:-$HOME/.samp-client}"
+  KS="$KSDIR/patcher.keystore"
+  KS_PASS="${PATCHER_STOREPASS:-patchit}"
+  KS_ALIAS="${PATCHER_KEYALIAS:-patcher}"
+  if [[ ! -f "$KS" ]]; then
+    mkdir -p "$KSDIR"; chmod 700 "$KSDIR"
+    "$JAVA_HOME/bin/keytool" -genkeypair -keystore "$KS" -alias "$KS_ALIAS" \
+      -storepass "$KS_PASS" -keypass "$KS_PASS" -keyalg RSA -keysize 2048 \
+      -validity 10000 -dname "CN=SA-MP Client Patcher, O=local, C=ID" >/dev/null 2>&1 \
+      || die "keytool failed to create $KS"
+    chmod 600 "$KS"
+  fi
+}
+
+align_sign() {
+  local apk="$1"
+  "$BT/zipalign" -p -f 4 "$apk" "$apk.aligned" >/dev/null || die "zipalign failed on $apk"
+  "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$KS_ALIAS" \
+    --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
+    --out "$apk.signed" "$apk.aligned" || die "apksigner sign failed on $apk"
+  mv "$apk.signed" "$apk"; rm -f "$apk.aligned" "$apk.signed.idsig"
+  "$BT/apksigner" verify "$apk" >/dev/null 2>&1 || die "signature does not verify on $apk"
+  # Verify the libraries this APK actually carries. The framework has no libGame.so on purpose, so
+  # asking for it there would report a failure the build just produced.
+  local entries=()
+  unzip -l "$apk" | grep -q 'lib/arm64-v8a/libGame.so' && entries+=("lib/arm64-v8a/libGame.so")
+  entries+=("lib/arm64-v8a/libsamp.so")
+  local entry
+  for entry in "${entries[@]}"; do
+    python3 "$ROOT/bin/apk-verify.py" --apk "$apk" --entry "$entry" \
+      --expect-package com.ferzdevzgta.game >/dev/null \
+      || die "$entry is not stored page-aligned in $apk"
+  done
+}
+
 # --- preflight -------------------------------------------------------------
 [[ -x "$JAVA_HOME/bin/java" ]] || die "no JDK at JAVA_HOME=$JAVA_HOME (apt install openjdk-17-jdk-headless)"
 [[ -d "$ANDROID_HOME/ndk/26.2.11394342" ]] || die "NDK 26.2.11394342 missing in $ANDROID_HOME (sdkmanager --install 'ndk;26.2.11394342')"
@@ -94,6 +147,13 @@ for lib in libsamp.so libGame.so; do
 done
 
 SO="$(find app/build/intermediates/cxx -name libsamp.so -path '*arm64-v8a*' | head -1)"
+
+# Gradle's output is the input here, never the thing that gets served.
+if [[ $FRAMEWORK -eq 0 ]]; then
+  patcher_key
+  align_sign "$APK"
+fi
+
 echo
 echo "PASS"
 echo "  apk      : $APK ($(du -h "$APK" | cut -f1))"
@@ -105,37 +165,23 @@ echo "  abi      : arm64-v8a"
 # app with that one file removed and signed with the local patcher key, so
 # bin/patch-apk.sh can put it back from a game APK the user owns.
 if [[ $FRAMEWORK -eq 1 ]]; then
-  BT="$(ls -d "$ANDROID_HOME"/build-tools/* 2>/dev/null | sort -V | tail -1)"
-  [[ -x "$BT/zipalign" && -x "$BT/apksigner" ]] || die "no zipalign/apksigner in $BT"
-  KSDIR="${PATCHER_KEYSTORE_DIR:-$HOME/.samp-client}"
-  KS="$KSDIR/patcher.keystore"
-  KS_PASS="${PATCHER_STOREPASS:-patchit}"
-  KS_ALIAS="${PATCHER_KEYALIAS:-patcher}"
-  if [[ ! -f "$KS" ]]; then
-    mkdir -p "$KSDIR"; chmod 700 "$KSDIR"
-    "$JAVA_HOME/bin/keytool" -genkeypair -keystore "$KS" -alias "$KS_ALIAS" \
-      -storepass "$KS_PASS" -keypass "$KS_PASS" -keyalg RSA -keysize 2048 \
-      -validity 10000 -dname "CN=SA-MP Client Patcher, O=local, C=ID" >/dev/null 2>&1 \
-      || die "keytool failed to create $KS"
-    chmod 600 "$KS"
-  fi
+  patcher_key
   mkdir -p "$ROOT/dist"
   FW="$ROOT/dist/samp-client-framework.apk"
   cp "$APK" "$FW"
   zip -q -d "$FW" "lib/arm64-v8a/libGame.so" || die "cannot remove libGame.so from the copy"
-  "$BT/zipalign" -p -f 4 "$FW" "$FW.aligned" >/dev/null || die "zipalign failed"
-  "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$KS_ALIAS" \
-    --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
-    --out "$FW.signed" "$FW.aligned" || die "apksigner sign failed"
-  mv "$FW.signed" "$FW"; rm -f "$FW.aligned" "$FW.signed.idsig"
-  "$BT/apksigner" verify "$FW" >/dev/null 2>&1 || die "framework signature does not verify"
+  align_sign "$FW"
   FW_INDEX="$(unzip -l "$FW")"
   grep -q 'lib/arm64-v8a/libsamp.so' <<<"$FW_INDEX" || die "framework is missing libsamp.so"
   if grep -q 'lib/arm64-v8a/libGame.so' <<<"$FW_INDEX"; then
     die "framework still contains libGame.so, it is not distributable"
   fi
   ( cd "$ROOT/dist" && sha256sum "$(basename "$FW")" > "$(basename "$FW").sha256" )
+  # Record which source tree produced this APK. A timestamp cannot do this job: `git checkout`
+  # rewrites every mtime, and a clock comparison would then claim a fresh framework is stale.
+  src-fingerprint "$ROOT/client/app/src/main" > "$FW.src"
   echo "  framework: $FW ($(du -h "$FW" | cut -f1)), no libGame.so, signed"
+  echo "  source   : $(cut -c1-16 "$FW.src") records the tree this APK came from"
   echo "  complete : bin/patch-apk.sh --gta-apk <your GTA SA apk> --out client.apk"
 fi
 exit 0
