@@ -32,7 +32,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:targetApi="31"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <uses-permission android:name="com.rockstargames.gtasa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" android:protectionLevel="signature" />
+    <uses-permission android:name="com.ferzdevzgta.game.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" android:protectionLevel="signature" />
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
 
@@ -64,7 +64,7 @@
         </provider>
 
         <activity
-            android:name="com.gta.launcher.activity.MainActivity"
+            android:name="com.ferzdevzgta.launcher.activity.MainActivity"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
             android:exported="true">
@@ -93,7 +93,7 @@
             android:resizeableActivity="false" />
 
         <activity
-            android:name="com.gta.game.SAMP"
+            android:name="com.ferzdevzgta.game.SAMP"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"

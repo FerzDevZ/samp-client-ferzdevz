@@ -5,5 +5,5 @@ pluginManagement {
         mavenCentral()
     }
 }
-rootProject.name = "GTA-2.11"
+rootProject.name = "samp-client-ferzdevz"
 include(":app")

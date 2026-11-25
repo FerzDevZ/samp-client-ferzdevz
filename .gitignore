@@ -38,7 +38,10 @@ keystore.properties
 *.keystore
 client/app/google-services.json
 
+# --- local build output -----------------------------------------------------
+# dist/ holds the last APK built here; it embeds libGame.so, so it stays local.
+dist/
+
 # --- scratch ----------------------------------------------------------------
-.patches/jniLibs-backup/
 *.orig
 *.rej

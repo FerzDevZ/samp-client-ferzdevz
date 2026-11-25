@@ -1,4 +1,4 @@
-package com.gta.launcher.activity;
+package com.ferzdevzgta.launcher.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.ferzdevzgta.game.R;
-import com.gta.game.SAMP;
+import com.ferzdevzgta.game.SAMP;
 
 public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());

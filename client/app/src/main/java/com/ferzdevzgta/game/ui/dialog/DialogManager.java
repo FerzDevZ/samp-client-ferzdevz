@@ -1,4 +1,4 @@
-package com.gta.game.ui.dialog;
+package com.ferzdevzgta.game.ui.dialog;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,8 +20,8 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.joom.paranoid.Obfuscate;
 import com.ferzdevzgta.game.R;
-import com.gta.launcher.util.CustomRecyclerView;
-import com.gta.launcher.util.Util;
+import com.ferzdevzgta.launcher.util.CustomRecyclerView;
+import com.ferzdevzgta.launcher.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

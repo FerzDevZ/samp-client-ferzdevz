@@ -12,7 +12,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "0.1.0"
 
         multiDexEnabled = true
 
@@ -42,7 +42,7 @@ android {
 
     applicationVariants.all {
         outputs.all {
-            val apkName = "GTA-2.11-${buildType.name}.apk"
+            val apkName = "samp-client-${buildType.name}.apk"
             (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = apkName
         }
     }

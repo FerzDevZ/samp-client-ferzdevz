@@ -1,4 +1,4 @@
-package com.gta.game.ui;
+package com.ferzdevzgta.game.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -11,7 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.joom.paranoid.Obfuscate;
 import com.ferzdevzgta.game.R;
-import com.gta.launcher.util.Util;
+import com.ferzdevzgta.launcher.util.Util;
 @Obfuscate
 public class AttachEdit {
     private final int POSITION_Y = 0;

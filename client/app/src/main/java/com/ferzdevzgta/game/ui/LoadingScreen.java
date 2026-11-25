@@ -1,4 +1,4 @@
-package com.gta.game.ui;
+package com.ferzdevzgta.game.ui;
 
 import android.app.Activity;
 import android.os.Handler;

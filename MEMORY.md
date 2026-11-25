@@ -33,3 +33,13 @@ Format: `- **[YY-MM-DD · Component]**: <symptom> → **Root Cause**: <exact cau
 - **[26-11-25 · data]**: players kept asking where to download the cache → **Root Cause**: the cache is Rockstar's asset set; `full` vs `lite` is a size difference, not an ownership difference → **Invariant Rule**: publish the *manifest* (`sha256` per file) and the builder (`bin/build-cache.sh`), never the bytes. 100 MB/file + DMCA make hosting impossible anyway.
 
 - **[26-11-25 · verify]**: manifest verification must load the JSON with `python3`, not `grep`, and must compare size **and** sha → **Root Cause**: a truncated copy keeps the same name and a plausible size → **Invariant Rule**: `--verify` fails with the exact relative path of every file that does not match, and a 1-byte tamper must make it exit non-zero.
+
+## Rebrand v2: own namespace, frozen namespaces (26-11-25 · rename)
+
+- **[26-11-25 · JNI]**: renaming a Java class that declares `native` methods without renaming the matching `Java_…` symbol in C++ → **Root Cause**: JNI resolves by symbol name, not by registration; the Java side compiles fine and fails at runtime with `UnsatisfiedLinkError` → **Invariant Rule**: rename the package, the `package`/`import` lines and the `Java_…` symbol in one change, then prove it with `nm -D --defined-only libsamp.so | grep Java_`.
+
+- **[26-11-25 · frozen names]**: `com.rockstargames.oswrapper` and `com.nvidia.devtech` cannot be renamed → **Root Cause**: `libGame.so` is prebuilt and hardcodes 38 `Java_com_rockstargames_oswrapper_GameNative_*` symbols plus `com/nvidia/devtech/NvUtil`, `…/DeviceInfo`, `…/GamePlatformServices` → **Invariant Rule**: a vendored binary owns every name it mentions; `nm -D | grep Java_` and `strings | grep '^com/'` decide the rename boundary, not taste.
+
+- **[26-11-25 · activity name]**: `android:name` must keep pointing at the real `.java` package after an `applicationId` change → **Invariant Rule**: manifest component names follow source packages; only the `R` class follows `namespace`.
+
+- **[26-11-25 · artfiact]**: the 5 exported JNI symbols in the shipped `libsamp.so` are the cheapest identity check there is → **Invariant Rule**: after any rename, assert the shipped `.so` exports the new names AND `aapt2 dump badging` reports the new launchable activity, before calling the rename done.

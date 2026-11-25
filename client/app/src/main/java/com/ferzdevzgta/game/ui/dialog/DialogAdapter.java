@@ -1,4 +1,4 @@
-package com.gta.game.ui.dialog;
+package com.ferzdevzgta.game.ui.dialog;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.joom.paranoid.Obfuscate;
 import com.ferzdevzgta.game.R;
-import com.gta.launcher.util.Util;
+import com.ferzdevzgta.launcher.util.Util;
 
 import java.util.ArrayList;
 @Obfuscate

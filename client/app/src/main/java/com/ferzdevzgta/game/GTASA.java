@@ -1,4 +1,4 @@
-package com.gta.game;
+package com.ferzdevzgta.game;
 
 import android.content.Intent;
 import android.content.res.Configuration;

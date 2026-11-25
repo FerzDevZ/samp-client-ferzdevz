@@ -1,4 +1,4 @@
-package com.gta.launcher.util;
+package com.ferzdevzgta.launcher.util;
 
 import android.content.Context;
 import android.util.AttributeSet;

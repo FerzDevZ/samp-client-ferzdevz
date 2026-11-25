@@ -1,3 +1,20 @@
+# AGENTS.md — project notes for this repo
+
+This repo is an Android SA-MP client, not a Pawn gamemode. The skill library this
+file was written against (`.agents/skills/`) has been removed from the repo.
+
+Start here instead:
+
+- [`README.md`](README.md) — status, build, download, legal boundary
+- [`docs/README.md`](docs/README.md) — six documents, English and Indonesian
+- [`MEMORY.md`](MEMORY.md) — invariant ledger, one entry per fixed failure
+- [`docs/BUILD.md`](docs/BUILD.md) — the build gate, before touching anything
+
+The Pawn / SA-MP-server material below is kept for reference only. Nothing in it
+applies to `client/`, which is C++ and Java.
+
+---
+
 # AGENTS.md — Freebuff-Power v13.0 · Multi-domain engineering manual
 
 This repo carries a large skill library (see `.agents/skills/`) across several domains. The deepest lane is **GTA SA-MP / open.mp 2026** (its own compile gate, TextDraw engine reference, and agent roster). The others — web, ML, security, data, mobile, systems — are **first-class lanes**, opened on demand (JIT), never bulk-loaded, and their rules never leak into Pawn or vice versa.
