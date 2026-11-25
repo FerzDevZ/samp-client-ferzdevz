@@ -71,20 +71,16 @@ these classes, only a reimplementation of their interface.
 counts. Last measured:
 
 ```
-rewritten: 11 files, 2413 lines
-  ok    com/nvidia/devtech/NvUtil.java
-  ok    com/rockstargames/oswrapper/DeviceInfo.java
-  ok    com/rockstargames/oswrapper/GameActivityBase.java
-  ok    com/rockstargames/oswrapper/GameNative.java
-  ok    com/rockstargames/oswrapper/GamePlatformServices.java
-  ok    com/rockstargames/oswrapper/GameView.java
-  ok    com/rockstargames/oswrapper/view/InputHandler.java
-  ok    com/rockstargames/oswrapper/view/MovieHandler.java
-  ok    com/rockstargames/oswrapper/view/PlaylistHandler.java
-  ok    com/rockstargames/oswrapper/view/SensorHandler.java
-  ok    com/rockstargames/oswrapper/view/SplashScreenHandler.java
-derived:   18 files, 2531 lines
+rewritten: 20 files, 3038 lines
+derived:    1 file,  1224 lines
+  todo  com/rockstargames/oswrapper/GameThread.java
 ```
+
+Run `bin/oswrapper-audit.sh` for the per-file list; it prints every `ok` path before the
+`todo` one. Nine files are gone rather than rewritten: the six Play Asset Delivery classes,
+`AssetUtils`, `UtilsKt` and `BuildConfig`. Each was measured as unreferenced in our source
+and in `libGame.so`, and the assets extraction `AssetUtils` performed is now
+`bin/build-cache.sh`'s job.
 
 ### What the fourth slice found
 
@@ -154,7 +150,7 @@ promise of dates.
 | 4 | `GameActivityBase`, `GameView`, `view/*` | done: the activity, the surface and the five handlers, four bugs fixed |
 | 5 | `GameThread` (1221 lines) | next: the frame loop; last because everything above must be stable first |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem`, `DownloaderPackConfig`, `DownloaderPackType`, `DownloaderActivity` | done, deleted: the Play Asset Delivery shell our own downloader replaced, 824 lines and the `asset-delivery` dependency removed |
-| 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | thin adapters, low risk |
+| 7 | `services/*`, `NvAPKFile*`, `GameViewHandler` | done: the six adapters and the two asset classes, `AssetUtils`/`UtilsKt`/`BuildConfig` deleted as unreferenced |
 
 ## Adding a rewrite
 

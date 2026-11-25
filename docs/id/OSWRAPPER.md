@@ -72,20 +72,16 @@ dekompilasi untuk kelas-kelas ini, hanya implementasi ulang antarmukanya.
 mencetak jumlah baris. Pengukuran terakhir:
 
 ```
-rewritten: 11 files, 2413 lines
-  ok    com/nvidia/devtech/NvUtil.java
-  ok    com/rockstargames/oswrapper/DeviceInfo.java
-  ok    com/rockstargames/oswrapper/GameActivityBase.java
-  ok    com/rockstargames/oswrapper/GameNative.java
-  ok    com/rockstargames/oswrapper/GamePlatformServices.java
-  ok    com/rockstargames/oswrapper/GameView.java
-  ok    com/rockstargames/oswrapper/view/InputHandler.java
-  ok    com/rockstargames/oswrapper/view/MovieHandler.java
-  ok    com/rockstargames/oswrapper/view/PlaylistHandler.java
-  ok    com/rockstargames/oswrapper/view/SensorHandler.java
-  ok    com/rockstargames/oswrapper/view/SplashScreenHandler.java
-derived:   18 files, 2531 lines
+rewritten: 20 files, 3038 lines
+derived:    1 file,  1224 lines
+  todo  com/rockstargames/oswrapper/GameThread.java
 ```
+
+Jalankan `bin/oswrapper-audit.sh` untuk daftar per file; semua path `ok` dicetak sebelum
+satu `todo`. Sembilan file dihapus, bukan ditulis ulang: enam kelas Play Asset Delivery,
+`AssetUtils`, `UtilsKt` dan `BuildConfig`. Masing-masing terukur tidak dirujuk di sumber
+kita maupun di `libGame.so`, dan ekstraksi asset yang dulu dilakukan `AssetUtils` sekarang
+menjadi tugas `bin/build-cache.sh`.
 
 ### Yang ditemukan iris keempat
 
@@ -156,7 +152,7 @@ tanggal.
 | 4 | `GameActivityBase`, `GameView`, `view/*` | selesai: activity, surface dan lima handler, empat bug diperbaiki |
 | 5 | `GameThread` (1221 baris) | berikutnya: loop frame; terakhir karena semua di atas harus stabil dulu |
 | 6 | `DownloaderActivityBase`, `DownloaderConfig`, `DownloaderItem`, `DownloaderPackConfig`, `DownloaderPackType`, `DownloaderActivity` | selesai, dihapus: cangkang Play Asset Delivery yang sudah digantikan downloader sendiri, 824 baris dan dependensi `asset-delivery` hilang |
-| 7 | `services/*`, `AssetUtils`, `NvAPKFile*` | adapter tipis, risiko rendah |
+| 7 | `services/*`, `NvAPKFile*`, `GameViewHandler` | selesai: enam adapter dan dua kelas asset, `AssetUtils`/`UtilsKt`/`BuildConfig` dihapus karena tidak dirujuk |
 
 ## Cara menambah satu penulisan ulang
 

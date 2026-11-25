@@ -24,7 +24,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Data game | **tidak ada di repo ini**, aplikasi mengunduhnya dari hostmu sendiri, lihat [docs/id/DATA.md](docs/id/DATA.md) |
 | Setup data di HP | **ada**, pilih varian, verifikasi SHA-256, unduh dengan resume, bagikan log |
 | APK di GitHub Release | **tidak**, APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
-| Tulis ulang wrapper | **berjalan**, 11 dari 29 file, sisanya dilaporkan `bin/oswrapper-audit.sh`, namanya dijaga `bin/wrapper-pins.sh` dan `bin/jni-pins.py` |
+| Tulis ulang wrapper | **berjalan**, 20 dari 21 file, tinggal `GameThread`, sisanya dilaporkan `bin/oswrapper-audit.sh`, namanya dijaga `bin/wrapper-pins.sh` dan `bin/jni-pins.py` |
 | Patch di HP | **ya**, `bin/patch-termux.sh` dengan apksigner, tanpa binary SDK |
 
 ## Mendapatkan APK yang bisa dipasang

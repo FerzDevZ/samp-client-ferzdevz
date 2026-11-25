@@ -1,43 +1,53 @@
+// Clean-room rewrite. Provenance, pinned names and what libGame.so expects: docs/OSWRAPPER.md.
 package com.rockstargames.oswrapper.services;
 
 import android.util.Log;
+
 import com.rockstargames.oswrapper.GameView;
 
-import kotlin.jvm.internal.Intrinsics;
-
+/** Menu music: the engine asks for a playlist by name and then controls it. */
 public final class PlaylistServices {
+
     private static final String TAG = "PlaylistServices";
+
     private final GameView view;
 
     public PlaylistServices(GameView view) {
-        Intrinsics.checkNotNullParameter(view, "view");
+        if (view == null) {
+            throw new IllegalArgumentException("view is null");
+        }
         this.view = view;
     }
+
     public int playlistCount() {
-        return this.view.getPlaylistHandler().getCount();
+        return view.getPlaylistHandler().getCount();
     }
+
     public boolean playlistIsPlaying() {
-        return this.view.getPlaylistHandler().isPlaying();
+        return view.getPlaylistHandler().isPlaying();
     }
+
     public void playlistOpen(String name) {
-        Intrinsics.checkNotNullParameter(name, "name");
-        Log.i(TAG, "[!!] playlistOpen: " + name);
-        this.view.getPlaylistHandler().open(name);
+        if (name == null) {
+            throw new IllegalArgumentException("name is null");
+        }
+        Log.i(TAG, "playlistOpen: " + name);
+        view.getPlaylistHandler().open(name);
     }
+
     public void playlistPause() {
-        Log.i(TAG, "[!!] playlistPause");
-        this.view.getPlaylistHandler().pause();
+        view.getPlaylistHandler().pause();
     }
+
     public void playlistPlay() {
-        Log.i(TAG, "[!!] playlistPlay");
-        this.view.getPlaylistHandler().play();
+        view.getPlaylistHandler().play();
     }
+
     public void playlistSetVolume(float volume) {
-        Log.i(TAG, "[!!] playlistSetVolume: " + volume);
-        this.view.getPlaylistHandler().setVolume(volume);
+        view.getPlaylistHandler().setVolume(volume);
     }
+
     public void playlistStop() {
-        Log.i(TAG, "[!!] playlistStop");
-        this.view.getPlaylistHandler().stop();
+        view.getPlaylistHandler().stop();
     }
 }
