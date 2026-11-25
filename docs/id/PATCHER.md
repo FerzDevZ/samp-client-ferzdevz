@@ -22,15 +22,27 @@ bin/android-build.sh framework
 
 # untuk perangkat mana pun
 bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
+
+# instalasi split (base.apk + split_config.*.apk) — bentuk normal dari Play Store
+bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
 ```
 
-`--framework <path>` menimpa lokasi framework default. `--out` wajib.
+`--framework <path>` menimpa lokasi framework default. `--out` wajib. Pilih salah
+satu: `--gta-apk` atau `--gta-split-dir`, jangan keduanya.
+
+Dengan `--gta-split-dir` tool menyisir semua `.apk` di direktori itu, mengambil nama
+package dari file yang mendeklarasikan `com.rockstargames.gtasa` (yaitu `base.apk`)
+dan mengambil library dari file yang benar-benar memuat
+`lib/arm64-v8a/libGame.so` (biasanya `split_config.arm64_v8a.apk`). Kalau tidak ada
+file yang memuat library, ia gagal — artinya split ABI yang salah yang disalin.
 
 ## Urutan kerjanya
 
-1. Periksa APK game: harus punya `lib/arm64-v8a/libGame.so` dan mendeklarasikan
-   `package com.rockstargames.gtasa`. Gagal di sini jauh lebih murah daripada
-   menghasilkan APK mati berukuran 36 MB.
+1. Tentukan sumber instalasi game: satu APK, atau direktori split di mana package
+dan library bisa berada di file berbeda. Pastikan APK library memuat
+`lib/arm64-v8a/libGame.so` dan APK package mendeklarasikan
+`package com.rockstargames.gtasa`. Gagal di sini jauh lebih murah daripada
+menghasilkan APK mati berukuran 36 MB.
 2. Periksa framework: harus punya `libsamp.so` dan **tidak** punya `libGame.so`.
 3. Keluarkan `libGame.so` ke direktori sementara, pastikan isinya
    `ELF 64-bit LSB shared object, ARM aarch64`.

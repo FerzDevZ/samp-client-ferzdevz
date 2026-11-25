@@ -79,6 +79,33 @@ That is the point: a manifest can be shared, the bytes behind it cannot. Send
 someone `manifest-lite.json` and their cache can be proven identical without
 transferring a single Rockstar file.
 
+## Downloading it in the app
+
+The upstream `DownloaderActivity` uses Play Asset Delivery, which does nothing
+for a sideloaded APK. Instead, a sideloaded build opens `DataSetupActivity` when
+`/storage/emulated/0/GTA/data` is missing:
+
+| Step | What happens |
+|---|---|
+| Pick a variant | `full` or `lite`, chosen on the screen, not at build time |
+| Read the manifest | `GTA/manifest-<variant>.json`, produced by `bin/build-cache.sh` |
+| Verify the tree | size and SHA-256 for every entry, nothing trusted by name alone |
+| Download the gaps | only files that are missing or wrong; `Range` resume from `.part` |
+| Verify again | the tree must match the manifest before the screen says done |
+
+Point it at a server that hosts the tree **you** built:
+
+```ini
+; /storage/emulated/0/GTA/SAMP/settings.ini
+[download]
+url = https://your-host/gtasa/
+```
+
+The client then asks for `https://your-host/gtasa/<relative path>`. It retries a
+transfer three times with exponential backoff and a little jitter, deletes a file
+whose hash does not match instead of keeping it, and refuses manifest paths that
+escape the target directory (`..`, leading `/`).
+
 ## Why not hosted here
 
 | Blocker | Detail |
@@ -91,6 +118,6 @@ transferring a single Rockstar file.
 `lite` dodges none of these.
 
 The legal way to give players a one-tap install is to host a cache **you built
-from your own copy** on your own server and point the client's downloader
-(`com.rockstargames.gtasa.DownloaderActivity`) at it. That is your call, your
-server, your risk — not something this repo does.
+from your own copy** on your own server and point the client's downloader at it
+(see *Downloading it in the app* above). That is your call, your server, your
+risk — not something this repo does.

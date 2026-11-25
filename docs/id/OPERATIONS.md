@@ -13,6 +13,34 @@ adb logcat -s SAMP:* AndroidRuntime:E
 
 Log yang berguna juga ditulis klien ke `/storage/emulated/0/GTA/logcat.txt`.
 
+## Layar
+
+| Layar | Dibuka saat | Fungsinya |
+|---|---|---|
+| `MainActivity` | aplikasi mulai | izin penyimpanan, lalu game atau setup data |
+| `DataSetupActivity` | `GTA/data` belum ada | pilih varian, periksa, unduh, bagikan log |
+| `UiSettingsActivity` | dari setup data | kotak chat, font, batas FPS, sakelar GUI |
+
+`MainActivity` merotasi `GTA/logcat.txt` pada 2 MiB dan menyimpan dua cadangan
+(`.1`, `.2`) sebelum logger native menulis apa pun, jadi HP yang dipakai berbulan-
+bulan tidak memenuhi penyimpanan. Tombol *Bagikan log* di kedua layar mengirim file
+terkini lewat `FileProvider` yang sudah ada, ditambah versi aplikasi dan perangkat.
+
+## Membuktikan tooling masih jalan
+
+```bash
+bin/self-test.sh            # semuanya, ~5 detik, tanpa HP, tanpa data game
+bin/self-test.sh jvm        # 71 assertion JVM saja
+bin/self-test.sh cache      # round trip build-cache dan deteksi manipulasi
+bin/self-test.sh patcher    # penolakan patcher
+```
+
+Tes JVM memakai `javac`/`java` biasa (tanpa JUnit, tanpa Gradle) karena kelas yang
+diuji memang sengaja tidak mengimpor Android. Cakupannya: parser dan verifier
+manifest, downloader terhadap server HTTP lokal sungguhan (jalan dingin, jalan
+hangat, resume `Range`, retry payload rusak, 404), rotasi log, dan editor INI yang
+tidak boleh membuang key yang dibutuhkan loader native.
+
 ## Gejala → penyebab
 
 | Gejala | Penyebab | Cara cek |

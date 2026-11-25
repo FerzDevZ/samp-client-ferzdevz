@@ -14,6 +14,35 @@ adb logcat -s SAMP:* AndroidRuntime:E
 With `separate-process` logging off, the useful log lines are the ones the client
 writes to `/storage/emulated/0/GTA/logcat.txt`.
 
+## Screens
+
+| Screen | Opened when | What it does |
+|---|---|---|
+| `MainActivity` | app start | storage permission, then game or data setup |
+| `DataSetupActivity` | `GTA/data` is missing | variant pick, verify, download, share log |
+| `UiSettingsActivity` | from data setup | chat box, font, frame limit, GUI toggles |
+
+`MainActivity` rotates `GTA/logcat.txt` at 2 MiB and keeps two backups
+(`.1`, `.2`) before the native logger appends anything, so a phone that plays for
+months does not fill its storage. *Share log* in either screen sends the current
+file through the existing `FileProvider` and adds device and app version to the
+message.
+
+## Proving the tooling still works
+
+```bash
+bin/self-test.sh            # everything, ~5 s, no device, no game data
+bin/self-test.sh jvm        # 71 JVM assertions only
+bin/self-test.sh cache      # build-cache round trip and tamper detection
+bin/self-test.sh patcher    # patcher refusals
+```
+
+The JVM tests are plain `javac`/`java` (no JUnit, no Gradle) because the classes
+under test deliberately avoid Android imports. They cover the manifest parser and
+verifier, the downloader against a real local HTTP server (cold run, warm run,
+range resume, corrupt payload retry, 404), log rotation and the INI editor that
+must not drop keys the native loader needs.
+
 ## Symptom → cause
 
 | Symptom | Cause | Check |

@@ -79,6 +79,33 @@ Itu intinya: manifest boleh dibagikan, byte-nya tidak. Kirim `manifest-lite.json
 ke orang lain dan cache mereka bisa dibuktikan identik tanpa memindahkan satu file
 Rockstar pun.
 
+## Mengunduhnya dari dalam aplikasi
+
+`DownloaderActivity` bawaan memakai Play Asset Delivery, yang tidak berbuat apa pun
+pada APK hasil sideload. Sebagai gantinya, build sideload membuka
+`DataSetupActivity` saat `/storage/emulated/0/GTA/data` belum ada:
+
+| Langkah | Yang terjadi |
+|---|---|
+| Pilih varian | `full` atau `lite`, dipilih di layar, bukan saat build |
+| Baca manifest | `GTA/manifest-<varian>.json` hasil `bin/build-cache.sh` |
+| Periksa isi | ukuran dan SHA-256 tiap entri, tidak ada yang dipercaya dari namanya |
+| Unduh sisanya | hanya file yang hilang atau salah; resume `Range` dari `.part` |
+| Periksa lagi | isi harus cocok dengan manifest sebelum layar menyatakan selesai |
+
+Arahkan ke server yang menghosting tree buatanmu sendiri:
+
+```ini
+; /storage/emulated/0/GTA/SAMP/settings.ini
+[download]
+url = https://host-kamu/gtasa/
+```
+
+Klien lalu meminta `https://host-kamu/gtasa/<path relatif>`. Transfer diulang tiga
+kali dengan backoff eksponensial dan sedikit jitter, file yang hash-nya tidak cocok
+dihapus (bukan disimpan), dan path manifest yang keluar dari direktori tujuan
+(`..`, garis miring di depan) ditolak.
+
 ## Kenapa tidak di-host di sini
 
 | Penghalang | Rincian |
@@ -91,6 +118,6 @@ Rockstar pun.
 `lite` tidak menghindari satu pun dari itu.
 
 Cara legal memberi pemain instalasi sekali klik: host cache yang **kamu bangun dari
-salinanmu sendiri** di servermu sendiri, lalu arahkan downloader klien
-(`com.rockstargames.gtasa.DownloaderActivity`) ke sana. Itu keputusanmu, servermu,
+salinanmu sendiri** di servermu sendiri, lalu arahkan downloader klien ke sana
+(lihat *Mengunduhnya dari dalam aplikasi* di atas). Itu keputusanmu, servermu,
 risikomu — bukan sesuatu yang dilakukan repo ini.

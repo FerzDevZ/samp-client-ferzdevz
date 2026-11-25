@@ -26,6 +26,10 @@ import androidx.core.content.ContextCompat;
 
 import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.SAMP;
+import com.ferzdevzgta.game.log.LogRotation;
+import com.ferzdevzgta.game.ui.DataSetupActivity;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -78,6 +82,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Log.d("MainActivity", "onCreate started");
+
+        // The native Log() appends forever; keep months of play from filling the disk.
+        // A rotation failure must never stop the launch.
+        try {
+            LogRotation.rotate(new File("/storage/emulated/0/GTA/logcat.txt"));
+        } catch (Exception e) {
+            Log.w("MainActivity", "log rotation skipped: " + e.getMessage());
+        }
 
         try {
             setFullScreenMode();
@@ -155,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void startGameIfReady() {
         if (storagePermissionGranted) {
+            if (!gameDataPresent()) {
+                startActivity(new Intent(MainActivity.this, DataSetupActivity.class));
+                return;
+            }
             startGame();
         } else {
             Toast.makeText(this, "Нет доступа к хранилищу. Игра не может быть запущена.", Toast.LENGTH_LONG).show();
@@ -225,6 +241,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** True when the game data tree exists: a fresh sideload has the APK but no assets. */
+    private boolean gameDataPresent() {
+        return new File("/storage/emulated/0/GTA/data").isDirectory();
+    }
+
     private void startGame() {
         try {
             Log.d("MainActivity", "Starting game");
@@ -251,6 +272,10 @@ public class MainActivity extends AppCompatActivity {
                                 .start();
 
                         if (storagePermissionGranted) {
+                            if (!gameDataPresent()) {
+                                startActivity(new Intent(MainActivity.this, DataSetupActivity.class));
+                                return;
+                            }
                             startGame();
                         } else {
                             checkAndRequestStoragePermission();

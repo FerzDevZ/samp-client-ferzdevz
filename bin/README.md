@@ -9,6 +9,7 @@ true turns out not to be.
 | `patch-apk.sh` | inject a game-owned `libGame.so` into the framework APK, realign, re-sign | it is the input |
 | `fetch-blobs.sh` | copy the two binary sets that cannot be tracked in git | — |
 | `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | — |
+| `self-test.sh` | prove the JVM tests, the cache round trip and the patcher refusals still pass | — |
 
 ## android-build.sh
 
@@ -38,6 +39,7 @@ build, all 0 warnings.
 
 ```bash
 bin/patch-apk.sh --gta-apk GTA.apk --out dist/samp-client-0.1.0.apk
+bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
 bin/patch-apk.sh --gta-apk GTA.apk --framework dist/samp-client-framework.apk --out client.apk
 ```
 
@@ -91,6 +93,7 @@ tidak benar.
 |---|---|---|
 | `android-build.sh` | build `libsamp.so` dan/atau APK, lalu periksa artifact-nya | ya, kecuali mode `native` |
 | `patch-apk.sh` | menyuntik `libGame.so` milik pengguna ke APK framework, realign, tanda tangan ulang | itu inputnya |
+| `self-test.sh` | membuktikan tes JVM, round trip cache, dan penolakan patcher masih lolos | — |
 | `fetch-blobs.sh` | menyalin dua set binary yang tidak boleh masuk git | — |
 | `build-cache.sh` | membangun dan memverifikasi tree aset `/storage/emulated/0/GTA/` | — |
 

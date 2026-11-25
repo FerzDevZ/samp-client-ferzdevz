@@ -9,9 +9,13 @@
 # realigned and re-signed. No file from the game is copied anywhere else, and
 # nothing leaves this machine.
 #
+# A modern GTA SA install is split: base.apk plus per-ABI splits, with the game
+# library inside split_config.arm64_v8a.apk. Both layouts are accepted.
+#
 # Usage
 #   bin/patch-apk.sh --gta-apk GTA.apk --out client.apk
-#   bin/patch-apk.sh --gta-apk GTA.apk --framework dist/samp-client-framework.apk --out client.apk
+#   bin/patch-apk.sh --gta-split-dir /path/to/split --out client.apk
+#   bin/patch-apk.sh --gta-split-dir SPLIT --framework dist/samp-client-framework.apk --out client.apk
 #
 # Exit codes: 0 patched + verified, 1 bad input or failed verification.
 set -euo pipefail
@@ -21,6 +25,7 @@ export JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-17-openjdk-amd64}"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
 
 GTA=""
+SPLIT_DIR=""
 FRAMEWORK="$ROOT/dist/samp-client-framework.apk"
 OUT=""
 KSDIR="${PATCHER_KEYSTORE_DIR:-$HOME/.samp-client}"
@@ -34,6 +39,7 @@ log() { echo "  $*"; }
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --gta-apk)   GTA="${2:-}"; shift 2 ;;
+    --gta-split-dir) SPLIT_DIR="${2:-}"; shift 2 ;;
     --framework) FRAMEWORK="${2:-}"; shift 2 ;;
     --out)       OUT="${2:-}"; shift 2 ;;
     -h|--help)   sed -n '2,20p' "${BASH_SOURCE[0]}"; exit 0 ;;
@@ -41,9 +47,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "$GTA" ]] || die "--gta-apk is required (a GTA SA APK you own)"
+[[ -n "$GTA" || -n "$SPLIT_DIR" ]] || die "one of --gta-apk or --gta-split-dir is required (a GTA SA install you own)"
 [[ -n "$OUT" ]] || die "--out is required"
-[[ -f "$GTA" ]] || die "no such file: $GTA"
+if [[ -n "$GTA" && -n "$SPLIT_DIR" ]]; then die "pass --gta-apk or --gta-split-dir, not both"; fi
+if [[ -n "$GTA" ]]; then
+  [[ -f "$GTA" ]] || die "no such file: $GTA"
+else
+  [[ -d "$SPLIT_DIR" ]] || die "not a directory: $SPLIT_DIR"
+fi
 [[ -f "$FRAMEWORK" ]] || die "no framework APK at $FRAMEWORK (run: bin/android-build.sh framework)"
 
 # --- tools ------------------------------------------------------------------
@@ -60,13 +71,38 @@ command -v unzip >/dev/null || die "missing unzip"
 command -v zip >/dev/null || die "missing zip"
 
 # --- inputs: what is actually in there? -------------------------------------
-echo "== inspecting game APK =="
-GTA_LIST="$(unzip -l "$GTA")"
-grep -q "lib/arm64-v8a/libGame.so" <<<"$GTA_LIST" \
-  || die "$GTA has no lib/arm64-v8a/libGame.so — wrong APK (arm64-v8a build required)"
-GTA_PKG="$("$AAPT2" dump badging "$GTA" 2>/dev/null | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+echo "== inspecting the game install =="
+# Which APK actually carries the library, and which one declares the package?
+PKG_APK=""
+GAME_APK=""
+if [[ -n "$GTA" ]]; then
+  PKG_APK="$GTA"
+  GAME_APK="$GTA"
+else
+  shopt -s nullglob
+  candidates=("$SPLIT_DIR"/*.apk)
+  shopt -u nullglob
+  [[ ${#candidates[@]} -gt 0 ]] || die "no .apk files in $SPLIT_DIR"
+  for f in "${candidates[@]}"; do
+    pkg="$("$AAPT2" dump badging "$f" 2>/dev/null | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+    if [[ "$pkg" == "com.rockstargames.gtasa" && -z "$PKG_APK" ]]; then
+      PKG_APK="$f"
+    fi
+    if unzip -l "$f" 2>/dev/null | grep -q "lib/arm64-v8a/libGame.so" && [[ -z "$GAME_APK" ]]; then
+      GAME_APK="$f"
+    fi
+  done
+  [[ -n "$PKG_APK" ]] || die "no APK in $SPLIT_DIR declares com.rockstargames.gtasa"
+  [[ -n "$GAME_APK" ]] || die "none of the ${#candidates[@]} APKs in $SPLIT_DIR carries lib/arm64-v8a/libGame.so (wrong ABI split?)"
+  log "package APK : $(basename "$PKG_APK")"
+  log "library APK : $(basename "$GAME_APK")"
+fi
+
+unzip -l "$GAME_APK" | grep -q "lib/arm64-v8a/libGame.so" \
+  || die "$(basename "$GAME_APK") has no lib/arm64-v8a/libGame.so — wrong APK (arm64-v8a build required)"
+GTA_PKG="$("$AAPT2" dump badging "$PKG_APK" 2>/dev/null | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
 [[ "$GTA_PKG" == "com.rockstargames.gtasa" ]] \
-  || die "$GTA is not GTA San Andreas (package '$GTA_PKG')"
+  || die "$(basename "$PKG_APK") is not GTA San Andreas (package '$GTA_PKG')"
 log "source package: $GTA_PKG"
 
 echo "== inspecting framework APK =="
@@ -84,7 +120,7 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 echo "== extracting libGame.so from the game APK =="
-unzip -o -j -q "$GTA" "lib/arm64-v8a/libGame.so" -d "$TMP/fetch" || die "cannot extract libGame.so"
+unzip -o -j -q "$GAME_APK" "lib/arm64-v8a/libGame.so" -d "$TMP/fetch" || die "cannot extract libGame.so"
 GAME_SO="$TMP/fetch/libGame.so"
 [[ -s "$GAME_SO" ]] || die "extracted libGame.so is empty"
 log "libGame.so: $(du -h "$GAME_SO" | cut -f1)"

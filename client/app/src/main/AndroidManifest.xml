@@ -64,6 +64,20 @@
         </provider>
 
         <activity
+            android:name="com.ferzdevzgta.game.ui.DataSetupActivity"
+            android:exported="false"
+            android:label="@string/data_title"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+            android:name="com.ferzdevzgta.game.ui.UiSettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_title"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
             android:name="com.ferzdevzgta.launcher.activity.MainActivity"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"

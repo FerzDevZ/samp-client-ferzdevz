@@ -20,15 +20,27 @@ never leaves the machine that ran the tool.
 bin/android-build.sh framework
 #   -> dist/samp-client-framework.apk (28 MB, signed, no libGame.so)
 
-# for any device
+# single APK install
 bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
+
+# split install (base.apk + split_config.*.apk) — the normal Play Store layout
+bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
 ```
 
-`--framework <path>` overrides the framework default. `--out` is required.
+`--framework <path>` overrides the framework default. `--out` is required. Pass
+one of `--gta-apk` or `--gta-split-dir`, never both.
+
+With `--gta-split-dir` the tool walks every `.apk` in the directory, takes the
+package name from whichever one declares `com.rockstargames.gtasa` (that is
+`base.apk`) and the library from whichever one actually carries
+`lib/arm64-v8a/libGame.so` (normally `split_config.arm64_v8a.apk`). It fails if no
+file carries the library — that means the wrong ABI split was extracted.
 
 ## What it does, in order
 
-1. Checks the game APK: must contain `lib/arm64-v8a/libGame.so` and must declare
+1. Resolves the game install: either one APK, or a split directory where the
+   package and the library can live in different files. Checks that the library
+   APK contains `lib/arm64-v8a/libGame.so` and that the package APK declares
    `package com.rockstargames.gtasa`. Dying here is cheaper than a 36 MB dead APK.
 2. Checks the framework: must contain `libsamp.so` and must **not** contain
    `libGame.so`.

@@ -21,7 +21,8 @@ Everything below was executed on this machine, not assumed.
 | Clean rebuild, no cache | **yes** — 2m08s, 0 warnings |
 | Telemetry | **removed** — Firebase, AppLovin, Splunk; APK 43 MB → 36 MB |
 | `libsamp.so` builds without Rockstar binary | **yes** — 10s, that is what CI runs |
-| Game data | **not in this repo** — see [docs/DATA.md](docs/DATA.md) |
+| Game data | **not in this repo** — the app downloads it from your own host, see [docs/DATA.md](docs/DATA.md) |
+| On-device data setup | **yes** — variant pick, SHA-256 verify, resumable download, share log |
 | APK in a GitHub Release | **no** — it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
 
 ## Getting an installable APK
@@ -56,6 +57,7 @@ bin/android-build.sh native     # libsamp.so only, 3.5 MB, that is what CI runs
 | `bin/build-cache.sh …` | the asset tree is complete and matches a SHA-256 manifest |
 | `bin/build-cache.sh --verify` | an existing cache is byte-identical to its manifest |
 | `bin/patch-apk.sh` | the completed APK installs: both native libs stored, aligned, signature valid |
+| `bin/self-test.sh` | manifest parsing, the downloader against a local HTTP server, log rotation, the INI editor, the cache round trip and the patcher refusals — 15 checks, no device |
 
 ## Layout
 
