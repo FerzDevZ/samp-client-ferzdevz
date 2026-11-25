@@ -1,0 +1,43 @@
+# --- vendored reference build: NOT part of this repo -------------------------
+# vendor/samp-mobile ships Rockstar's libGame.so and is 187 MB. It is a
+# reference checkout, never a committed dependency. Re-fetch with bin/fetch-ref.sh
+/vendor/
+.sdk/
+
+# --- Android / Gradle build output -----------------------------------------
+build/
+.gradle/
+local.properties
+.cxx/
+*.apk
+*.aab
+*.apk.idsig
+*.hprof
+captures/
+.externalNativeBuild/
+
+# --- Java / Kotlin ----------------------------------------------------------
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.log
+
+# --- IDE --------------------------------------------------------------------
+.idea/
+*.iml
+.vscode/
+
+# --- our own scratch space --------------------------------------------------
+.patches/jniLibs-backup/
+*.orig
+*.rej
+
+# --- secrets / keys ---------------------------------------------------------
+keystore.properties
+*.jks
+*.keystore
+google-services.json
+
+# --- agent toolkit (re-installable, not project source) ---------------------
+.agents/
+.freebuff/

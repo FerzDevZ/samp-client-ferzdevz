@@ -1,0 +1,38 @@
+diff --git a/app/src/main/cpp/samp/game/rgba.cpp b/app/src/main/cpp/samp/game/rgba.cpp
+index 099d852..30cac2c 100644
+--- a/app/src/main/cpp/samp/game/rgba.cpp
++++ b/app/src/main/cpp/samp/game/rgba.cpp
+@@ -5,7 +5,7 @@
+     Do not delete this comment block. Respect others' work!
+ */
+ 
+-#include "RGBA.h"
++#include "rgba.h"
+ #include "common.h"
+ 
+ CRGBA::CRGBA(RwRGBAReal rgba) :
+diff --git a/app/src/main/cpp/samp/gui/gui.h b/app/src/main/cpp/samp/gui/gui.h
+index 89a8cb3..2343401 100644
+--- a/app/src/main/cpp/samp/gui/gui.h
++++ b/app/src/main/cpp/samp/gui/gui.h
+@@ -22,7 +22,7 @@
+ #include "samp_widgets/chat.h"
+ #include "samp_widgets/spawn.h"
+ #include "samp_widgets/buttonpanel.h"
+-#include "samp_widgets/playerTabList.h"
++#include "samp_widgets/playertablist.h"
+ #include "samp_widgets/voicebutton.h"
+ 
+ #include "samp_widgets/dialogs/dialog.h"
+diff --git a/gradle.properties b/gradle.properties
+index dab7c28..e9327df 100644
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -18,4 +18,5 @@ android.useAndroidX=true
+ # Enables namespacing of each library's R class so that its R class includes only the
+ # resources declared in the library itself and none from the library's dependencies,
+ # thereby reducing the size of the R class for that library
+-android.nonTransitiveRClass=true
+\ No newline at end of file
++android.nonTransitiveRClass=true
++org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
