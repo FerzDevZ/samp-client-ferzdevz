@@ -150,4 +150,9 @@
     <string name="loading_tip_1">Diagnostics lives in Display. It reads this phone, not a build script.</string>
     <string name="loading_tip_2">You can change server without editing settings.ini.</string>
     <string name="loading_tip_3">Lite data is enough for most phones. Full data only adds the cutscene audio.</string>
+    <string name="report_discord">Report a bug</string>
+    <string name="report_discord_note">Opens our Discord. The diagnostics report is copied first, so you can paste it straight into the chat.</string>
+    <string name="report_discord_missing">No app can open that link. The invite is discord.gg/fkhs4TXf</string>
+    <string name="settings_section_support">Support</string>
+    <string name="home_bug_open">Report a bug on Discord</string>
 </resources>

@@ -149,4 +149,9 @@
     <string name="loading_tip_1">Diagnostik ada di Tampilan. Ia membaca HP ini, bukan skrip build.</string>
     <string name="loading_tip_2">Server bisa diganti tanpa menyunting settings.ini.</string>
     <string name="loading_tip_3">Data lite cukup untuk sebagian besar HP. Data full hanya menambah audio cutscene.</string>
+    <string name="report_discord">Lapor bug</string>
+    <string name="report_discord_note">Membuka Discord kami. Laporan diagnostik disalin lebih dulu, jadi bisa langsung kamu tempel di chat.</string>
+    <string name="report_discord_missing">Tidak ada aplikasi yang bisa membuka tautan itu. Invite-nya discord.gg/fkhs4TXf</string>
+    <string name="settings_section_support">Dukungan</string>
+    <string name="home_bug_open">Lapor bug di Discord</string>
 </resources>

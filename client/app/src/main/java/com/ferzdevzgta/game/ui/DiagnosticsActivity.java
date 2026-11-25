@@ -128,6 +128,16 @@ public class DiagnosticsActivity extends AppCompatActivity {
         actions.addView(share, Ui.weight(this, 1f, 0f));
         root.addView(actions, Ui.fill());
 
+        // The report is copied before Discord opens: the player lands in the chat with the
+        // evidence already on the clipboard, which is the difference between a usable report and
+        // "it crashes".
+        Ui.gap(this, root, 10);
+        Button bug = Ui.button(this, getString(R.string.report_discord), Ui.SECONDARY,
+                R.drawable.ic_report);
+        bug.setOnClickListener(v -> reportToDiscord());
+        root.addView(bug, Ui.fill());
+        root.addView(Ui.label(this, getString(R.string.report_discord_note)), Ui.fill(8, this));
+
         if (!lastCrash.isEmpty()) {
             Ui.gap(this, root, 18);
             root.addView(Ui.section(this, getString(R.string.diag_crash_title)));
@@ -287,6 +297,17 @@ public class DiagnosticsActivity extends AppCompatActivity {
         } catch (Exception e) {
             return getString(R.string.diag_unreadable);
         }
+    }
+
+    private void reportToDiscord() {
+        copyReport();
+        if (!Ui.openUrl(this, Community.INVITE)) {
+            showNote(getString(R.string.report_discord_missing));
+        }
+    }
+
+    private void showNote(String message) {
+        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show();
     }
 
     private void copyReport() {

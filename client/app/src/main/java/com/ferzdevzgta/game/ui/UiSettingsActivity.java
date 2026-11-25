@@ -163,6 +163,20 @@ public class UiSettingsActivity extends AppCompatActivity {
                 new android.content.Intent(this, DiagnosticsActivity.class)));
         root.addView(diagnostics, Ui.fill());
 
+        Ui.gap(this, root, 18);
+        root.addView(Ui.section(this, getString(R.string.settings_section_support)));
+        Ui.gap(this, root, 8);
+        Button discord = Ui.button(this, getString(R.string.report_discord), Ui.SECONDARY,
+                R.drawable.ic_report);
+        discord.setOnClickListener(v -> {
+            if (!Ui.openUrl(this, Community.INVITE)) {
+                android.widget.Toast.makeText(this, getString(R.string.report_discord_missing),
+                        android.widget.Toast.LENGTH_LONG).show();
+            }
+        });
+        root.addView(discord, Ui.fill());
+        root.addView(Ui.label(this, getString(R.string.report_discord_note)), Ui.fill(8, this));
+
         Ui.gap(this, root, 14);
         root.addView(Ui.label(this, getString(R.string.settings_note_restart)));
 

@@ -10,6 +10,7 @@ import com.ferzdevzgta.game.servers.ServerEndpointTest;
 import com.ferzdevzgta.game.servers.ServerQueryTest;
 import com.ferzdevzgta.game.servers.ServerListTest;
 import com.ferzdevzgta.game.settings.IniFileTest;
+import com.ferzdevzgta.game.ui.CommunityTest;
 import com.ferzdevzgta.game.ui.LanguageTest;
 
 /**
@@ -39,6 +40,7 @@ public final class TestMain {
         GameConfigTest.run();
         System.out.println("-- Language");
         LanguageTest.run();
+        CommunityTest.run();
         System.exit(Check.report());
     }
 }

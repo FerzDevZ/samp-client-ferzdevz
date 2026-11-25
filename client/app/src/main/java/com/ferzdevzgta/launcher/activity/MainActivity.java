@@ -30,6 +30,7 @@ import com.ferzdevzgta.game.SAMP;
 import com.ferzdevzgta.game.log.LogRotation;
 import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
+import com.ferzdevzgta.game.ui.Community;
 import com.ferzdevzgta.game.ui.DataSetupActivity;
 import com.ferzdevzgta.game.ui.ServerBrowserActivity;
 import com.ferzdevzgta.game.ui.Ui;
@@ -174,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         Ui.fadeIn(languageCard, 1);
 
         Ui.gap(this, content, 20);
-        content.addView(Ui.label(this, getString(R.string.home_bug_info)));
+        content.addView(linkNote(getString(R.string.home_bug_info), getString(R.string.home_bug_open)));
 
         ScrollView scroll = Ui.scroll(this, content);
         shell.addView(scroll, new LinearLayout.LayoutParams(
@@ -220,9 +221,27 @@ public class MainActivity extends AppCompatActivity {
 
     /** Turns a status row into the shortcut for the screen that changes it. */
     private void makeShortcut(LinearLayout row, Class<?> screen) {
-        row.setClickable(true);
+        Ui.pressable(row);
         row.setFocusable(true);
         row.setOnClickListener(v -> startActivity(new Intent(this, screen)));
+    }
+
+    /**
+     * A quiet note that is also the link. The sentence promising bug reports are welcome and the
+     * control that opens the room are the same element, so nobody has to hunt for the channel.
+     */
+    private TextView linkNote(String note, String action) {
+        TextView view = Ui.label(this, note + "  " + action);
+        view.setTextColor(Ui.FAINT);
+        view.setPaintFlags(view.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        Ui.pressable(view);
+        view.setOnClickListener(v -> {
+            if (!Ui.openUrl(this, Community.INVITE)) {
+                Toast.makeText(this, getString(R.string.report_discord_missing), Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
+        return view;
     }
 
     @Override

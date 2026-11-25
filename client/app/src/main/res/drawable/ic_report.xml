@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Speech bubble with a mark inside: bug reports go to a chat room, not a form. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M4,5.5A2.5,2.5 0 0 1 6.5,3h11A2.5,2.5 0 0 1 20,5.5v7A2.5,2.5 0 0 1 17.5,15H10l-4.4,3.4A0.8,0.8 0 0 1 4.3,17.8V15.2A2.5,2.5 0 0 1 4,13.5Z"
+        android:strokeColor="#FFF3EEE6"
+        android:strokeWidth="1.6"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M12,6.6v4.2"
+        android:strokeColor="#FFF3EEE6"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#FFF3EEE6"
+        android:pathData="M12,14.1a1,1 0 1,0 0.01,0z" />
+</vector>

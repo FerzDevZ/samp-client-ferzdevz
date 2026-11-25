@@ -36,23 +36,24 @@ import com.ferzdevzgta.game.R;
  */
 public final class Ui {
 
+    // The palette is taken from the app icon: deep navy field, sunset amber, warm off-white.
     // Surfaces
-    public static final int BG = 0xFF0B0F14;
-    public static final int SURFACE = 0xFF141A22;
-    public static final int SURFACE_2 = 0xFF1B232D;
-    public static final int STROKE = 0xFF33404F;
+    public static final int BG = 0xFF0B111B;
+    public static final int SURFACE = 0xFF151F32;
+    public static final int SURFACE_2 = 0xFF1F2C45;
+    public static final int STROKE = 0xFF3A4A66;
 
     // Content
-    public static final int TEXT = 0xFFE9EFF6;
-    public static final int MUTED = 0xFFA6B3C1;
-    public static final int FAINT = 0xFF7E8B9A;
+    public static final int TEXT = 0xFFF3EEE6;
+    public static final int MUTED = 0xFFB7C0CE;
+    public static final int FAINT = 0xFF8C97A8;
 
     // Roles
-    public static final int ACCENT = 0xFF3D8BFD;
-    public static final int ACCENT_INK = 0xFF04121F;
-    public static final int OK = 0xFF3FBF7F;
-    public static final int WARN = 0xFFF0B429;
-    public static final int ERR = 0xFFFF8A8A;
+    public static final int ACCENT = 0xFFEF7D2B;
+    public static final int ACCENT_INK = 0xFF1B1206;
+    public static final int OK = 0xFF43BF8F;
+    public static final int WARN = 0xFFF2C14E;
+    public static final int ERR = 0xFFFF8A7A;
 
     // Button kinds
     public static final int PRIMARY = 0;
@@ -555,6 +556,26 @@ public final class Ui {
         }
         row.addView(val);
         return row;
+    }
+
+    /**
+     * Opens a link outside the app. Returns false when nothing can handle it, so the caller can
+     * tell the player instead of leaving a tap with no visible result.
+     */
+    public static boolean openUrl(Context c, String url) {
+        if (c == null || url == null || url.isEmpty()) {
+            return false;
+        }
+        android.content.Intent intent = new android.content.Intent(
+                android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            c.startActivity(intent);
+            return true;
+        } catch (android.content.ActivityNotFoundException | SecurityException e) {
+            android.util.Log.w("Ui", "link could not be opened: " + e.getMessage());
+            return false;
+        }
     }
 
     public static void setText(TextView view, String value) {

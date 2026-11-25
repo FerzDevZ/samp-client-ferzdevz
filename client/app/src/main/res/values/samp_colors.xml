@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Kept in sync with ui/Ui.java, which is the source of truth for the palette.
-         bin/ui-contrast.py asserts the pairs; these entries exist because window backgrounds,
-         the splash theme and the game loading screen are inflated before Java runs. -->
-    <color name="samp_bg">#FF0B0F14</color>
-    <color name="samp_surface">#FF141A22</color>
-    <color name="samp_surface_2">#FF1B232D</color>
-    <color name="samp_stroke">#FF33404F</color>
-    <color name="samp_text">#FFE9EFF6</color>
-    <color name="samp_muted">#FFA6B3C1</color>
-    <color name="samp_faint">#FF7E8B9A</color>
-    <color name="samp_accent">#FF3D8BFD</color>
-    <color name="samp_ok">#FF3FBF7F</color>
-    <color name="samp_warn">#FFF0B429</color>
-    <color name="samp_err">#FFFF8A8A</color>
+    <!-- Kept in sync with ui/Ui.java, which is the source of truth for the palette: navy field,
+         sunset amber, warm off-white, taken from the app icon. bin/ui-contrast.py asserts both
+         the contrast pairs and that these copies have not drifted. -->
+    <color name="samp_bg">#FF0B111B</color>
+    <color name="samp_surface">#FF151F32</color>
+    <color name="samp_surface_2">#FF1F2C45</color>
+    <color name="samp_stroke">#FF3A4A66</color>
+    <color name="samp_text">#FFF3EEE6</color>
+    <color name="samp_muted">#FFB7C0CE</color>
+    <color name="samp_faint">#FF8C97A8</color>
+    <color name="samp_accent">#FFEF7D2B</color>
+    <color name="samp_ok">#FF43BF8F</color>
+    <color name="samp_warn">#FFF2C14E</color>
+    <color name="samp_err">#FFFF8A7A</color>
 </resources>

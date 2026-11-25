@@ -222,3 +222,35 @@ mencetak satu kalimat di tengah kartu.
 
 `res/values/samp_colors.xml` menyimpan warna yang dibutuhkan XML sebelum Java berjalan. Itu bukan
 palet kedua: `bin/ui-contrast.py` gagal bila ada entri yang berbeda dari konstanta di `Ui.java`.
+
+### Palet dan ikon berasal dari gambar yang sama
+
+Ikon aplikasi digambar tangan: bidang navy, cakram matahari terbenam, pohon palem, garis hitam.
+Token desain di `ui/Ui.java` mengikutinya, jadi aplikasi dan ikonnya terbaca sebagai satu produk,
+bukan poster dengan antarmuka yang tidak berhubungan:
+
+| Token | Nilai | Asalnya |
+|---|---|---|
+| `BG` | `#0B111B` | bidang navy, digelapkan supaya teks bisa mencapai 16:1 |
+| `SURFACE` | `#151F32` | bidang navy itu sendiri |
+| `SURFACE_2` | `#1F2C45` | navy lebih terang di sekitar matahari |
+| `ACCENT` | `#EF7D2B` | oranye matahari terbenam |
+| `WARN` | `#F2C14E` | kuning dari hurufnya |
+| `TEXT` | `#F3EEE6` | putih hangat dari langitnya |
+
+`WARN` tetap berbeda dari `ACCENT` lewat hue dan terang, jadi titik status tidak pernah disangka
+tombol, dan `bin/ui-contrast.py` menjaga semua pasangan di atas AA. `ic_splash_mark.xml` dan ikon
+launcher adaptif memakai cakram matahari dengan palem yang sama, digambar sebagai vektor, jadi
+ikon di home screen, splash, dan loading screen menampilkan satu tanda di semua ukuran.
+
+### Melaporkan bug
+
+`ui/Community` menyimpan invite Discord di satu konstanta, tanpa import Android, jadi
+`CommunityTest` bisa menjaga bentuknya di suite JVM: https, host `discord.gg`, kode alfanumerik,
+tanpa query string. Invite-nya bisa dijangkau dari tiga tempat, karena kanal dukungan yang tidak
+bisa ditemukan hanya jadi hiasan:
+
+- catatan di bawah layar launcher, bergaris bawah dan bisa ditekan
+- Tampilan, di bagian Dukungan
+- Diagnostik, di mana tombolnya menyalin laporan ke clipboard sebelum membuka Discord, jadi
+  pemain datang dengan bukti yang siap ditempel

@@ -223,3 +223,35 @@ button instead of printing a sentence in the middle of the card.
 
 `res/values/samp_colors.xml` holds the colours that XML needs before Java runs. It is not a second
 palette: `bin/ui-contrast.py` fails when any entry disagrees with the constants in `Ui.java`.
+
+### Palette and icon come from the same drawing
+
+The app icon is hand drawn: navy field, sunset disc, palms, black outlines. The design tokens in
+`ui/Ui.java` follow it, so the app and the icon read as one product instead of a poster with an
+unrelated interface attached:
+
+| Token | Value | Where it comes from |
+|---|---|---|
+| `BG` | `#0B111B` | the navy field, darkened so text can reach 16:1 |
+| `SURFACE` | `#151F32` | the navy field itself |
+| `SURFACE_2` | `#1F2C45` | the lighter navy around the sun |
+| `ACCENT` | `#EF7D2B` | the sunset orange |
+| `WARN` | `#F2C14E` | the yellow of the lettering |
+| `TEXT` | `#F3EEE6` | the warm off white of the sky |
+
+`WARN` stays distinct from `ACCENT` by hue and lightness, so a status dot is never mistaken for a
+button, and `bin/ui-contrast.py` keeps the pairs above AA. `ic_splash_mark.xml` and the adaptive
+launcher icon are the same sunset disc with palms, drawn as vectors, so the home screen icon, the
+splash window and the loading screen show one mark at every size.
+
+### Reporting a bug
+
+`ui/Community` holds the Discord invite in one constant, with no Android imports, so
+`CommunityTest` can pin its shape in the JVM suite: https, host `discord.gg`, alphanumeric code,
+no query string. The invite is reachable from three places, because a support channel nobody can
+find is decoration:
+
+- the launcher note at the bottom, which is underlined and tappable
+- Display, in a Support section
+- Diagnostics, where the button copies the report to the clipboard before opening Discord, so the
+  player arrives with the evidence already pasted-ready
