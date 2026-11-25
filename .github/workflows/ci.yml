@@ -1,0 +1,83 @@
+name: ci
+
+# What CI can legally prove: that OUR C++ (libsamp.so) compiles to a real binary
+# with zero warnings, from a clean checkout, with no Rockstar files present.
+#
+# What CI must NOT do: build or publish a full APK. That needs libGame.so
+# (Rockstar's binary, 8.9 MB) which is not in this repo and cannot be shipped
+# from here. Full builds happen on a machine that owns a GTA SA install.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: libsamp.so (arm64-v8a, 0 warnings)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK + NDK 26.2.11394342 + cmake 3.22.1
+        uses: android-actions/setup-android@v3
+        with:
+          packages: >-
+            platform-tools
+            platforms;android-36
+            build-tools;36.0.0
+            ndk;26.2.11394342
+            cmake;3.22.1
+
+      - name: Cache gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('client/**/*.gradle.kts', 'client/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Assert no Rockstar / BASS binaries are tracked
+        run: |
+          set -eu
+          if git ls-files --error-unmatch client/app/src/main/jniLibs/arm64-v8a/libGame.so 2>/dev/null; then
+            echo "libGame.so is tracked — it must never be committed"; exit 1
+          fi
+          if git ls-files 'client/app/src/main/cpp/samp/vendor/bass/libs/*'; then
+            echo "BASS .so files are tracked — licence forbids it"; exit 1
+          fi
+          echo "clean: no proprietary binaries in git"
+
+      - name: Build libsamp.so
+        run: ./bin/android-build.sh native
+
+      - name: Assert the .so is a real ARM64 shared object
+        run: |
+          set -eu
+          SO=$(find client/app/build/intermediates/cxx -name libsamp.so -path '*arm64-v8a*' | head -1)
+          file "$SO"
+          file "$SO" | grep -q 'ELF 64-bit LSB shared object, ARM aarch64' \
+            || { echo "not an arm64 shared object"; exit 1; }
+          # SAMP client identity: the multiplayer netcode must be linked in
+          strings "$SO" | grep -qi 'samp' || { echo "no SAMP symbols in the binary"; exit 1; }
+          echo "SHA256 $(sha256sum "$SO")"
+
+      - name: Upload libsamp.so
+        uses: actions/upload-artifact@v4
+        with:
+          name: libsamp-arm64-v8a-${{ github.sha }}
+          path: client/app/build/intermediates/cxx/**/obj/arm64-v8a/libsamp.so
+          if-no-files-found: error

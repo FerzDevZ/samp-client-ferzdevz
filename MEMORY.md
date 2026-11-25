@@ -23,3 +23,13 @@ Format: `- **[YY-MM-DD · Component]**: <symptom> → **Root Cause**: <exact cau
 - **[26-11-25 · firebase]**: removing `id("com.google.gms.google-services")` without deleting `app/google-services.json` → **Root Cause**: the plugin is what validates `package_name` against applicationId; deleting one but not the other leaves a mismatched config in the APK → **Invariant Rule**: strip the plugin, the classpath, the dependency block and the JSON together; the `release { firebaseCrashlytics {} }` block and the native `firebase::crashlytics::Log()` call go in the same change or the native link fails.
 
 - **[26-11-25 · artifact size]**: APK 43 MB → 36 MB after the strip → **Invariant Rule**: the delta is the measure that the telemetry is actually gone, not the grep. Verify with `aapt2 dump badging` (applicationId) **and** `unzip -l | grep -ci firebase` (0 hits).
+
+## Full source in git + data pipeline (26-11-25 · layout)
+
+- **[26-11-25 · vendoring]**: `vendor/samp-mobile` held a nested `.git` (139 MB) and 7.2 MB `cpp.zip` that duplicated files already on disk → **Root Cause**: cloning a reference *into* the repo drags its history and its own archives → **Invariant Rule**: track the tree as `client/` with `rm -rf client/.git`; a nested repo makes `git add` either skip the source or create a submodule, never what you want.
+
+- **[26-11-25 · CI]**: `assembleDebug` needs `libGame.so` only for *packaging*, not for compiling — CMake never references it (`CUtil::FindLib` resolves at runtime) → **Root Cause**: mixing "compiles" with "packages" made the build gate unusable without a copyrighted binary → **Invariant Rule**: `bin/android-build.sh native` runs `externalNativeBuildDebug` and gates on `libsamp.so` alone; that is the only unit CI may publish.
+
+- **[26-11-25 · data]**: players kept asking where to download the cache → **Root Cause**: the cache is Rockstar's asset set; `full` vs `lite` is a size difference, not an ownership difference → **Invariant Rule**: publish the *manifest* (`sha256` per file) and the builder (`bin/build-cache.sh`), never the bytes. 100 MB/file + DMCA make hosting impossible anyway.
+
+- **[26-11-25 · verify]**: manifest verification must load the JSON with `python3`, not `grep`, and must compare size **and** sha → **Root Cause**: a truncated copy keeps the same name and a plausible size → **Invariant Rule**: `--verify` fails with the exact relative path of every file that does not match, and a 1-byte tamper must make it exit non-zero.

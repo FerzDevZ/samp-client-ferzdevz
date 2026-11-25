@@ -1,14 +1,19 @@
-# --- vendored reference build: NOT part of this repo -------------------------
-# vendor/samp-mobile ships Rockstar's libGame.so and is 187 MB. It is a
-# reference checkout, never a committed dependency. Re-fetch with bin/fetch-ref.sh
-/vendor/
-.sdk/
+# --- proprietary / copyrighted binaries: never in this repo ------------------
+# Rockstar's game library. Not ours to distribute. Fetched by bin/fetch-blobs.sh
+# from a locally-owned GTA SA install or the upstream reference tree.
+client/app/src/main/jniLibs/arm64-v8a/libGame.so
 
-# --- Android / Gradle build output -----------------------------------------
-build/
-.gradle/
-local.properties
-.cxx/
+# BASS audio — un4seen licence forbids redistribution.
+client/app/src/main/cpp/samp/vendor/bass/libs/**/*.so
+
+# Redundant 7.2 MB zip of the cpp/ tree that already exists on disk.
+client/app/src/main/cpp/cpp.zip
+
+# --- Android / Gradle build output ------------------------------------------
+client/**/build/
+client/.gradle/
+client/**/.cxx/
+client/local.properties
 *.apk
 *.aab
 *.apk.idsig
@@ -19,21 +24,21 @@ captures/
 # --- Java / Kotlin ----------------------------------------------------------
 *.class
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
+!client/gradle/wrapper/gradle-wrapper.jar
 *.log
 
 # --- IDE --------------------------------------------------------------------
-.idea/
+client/.idea/
 *.iml
 .vscode/
-
-# --- our own scratch space --------------------------------------------------
-.patches/jniLibs-backup/
-*.orig
-*.rej
 
 # --- secrets / keys ---------------------------------------------------------
 keystore.properties
 *.jks
 *.keystore
-google-services.json
+client/app/google-services.json
+
+# --- scratch ----------------------------------------------------------------
+.patches/jniLibs-backup/
+*.orig
+*.rej
