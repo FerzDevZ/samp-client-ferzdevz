@@ -17,7 +17,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Item | Kondisi |
 |---|---|
 | `libsamp.so` arm64-v8a dari source | **ya**, 3,5 MB, 0 warning |
-| APK debug | **ya**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.1.0` |
+| APK debug | **ya**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.2.0` |
 | Rebuild bersih tanpa cache | **ya**, 2m08s, 0 warning |
 | Telemetri | **dihapus**, Firebase, AppLovin, Splunk; APK 43 MB → 37 MB |
 | `libsamp.so` terbangun tanpa binary Rockstar | **ya**, 10s, inilah yang dijalankan CI |
@@ -31,7 +31,11 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Status server langsung | **ya**, ping dan jumlah pemain per server di daftar, satu query UDP per baris dengan timeout 1200 ms, tidak pernah di main thread |
 | Diagnostik | **ya**, `DiagnosticsActivity` membaca HP: pustaka native, lima titik masuk JNI, pohon data, manifest, target, 20 baris log terakhir, salin dan bagikan |
 | Catatan crash | **ya**, pengecualian Java yang tidak tertangani ditambahkan ke `GTA/logcat.txt` sebagai blok bertanda dengan waktu UTC dan versi aplikasi, diputar pada 2 MiB, lalu tampil di Diagnostik |
-| Layar launcher | **didesain ulang**, menampilkan status data, server dan nickname sebelum menekan Start, `bin/ui-contrast.py` menjaga palette di atas WCAG AA |
+| Layar launcher | **didesain ulang**, menampilkan status data, server dan nickname sebelum menekan Mulai, `bin/ui-contrast.py` menjaga palet di atas WCAG AA |
+| Gamepad | **ya**, tiga callback stik yang sudah diekspor `libGame.so` tapi belum dideklarasikan sekarang disambung, jadi stik tersambung, tersambung lagi setelah pause, dan terlihat di Diagnostik, `bin/jni-pins.py` melaporkan 0 ekspor tanpa pemakai |
+| Backup profil | **ya**, Pengaturan mengekspor satu zip berisi `settings.ini` dan `servers.txt` lalu memulihkannya di HP baru, nama entri tetap, batas 512 KiB per entri |
+| Panduan offline | **ya**, `assets/help/help.html` digambar WebView bawaan sistem, dua bahasa, tanpa menambah ukuran APK |
+| Catatan perubahan | **ya**, [CHANGELOG.md](CHANGELOG.md) dan [CHANGELOG.id.md](CHANGELOG.id.md) |
 
 ## Mendapatkan APK yang bisa dipasang
 
@@ -42,8 +46,8 @@ mesinmu dari APK game yang kamu miliki:
 ```bash
 bin/android-build.sh framework        # 1. separuh yang boleh diterbitkan -> dist/samp-client-framework.apk (28 MB)
 bin/patch-apk.sh --gta-apk GTA.apk \
-                 --out dist/samp-client-0.1.0.apk      # 2. tambah libGame.so, realign, tanda tangan ulang (37 MB)
-adb install -r dist/samp-client-0.1.0.apk              # 3. pasang
+                 --out dist/samp-client-0.2.0.apk      # 2. tambah libGame.so, realign, tanda tangan ulang (37 MB)
+adb install -r dist/samp-client-0.2.0.apk              # 3. pasang
 adb push cache/full/. /storage/emulated/0/GTA/         # 4. aset, kalau tidak aplikasi tertutup saat dibuka
 ```
 

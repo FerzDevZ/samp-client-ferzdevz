@@ -116,7 +116,7 @@ on a declaration with no symbol. It found two:
 | Declaration | Called from | Reality |
 |---|---|---|
 | `GameNative.initializeSAMP()` | only a commented-out line in `GameActivityBase` | no symbol anywhere; the real entry point is `SAMP.initializeSAMP` in libsamp.so |
-| `GameNative.implOnGamepadCountChanged(int)` | `GameThread.onGamepadCountChanged` | no symbol; libGame.so exports `implOnGamepadConnected`, `implOnGamepadDisconnected` and `implOnGamepadResume` instead |
+| `GameNative.implOnGamepadCountChanged(int)` | `GameThread.onGamepadCountChanged` | no symbol; the three real exports `implOnGamepadConnected(int)`, `implOnGamepadDisconnected(int)` and `implOnGamepadResume(int[])` are now declared and wired from `oswrapper/input/GamepadInput`, so `bin/jni-pins.py` reports 0 unclaimed exports |
 
 Both are gone. The gamepad call site keeps its log line and explains why it no longer
 calls anything: connecting a controller already reaches the engine through

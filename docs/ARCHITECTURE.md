@@ -269,3 +269,62 @@ find is decoration:
 - Display, in a Support section
 - Diagnostics, where the button copies the report to the clipboard before opening Discord, so the
   player arrives with the evidence already pasted-ready
+
+## Input: gamepad
+
+Three of the pad callbacks existed in `libGame.so` before anything in Java declared them, so a
+controller connected, Android reported it, and the game never heard about it. They were declared
+only after the signatures were read from the binary:
+
+```
+implOnGamepadConnected(int)      -> GamepadProvider::onConnect(int)
+implOnGamepadDisconnected(int)   -> GamepadProvider::onDisconnect(int)
+implOnGamepadResume(int[])       -> GamepadProvider::onResume(std::vector<int>)
+```
+
+`bin/jni-pins.py` now reports 0 unclaimed exports, which is the proof that the three were not
+guessed. The wiring has three parts:
+
+- `com.rockstargames.oswrapper.input.GamepadInput` registers an `InputManager.InputDeviceListener`,
+  so a pad added while the game is already running is reported immediately, not only on the next
+  startup.
+- The same class hands the full id list back on every resume. The engine rebuilds its pad table from
+  that list, so skipping it left a controller connected but unusable after the first pause.
+- `com.ferzdevzgta.game.input.GamepadMap` holds the numbers and no Android imports: 0.15 deadzone
+  rescaled to full travel, triggers accepted as 0..1 or -1..1, six axes in the order the engine's
+  signature expects, and a `SOURCE_JOYSTICK` test so a keyboard key is not mistaken for a pad.
+  `GamepadMapTest` pins all of it in the JVM suite.
+
+Every call is wrapped against `UnsatisfiedLinkError`. The framework-only APK has the Java classes
+and no engine, and a pad event must not be able to kill it.
+
+## Settings that leave the phone
+
+`settings/ProfileBackup` writes one zip with `settings.ini` and `servers.txt`, which is what makes
+moving to a new phone a short job instead of an evening of retyping. The archive is a plain zip with
+three fixed entry names, and reading it accepts those names only:
+
+- an archive without `settings.ini` is refused rather than half-applied
+- every entry is capped at 512 KiB, so a corrupt or hostile file cannot fill shared storage
+- an entry named `../../settings.ini` is ignored, because the destination path comes from the code
+  and never from the archive
+
+`ProfileBackupTest` covers the round trip, both refusals and the traversal case against a scratch
+directory. Export and Restore go through the system file picker, so the zip lands wherever the player
+keeps backups.
+
+## The guide screen and why it is a WebView
+
+The client has three UI layers and none of them can hold formatted help text: the app screens are
+Java views, the in-game HUD is ImGui, and TextDraw belongs to the server. Android ships a WebView
+with every device, so `ui/WebPanelActivity` renders `assets/help/help.html` and adds nothing to the
+APK.
+
+It is deliberately narrow in authority: JavaScript is on for the asset, file access from file URLs
+is off, universal access is off, DOM storage is off, and any link that is not the asset is handed to
+the browser. The page may call exactly three methods: current language, version, and open diagnostics
+or Discord. `openDiagnostics` is used instead of a second copy-to-clipboard path because the report
+is already built in one place, and duplicating it would let the two versions drift.
+
+None of this replaces server TextDraw. That is RPC data the engine must draw, and translating it to
+HTML would be a different project with unreliable results across servers.

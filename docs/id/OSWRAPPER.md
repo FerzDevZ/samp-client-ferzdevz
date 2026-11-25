@@ -118,7 +118,7 @@ kalau ada deklarasi tanpa simbol. Hasilnya dua:
 | Deklarasi | Dipanggil dari | Kenyataan |
 |---|---|---|
 | `GameNative.initializeSAMP()` | hanya baris komentar di `GameActivityBase` | tidak ada simbolnya di mana pun; entry point asli ada di `SAMP.initializeSAMP` dalam libsamp.so |
-| `GameNative.implOnGamepadCountChanged(int)` | `GameThread.onGamepadCountChanged` | tidak ada simbolnya; `libGame.so` justru mengekspor `implOnGamepadConnected`, `implOnGamepadDisconnected`, `implOnGamepadResume` |
+| `GameNative.implOnGamepadCountChanged(int)` | `GameThread.onGamepadCountChanged` | tidak ada simbolnya; tiga ekspor aslinya `implOnGamepadConnected(int)`, `implOnGamepadDisconnected(int)` dan `implOnGamepadResume(int[])` sekarang dideklarasikan dan disambung dari `oswrapper/input/GamepadInput`, jadi `bin/jni-pins.py` melaporkan 0 ekspor tanpa pemakai |
 
 Keduanya sudah dihapus. Titik panggilan gamepad tetap menyimpan baris log dan menjelaskan
 kenapa tidak memanggil apa pun lagi: mencolok controller sudah sampai ke engine lewat

@@ -21,10 +21,10 @@ bin/android-build.sh framework
 #   -> dist/samp-client-framework.apk (28 MB, sudah ditandatangani, tanpa libGame.so)
 
 # untuk perangkat mana pun
-bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
+bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.2.0.apk
 
 # instalasi split (base.apk + split_config.*.apk), bentuk normal dari Play Store
-bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
+bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.2.0.apk
 ```
 
 `--framework <path>` menimpa lokasi framework default. `--out` wajib. Pilih salah

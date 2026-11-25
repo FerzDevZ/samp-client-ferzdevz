@@ -66,8 +66,8 @@ client/app/build/intermediates/cxx/Debug/<hash>/obj/arm64-v8a/libsamp.so
 git-ignored: the APK embeds `libGame.so`.
 
 ```bash
-sha256sum -c dist/samp-client-0.1.0-debug.apk.sha256
-adb install -r dist/samp-client-0.1.0-debug.apk
+sha256sum -c dist/samp-client-0.2.0-debug.apk.sha256
+adb install -r dist/samp-client-0.2.0-debug.apk
 ```
 
 Installing is not the same as launching. First launch needs the asset tree at

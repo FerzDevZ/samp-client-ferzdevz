@@ -12,14 +12,22 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import com.ferzdevzgta.game.BuildConfig;
 import com.ferzdevzgta.game.R;
+import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.settings.IniFile;
+import com.ferzdevzgta.game.settings.ProfileBackup;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -83,6 +91,16 @@ public class UiSettingsActivity extends AppCompatActivity {
     private final Map<String, EditText> numericFields = new LinkedHashMap<>();
     private final Map<String, CheckBox> flagFields = new LinkedHashMap<>();
     private IniFile ini;
+
+    // Export goes through the system file picker so the archive lands wherever the player keeps
+    // backups, not deep inside the app's cache where nobody would find it.
+    private final ActivityResultLauncher<String> exportLauncher = registerForActivityResult(
+            new ActivityResultContracts.CreateDocument("application/zip"),
+            this::exportTo);
+
+    private final ActivityResultLauncher<String[]> importLauncher = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(),
+            this::importFrom);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +175,22 @@ public class UiSettingsActivity extends AppCompatActivity {
         root.addView(row, Ui.fill());
 
         Ui.gap(this, root, 14);
+        LinearLayout backup = Ui.card(this);
+        backup.addView(Ui.section(this, getString(R.string.profile_section)));
+        Ui.gap(this, backup, 8);
+        LinearLayout backupRow = Ui.row(this);
+        Button export = Ui.button(this, getString(R.string.profile_export), Ui.SECONDARY);
+        Button restore = Ui.button(this, getString(R.string.profile_import), Ui.GHOST);
+        export.setOnClickListener(v -> exportLauncher.launch(
+                ProfileBackup.fileName(BuildConfig.VERSION_NAME, System.currentTimeMillis())));
+        restore.setOnClickListener(v -> importLauncher.launch(new String[]{"application/zip"}));
+        backupRow.addView(export, Ui.weight(this, 1f, 8f));
+        backupRow.addView(restore, Ui.weight(this, 1f, 0f));
+        backup.addView(backupRow, Ui.fill());
+        backup.addView(Ui.label(this, getString(R.string.profile_note)), Ui.fill(8, this));
+        root.addView(backup, Ui.fill());
+
+        Ui.gap(this, root, 14);
         Button diagnostics = Ui.button(this, getString(R.string.diag_open), Ui.GHOST,
                 R.drawable.ic_warn);
         diagnostics.setOnClickListener(v -> startActivity(
@@ -165,6 +199,12 @@ public class UiSettingsActivity extends AppCompatActivity {
 
         Ui.gap(this, root, 18);
         root.addView(Ui.section(this, getString(R.string.settings_section_support)));
+        Ui.gap(this, root, 8);
+        Button guide = Ui.button(this, getString(R.string.guide_open), Ui.GHOST,
+                R.drawable.ic_report);
+        guide.setOnClickListener(v -> startActivity(
+                new android.content.Intent(this, WebPanelActivity.class)));
+        root.addView(guide, Ui.fill());
         Ui.gap(this, root, 8);
         Button discord = Ui.button(this, getString(R.string.report_discord), Ui.SECONDARY,
                 R.drawable.ic_report);
@@ -181,6 +221,70 @@ public class UiSettingsActivity extends AppCompatActivity {
         root.addView(Ui.label(this, getString(R.string.settings_note_restart)));
 
         return Ui.scroll(this, root);
+    }
+
+    private void exportTo(android.net.Uri target) {
+        if (target == null) {
+            return;
+        }
+        File temp = new File(getCacheDir(), "profile.zip");
+        try {
+            ProfileBackup.write(GameConfig.settingsFile(), GameConfig.serversFile(), temp,
+                    getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
+            try (InputStream in = new java.io.FileInputStream(temp);
+                 OutputStream out = getContentResolver().openOutputStream(target)) {
+                if (out == null) {
+                    throw new IOException("picker returned no stream");
+                }
+                byte[] buf = new byte[16 * 1024];
+                int n;
+                while ((n = in.read(buf)) > 0) {
+                    out.write(buf, 0, n);
+                }
+            }
+            toast(getString(R.string.profile_export_ok));
+        } catch (IOException | SecurityException ex) {
+            toast(getString(R.string.profile_export_fail, String.valueOf(ex.getMessage())));
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            temp.delete();
+        }
+    }
+
+    private void importFrom(android.net.Uri source) {
+        if (source == null) {
+            return;
+        }
+        File temp = new File(getCacheDir(), "profile-import.zip");
+        try {
+            try (InputStream in = getContentResolver().openInputStream(source);
+                 OutputStream out = new FileOutputStream(temp)) {
+                if (in == null) {
+                    throw new IOException("picker returned no stream");
+                }
+                byte[] buf = new byte[16 * 1024];
+                int n;
+                while ((n = in.read(buf)) > 0) {
+                    out.write(buf, 0, n);
+                }
+            }
+            ProfileBackup.Summary summary = ProfileBackup.read(temp,
+                    GameConfig.settingsFile(), GameConfig.serversFile());
+            toast(summary.servers
+                    ? getString(R.string.profile_import_ok, summary.serversCount)
+                    : getString(R.string.profile_import_partial));
+            // Rebuild the form from the file that was just written, not from the old copy.
+            recreate();
+        } catch (IOException | SecurityException ex) {
+            toast(getString(R.string.profile_import_fail, String.valueOf(ex.getMessage())));
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            temp.delete();
+        }
+    }
+
+    private void toast(String message) {
+        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show();
     }
 
     private LinearLayout warning(String message) {

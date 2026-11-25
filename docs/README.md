@@ -1,6 +1,6 @@
 # docs/
 
-Two languages, nine documents each. English in `docs/`, Indonesian in `docs/id/`.
+Two languages, nine documents each, plus the changelog at the repository root. English in `docs/`, Indonesian in `docs/id/`.
 
 | Document | English | Indonesian | Answers |
 |---|---|---|---|
@@ -13,12 +13,13 @@ Two languages, nine documents each. English in `docs/`, Indonesian in `docs/id/`
 | Upstream delta | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | every change against `kuzia15/SAMP-Mobile` `GTA-2.11` |
 | Device verification | [VERIFY.md](VERIFY.md) | [id/VERIFY.md](id/VERIFY.md) | what to press on a real phone, what each screen must show, and what to capture when it does not |
 | Wrapper surface | [OSWRAPPER.md](OSWRAPPER.md) | [id/OSWRAPPER.md](id/OSWRAPPER.md) | which names `libGame.so` pins, what is free to rewrite, how far the rewrite has got |
+| Changelog | [CHANGELOG.md](../CHANGELOG.md) | [CHANGELOG.id.md](../CHANGELOG.id.md) | what changed in each version and which gate proves it |
 
 ---
 
 # docs/ (Bahasa Indonesia)
 
-Dua bahasa, sembilan dokumen masing-masing. Bahasa Inggris di `docs/`, bahasa Indonesia
+Dua bahasa, sembilan dokumen masing-masing, plus catatan perubahan di akar repo. Bahasa Inggris di `docs/`, bahasa Indonesia
 di `docs/id/`.
 
 | Dokumen | English | Indonesia | Menjawab |

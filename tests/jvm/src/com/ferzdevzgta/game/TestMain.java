@@ -2,6 +2,7 @@ package com.ferzdevzgta.game;
 
 import com.ferzdevzgta.game.data.CacheDownloaderTest;
 import com.ferzdevzgta.game.data.CacheManifestTest;
+import com.ferzdevzgta.game.input.GamepadMapTest;
 import com.ferzdevzgta.game.log.LogRotationTest;
 import com.ferzdevzgta.game.servers.GameConfigTest;
 import com.ferzdevzgta.game.diag.ReportTest;
@@ -10,6 +11,7 @@ import com.ferzdevzgta.game.servers.ServerEndpointTest;
 import com.ferzdevzgta.game.servers.ServerQueryTest;
 import com.ferzdevzgta.game.servers.ServerListTest;
 import com.ferzdevzgta.game.settings.IniFileTest;
+import com.ferzdevzgta.game.settings.ProfileBackupTest;
 import com.ferzdevzgta.game.ui.CommunityTest;
 import com.ferzdevzgta.game.ui.LanguageTest;
 
@@ -41,6 +43,10 @@ public final class TestMain {
         System.out.println("-- Language");
         LanguageTest.run();
         CommunityTest.run();
+        System.out.println("-- ProfileBackup");
+        ProfileBackupTest.run();
+        System.out.println("-- GamepadMap");
+        GamepadMapTest.run();
         System.exit(Check.report());
     }
 }

@@ -40,6 +40,7 @@ run_jvm() {
                 client/app/src/main/java/com/ferzdevzgta/game/log \
                 client/app/src/main/java/com/ferzdevzgta/game/servers \
                 client/app/src/main/java/com/ferzdevzgta/game/settings \
+                client/app/src/main/java/com/ferzdevzgta/game/input/GamepadMap.java \
                 client/app/src/main/java/com/ferzdevzgta/game/ui/Language.java \
                 client/app/src/main/java/com/ferzdevzgta/game/ui/Community.java \
                 tests/jvm/src -name '*.java')"

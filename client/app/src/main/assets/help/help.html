@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SA-MP FerzDevZ guide</title>
+<style>
+  :root {
+    --bg: #0B111B;
+    --surface: #151F32;
+    --stroke: #3A4A66;
+    --text: #F3EEE6;
+    --muted: #B7C0CE;
+    --accent: #EF7D2B;
+    --ok: #43BF8F;
+    --warn: #F2C14E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 20px 18px 40px;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, "Roboto", system-ui, sans-serif;
+  }
+  h1 { font-size: 22px; line-height: 1.2; margin: 4px 0 6px; letter-spacing: -0.01em; }
+  p.lead { color: var(--muted); margin: 0 0 18px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin: 26px 0 8px; }
+  ol, ul { padding-left: 20px; margin: 8px 0 0; }
+  li { margin-bottom: 8px; }
+  code { font-family: ui-monospace, "Roboto Mono", monospace; font-size: 13px; color: var(--text); }
+  .card { background: var(--surface); border: 1px solid var(--stroke); border-radius: 16px; padding: 14px 16px; margin-top: 10px; }
+  .k { color: var(--ok); }
+  .w { color: var(--warn); }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+  button {
+    flex: 1 1 140px; min-height: 48px; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--stroke); background: var(--surface); color: var(--text);
+    font: 600 15px/1 inherit;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #1B1206; }
+  footer { margin-top: 30px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main id="doc">
+  <h1 data-i18n="title">How to get into a server</h1>
+  <p class="lead" data-i18n="lead">Three steps, in this order. Each one is a row on the first screen.</p>
+
+  <h2 data-i18n="h_data">1. Game data</h2>
+  <div class="card">
+    <p data-i18n="data_body">The client needs your own GTA San Andreas files. Copy them into <code>/storage/emulated/0/GTA/</code>, or let the app download the cache when a link is configured. The row turns green when the files are complete.</p>
+  </div>
+
+  <h2 data-i18n="h_server">2. Server</h2>
+  <div class="card">
+    <p data-i18n="server_body">Pick a server from the list or add one by address. The chosen server is written to <code>SAMP/settings.ini</code> for you, so nothing has to be typed into a file.</p>
+  </div>
+
+  <h2 data-i18n="h_play">3. Play</h2>
+  <div class="card">
+    <p data-i18n="play_body">The button stays disabled until the first two rows are ready. Nothing is faked during loading: the bar shows the phase the engine reports, and if it takes longer than twenty seconds the screen says so.</p>
+  </div>
+
+  <h2 data-i18n="h_pad">Gamepad</h2>
+  <div class="card">
+    <p data-i18n="pad_body">A controller is recognised when it is plugged in or paired, even while the game is already running. Sticks have a deadzone so the camera does not drift, triggers are read from the analog axes when the pad has them, and buttons are forwarded with the key code Android assigned.</p>
+  </div>
+
+  <h2 data-i18n="h_backup">Backup</h2>
+  <div class="card">
+    <p data-i18n="backup_body">Settings has Export and Restore. Export writes one zip with <code>settings.ini</code> and your server list. Restore puts both back, which is what makes a new phone a five minute job instead of an evening.</p>
+  </div>
+
+  <h2 data-i18n="h_help">When it breaks</h2>
+  <div class="card">
+    <p data-i18n="help_body">Diagnostics reads the phone: data files, settings, last crash, pads in use. Copy report puts that text on the clipboard, then the same screen opens the Discord room. Paste it there and the report is already the useful part.</p>
+  </div>
+
+  <h2 data-i18n="h_limits">What this build does not do</h2>
+  <ul>
+    <li data-i18n="limit_1">No Rockstar assets are shipped. The APK contains only the client, so the data has to come from your install.</li>
+    <li data-i18n="limit_2">Server TextDraw is drawn by the engine. This guide page cannot replace a server's HUD.</li>
+    <li data-i18n="limit_3">Voice is compiled in but still needs a real device test before it is called working.</li>
+  </ul>
+
+  <div class="row">
+    <button class="primary" onclick="Panel.openDiagnostics()" data-i18n="copy">Open diagnostics</button>
+    <button onclick="Panel.openDiscord()" data-i18n="discord">Discord</button>
+  </div>
+
+  <footer><span data-i18n="version">Version</span> <span id="version">...</span></footer>
+</main>
+
+<script>
+  var TEXT = {
+    en: {
+      title: "How to get into a server",
+      lead: "Three steps, in this order. Each one is a row on the first screen.",
+      h_data: "1. Game data",
+      data_body: "The client needs your own GTA San Andreas files. Copy them into /storage/emulated/0/GTA/, or let the app download the cache when a link is configured. The row turns green when the files are complete.",
+      h_server: "2. Server",
+      server_body: "Pick a server from the list or add one by address. The chosen server is written to SAMP/settings.ini for you, so nothing has to be typed into a file.",
+      h_play: "3. Play",
+      play_body: "The button stays disabled until the first two rows are ready. Nothing is faked during loading: the bar shows the phase the engine reports, and if it takes longer than twenty seconds the screen says so.",
+      h_pad: "Gamepad",
+      pad_body: "A controller is recognised when it is plugged in or paired, even while the game is already running. Sticks have a deadzone so the camera does not drift, triggers are read from the analog axes when the pad has them, and buttons are forwarded with the key code Android assigned.",
+      h_backup: "Backup",
+      backup_body: "Settings has Export and Restore. Export writes one zip with settings.ini and your server list. Restore puts both back, which is what makes a new phone a five minute job instead of an evening.",
+      h_help: "When it breaks",
+      help_body: "Diagnostics reads the phone: data files, settings, last crash, pads in use. Copy report puts that text on the clipboard, then the same screen opens the Discord room. Paste it there and the report is already the useful part.",
+      h_limits: "What this build does not do",
+      limit_1: "No Rockstar assets are shipped. The APK contains only the client, so the data has to come from your install.",
+      limit_2: "Server TextDraw is drawn by the engine. This guide page cannot replace a server's HUD.",
+      limit_3: "Voice is compiled in but still needs a real device test before it is called working.",
+      copy: "Open diagnostics",
+      discord: "Discord",
+      version: "Version"
+    },
+    in: {
+      title: "Cara masuk ke server",
+      lead: "Tiga langkah, urutannya begini. Tiap langkah adalah satu baris di layar pertama.",
+      h_data: "1. Data game",
+      data_body: "Client butuh file GTA San Andreas milikmu sendiri. Salin ke /storage/emulated/0/GTA/, atau biarkan app mengunduh cache kalau linknya sudah diisi. Barisnya jadi hijau kalau file sudah lengkap.",
+      h_server: "2. Server",
+      server_body: "Pilih server dari daftar atau tambah lewat alamat. Server yang dipilih ditulis ke SAMP/settings.ini otomatis, jadi tidak ada yang perlu diketik ke file.",
+      h_play: "3. Main",
+      play_body: "Tombolnya tetap mati sampai dua baris pertama siap. Tidak ada angka palsu saat loading: bar menunjukkan fase yang dilaporkan mesin, dan kalau lebih dari dua puluh detik layarnya bilang terus terang.",
+      h_pad: "Gamepad",
+      pad_body: "Stik langsung dikenali saat dicolok atau dipasangkan, termasuk kalau game sudah jalan. Stik punya deadzone supaya kamera tidak jalan sendiri, trigger dibaca dari axis analog kalau stiknya punya, dan tombol diteruskan dengan key code yang diberikan Android.",
+      h_backup: "Backup",
+      backup_body: "Di Pengaturan ada Ekspor dan Pulihkan. Ekspor menulis satu zip berisi settings.ini dan daftar server. Pulihkan mengembalikan keduanya, jadi pindah HP cukup lima menit, bukan semalam.",
+      h_help: "Kalau ada masalah",
+      help_body: "Diagnostik membaca isi HP: file data, pengaturan, crash terakhir, stik yang kepasang. Copy report menaruh teksnya di clipboard, lalu layar yang sama membuka room Discord. Tempel di sana, laporannya sudah langsung berguna.",
+      h_limits: "Yang belum ada di build ini",
+      limit_1: "Tidak ada aset Rockstar yang ikut dikirim. APK isinya cuma client, jadi datanya harus dari install punyamu.",
+      limit_2: "TextDraw server digambar oleh mesin. Halaman panduan ini tidak bisa menggantikan HUD server.",
+      limit_3: "Voice sudah ikut dikompilasi tapi masih perlu dites di HP beneran sebelum boleh disebut jalan.",
+      copy: "Buka diagnostik",
+      discord: "Discord",
+      version: "Versi"
+    }
+  };
+
+  function apply(locale) {
+    var table = TEXT[locale] || TEXT.en;
+    document.documentElement.lang = locale === "in" ? "id" : "en";
+    var nodes = document.querySelectorAll("[data-i18n]");
+    for (var i = 0; i < nodes.length; i++) {
+      var key = nodes[i].getAttribute("data-i18n");
+      if (table[key]) {
+        nodes[i].textContent = table[key];
+      }
+    }
+    var v = document.getElementById("version");
+    if (v && window.Panel) {
+      v.textContent = Panel.version();
+    }
+  }
+
+  try {
+    apply(window.Panel ? Panel.locale() : "en");
+  } catch (e) {
+    apply("en");
+  }
+</script>
+</body>
+</html>

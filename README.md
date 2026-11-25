@@ -17,7 +17,7 @@ Everything below was executed on this machine, not assumed.
 | Item | State |
 |---|---|
 | `libsamp.so` arm64-v8a from source | **yes**, 3.5 MB, 0 warnings |
-| Debug APK | **yes**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.1.0` |
+| Debug APK | **yes**, 37 MB, `com.ferzdevzgta.game`, label `SA-MP FerzDevZ`, versionName `0.2.0` |
 | Clean rebuild, no cache | **yes**, 2m08s, 0 warnings |
 | Telemetry | **removed**, Firebase, AppLovin, Splunk; APK 43 MB → 37 MB |
 | `libsamp.so` builds without Rockstar binary | **yes**, 10s, that is what CI runs |
@@ -32,6 +32,10 @@ Everything below was executed on this machine, not assumed.
 | Diagnostics | **yes**, `DiagnosticsActivity` reads the phone: native libraries, the five JNI entry points, data tree, manifest, target, last 20 log lines, copy and share |
 | Crash record | **yes**, an uncaught Java exception is appended to `GTA/logcat.txt` as a marked block with a UTC stamp and the app version, rotated at 2 MiB, then shown in Diagnostics |
 | Launcher screen | **redesigned**, shows data, server and nickname state before you press Start, `bin/ui-contrast.py` holds the palette above WCAG AA |
+| Gamepad | **yes**, the three pad callbacks that `libGame.so` exported but nothing declared are wired, so a controller connects, reconnects after a pause and is listed in Diagnostics, `bin/jni-pins.py` reports 0 unclaimed exports |
+| Profile backup | **yes**, Settings exports one zip with `settings.ini` and `servers.txt` and restores it on a new phone, entry names fixed, 512 KiB cap per entry |
+| Offline guide | **yes**, `assets/help/help.html` rendered by the system WebView, two languages, no APK size cost |
+| Changelog | **yes**, [CHANGELOG.md](CHANGELOG.md) and [CHANGELOG.id.md](CHANGELOG.id.md) |
 
 ## Getting an installable APK
 
@@ -42,8 +46,8 @@ machine from a game APK you own:
 ```bash
 bin/android-build.sh framework        # 1. publishable half -> dist/samp-client-framework.apk (28 MB)
 bin/patch-apk.sh --gta-apk GTA.apk \
-                 --out dist/samp-client-0.1.0.apk      # 2. add libGame.so, realign, re-sign (37 MB)
-adb install -r dist/samp-client-0.1.0.apk              # 3. install
+                 --out dist/samp-client-0.2.0.apk      # 2. add libGame.so, realign, re-sign (37 MB)
+adb install -r dist/samp-client-0.2.0.apk              # 3. install
 adb push cache/full/. /storage/emulated/0/GTA/         # 4. assets, or the app closes on launch
 ```
 

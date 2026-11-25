@@ -2,6 +2,7 @@
 package com.rockstargames.oswrapper;
 
 import android.content.Intent;
+import android.hardware.input.InputManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -9,6 +10,9 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.InputDevice;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.WindowManager;
@@ -18,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ferzdevzgta.game.R;
+import com.rockstargames.oswrapper.input.GamepadInput;
 import com.nvidia.devtech.NvAPKFileHelper;
 import com.nvidia.devtech.NvUtil;
 
@@ -71,6 +76,8 @@ public abstract class GameActivityBase extends AppCompatActivity {
     private int lastNetworkType;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private PermissionCallback requestPermissionCallback;
+    private InputManager inputManager;
+    private InputManager.InputDeviceListener padListener;
 
     /** Replaces the Kotlin function type the original code passed around. */
     public interface PermissionCallback {
@@ -275,6 +282,8 @@ public abstract class GameActivityBase extends AppCompatActivity {
         hideSystemUI();
         setContentView(R.layout.game);
 
+        registerPads();
+
         view = findViewById(R.id.viewGame);
         getWindow().setSustainedPerformanceMode(true);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -329,6 +338,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy");
+        unregisterPads();
         super.onDestroy();
         GameThread.INSTANCE.onActivityDestroyed();
         GameThread.INSTANCE.stop();
@@ -369,6 +379,92 @@ public abstract class GameActivityBase extends AppCompatActivity {
         super.onResume();
         hideSystemUI();
         getView().onResume();
+        // Pads survive a background trip; the engine's own table does not. Hand it the list
+        // again, otherwise the controller works only until the first pause.
+        callPad("resume", GamepadInput::onResume);
+    }
+
+    // --- gamepad ------------------------------------------------------------
+
+    /**
+     * Forwards pad traffic to the engine. Every call is guarded, because the framework-only APK
+     * has the classes but not libGame.so, and an input event must not kill the app.
+     */
+    private static void callPad(String what, Runnable action) {
+        try {
+            action.run();
+        } catch (UnsatisfiedLinkError missingEngine) {
+            Log.w(TAG, "gamepad " + what + " without engine: " + missingEngine.getMessage());
+        }
+    }
+
+    private void registerPads() {
+        inputManager = getSystemService(InputManager.class);
+        if (inputManager == null) {
+            Log.w(TAG, "no InputManager, pads stay silent");
+            return;
+        }
+        padListener = new InputManager.InputDeviceListener() {
+            @Override
+            public void onInputDeviceAdded(int deviceId) {
+                InputDevice device = InputDevice.getDevice(deviceId);
+                Log.i(TAG, "input device added: " + deviceId + " " + (device == null ? "?" : device.getName()));
+                if (GamepadInput.isPad(device)) {
+                    callPad("connect", () -> GamepadInput.onConnected(deviceId));
+                }
+            }
+
+            @Override
+            public void onInputDeviceRemoved(int deviceId) {
+                Log.i(TAG, "input device removed: " + deviceId);
+                callPad("disconnect", () -> GamepadInput.onDisconnected(deviceId));
+            }
+
+            @Override
+            public void onInputDeviceChanged(int deviceId) {
+                // Layouts change when a pad is remapped, and the engine re-reads them on connect.
+                InputDevice device = InputDevice.getDevice(deviceId);
+                if (GamepadInput.isPad(device)) {
+                    callPad("change", () -> {
+                        GamepadInput.onDisconnected(deviceId);
+                        GamepadInput.onConnected(deviceId);
+                    });
+                }
+            }
+        };
+        inputManager.registerInputDeviceListener(padListener, handler);
+        callPad("initial resume", GamepadInput::onResume);
+    }
+
+    private void unregisterPads() {
+        if (inputManager != null && padListener != null) {
+            inputManager.unregisterInputDeviceListener(padListener);
+            padListener = null;
+        }
+    }
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        try {
+            if (GamepadInput.onMotion(event)) {
+                return true;
+            }
+        } catch (UnsatisfiedLinkError missingEngine) {
+            Log.w(TAG, "pad motion without engine: " + missingEngine.getMessage());
+        }
+        return super.dispatchGenericMotionEvent(event);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        try {
+            if (GamepadInput.onKey(event, event.getAction() == KeyEvent.ACTION_DOWN)) {
+                return true;
+            }
+        } catch (UnsatisfiedLinkError missingEngine) {
+            Log.w(TAG, "pad key without engine: " + missingEngine.getMessage());
+        }
+        return super.dispatchKeyEvent(event);
     }
 
     @Override

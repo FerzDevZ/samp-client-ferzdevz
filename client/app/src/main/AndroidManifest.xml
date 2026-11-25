@@ -93,6 +93,12 @@
             android:theme="@style/Theme.SampLauncher" />
 
         <activity
+            android:name="com.ferzdevzgta.game.ui.WebPanelActivity"
+            android:exported="false"
+            android:label="@string/guide_title"
+            android:theme="@style/Theme.SampLauncher" />
+
+        <activity
             android:name="com.ferzdevzgta.launcher.activity.MainActivity"
             android:theme="@style/Theme.SampLauncher"
             android:exported="true">

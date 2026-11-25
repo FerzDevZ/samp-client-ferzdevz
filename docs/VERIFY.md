@@ -46,7 +46,7 @@ Open `Display → Diagnostics`. This is the screen that turns a bug report into 
 
 | Row | Expected on a clean install | Expected after setup |
 |---|---|---|
-| App version | `0.1.0 (1)` | same |
+| App version | `0.2.0 (2)` | same |
 | Native libraries | `2/2 libGame.so …, libsamp.so …` | same |
 | JNI entry points | `5/5` | same |
 | Game data | **fails**, `0 files, 0 B` | passes, a real file count and size |
@@ -103,7 +103,7 @@ reproducible:
 ```
 [app crash]
 time   : 2026-11-25 06:20:11 UTC
-version: 0.1.0 (1)
+version: 0.2.0 (2)
 thread : main
 java.lang.IllegalStateException: boom
     at …
@@ -124,3 +124,14 @@ java.lang.IllegalStateException: boom
   checklist.
 - **Other devices.** Android 15 and 16 change insets and back behaviour. One passing phone is one
   passing phone.
+
+## 0.2.0 additions
+
+| Step | Pass looks like |
+|---|---|
+| Plug a pad into a running game | the pad works within a second, no restart, no `[pad]` failure line in `GTA/logcat.txt` |
+| Press Home, come back | the pad still works. A pad that dies after the first pause means `implOnGamepadResume` was skipped |
+| Open Diagnostics with a pad attached | the pad row lists its name and id, so the app is not guessing |
+| Settings, Export, save the zip | the file picker appears and the zip exists after saving |
+| Fresh install, Settings, Restore, pick that zip | settings come back and the server list shows the old entries |
+| Settings, Open guide | the page loads offline, language follows the app, and the two buttons reach Diagnostics and Discord |

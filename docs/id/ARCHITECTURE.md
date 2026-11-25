@@ -268,3 +268,61 @@ bisa ditemukan hanya jadi hiasan:
 - Tampilan, di bagian Dukungan
 - Diagnostik, di mana tombolnya menyalin laporan ke clipboard sebelum membuka Discord, jadi
   pemain datang dengan bukti yang siap ditempel
+
+## Input: gamepad
+
+Tiga callback stik sudah ada di `libGame.so` sebelum apa pun di Java mendeklarasikannya, jadi stik
+terpasang, Android melaporkannya, dan game tidak pernah dengar. Deklarasinya baru ditulis setelah
+tanda tangan dibaca dari binary:
+
+```
+implOnGamepadConnected(int)      -> GamepadProvider::onConnect(int)
+implOnGamepadDisconnected(int)   -> GamepadProvider::onDisconnect(int)
+implOnGamepadResume(int[])       -> GamepadProvider::onResume(std::vector<int>)
+```
+
+`bin/jni-pins.py` sekarang melaporkan 0 ekspor tanpa pemakai, dan itu buktinya ketiganya bukan
+tebakan. Sambungannya ada tiga bagian:
+
+- `com.rockstargames.oswrapper.input.GamepadInput` mendaftarkan `InputManager.InputDeviceListener`,
+  jadi stik yang dicolok saat game sudah jalan langsung dilaporkan, bukan menunggu start berikutnya.
+- Kelas yang sama mengirim ulang daftar id lengkap setiap resume. Mesin menyusun ulang tabel stiknya
+  dari daftar itu, jadi kalau dilewati, stik tetap terpasang tapi tidak bisa dipakai setelah pause
+  pertama.
+- `com.ferzdevzgta.game.input.GamepadMap` menyimpan angkanya tanpa import Android: deadzone 0.15
+  yang diskalakan lagi ke travel penuh, trigger diterima sebagai 0..1 atau -1..1, enam axis sesuai
+  urutan tanda tangan mesin, dan tes `SOURCE_JOYSTICK` supaya tombol keyboard tidak dianggap stik.
+  `GamepadMapTest` menjaga semuanya di suite JVM.
+
+Semua panggilan dibungkus penjaga `UnsatisfiedLinkError`. APK framework-only punya kelas Java tanpa
+mesin, dan satu event stik tidak boleh mematikannya.
+
+## Pengaturan yang bisa pindah HP
+
+`settings/ProfileBackup` menulis satu zip berisi `settings.ini` dan `servers.txt`, dan itulah yang
+membuat pindah HP jadi pekerjaan sebentar, bukan semalaman mengetik ulang. Arsipnya zip biasa dengan
+tiga nama entri tetap, dan saat dibaca hanya nama itu yang diterima:
+
+- arsip tanpa `settings.ini` ditolak, bukan dipasang setengah
+- tiap entri dibatasi 512 KiB, jadi file rusak atau jahat tidak bisa memenuhi penyimpanan bersama
+- entri bernama `../../settings.ini` diabaikan, karena path tujuan datang dari kode dan tidak pernah
+  dari arsip
+
+`ProfileBackupTest` menguji perjalanan penuh, dua penolakan itu, dan kasus traversal di direktori
+sementara. Ekspor dan Pulihkan lewat pemilih file sistem, jadi zip-nya mendarat di tempat pemain
+menyimpan backup.
+
+## Layar panduan dan kenapa WebView
+
+Client punya tiga lapis UI dan tidak ada yang bisa memuat teks bantuan berformat: layar app itu view
+Java, HUD dalam game itu ImGui, dan TextDraw milik server. Android membawa WebView di setiap
+perangkat, jadi `ui/WebPanelActivity` menggambar `assets/help/help.html` tanpa menambah ukuran APK.
+
+Wewenangnya sengaja sempit: JavaScript hidup untuk aset itu, akses file dari file URL mati, akses
+universal mati, DOM storage mati, dan tautan selain aset diserahkan ke browser. Halaman itu hanya
+boleh memanggil tiga hal: bahasa aktif, versi, dan buka diagnostik atau Discord. `openDiagnostics`
+dipakai supaya tidak ada jalur salin-ke-clipboard kedua, karena laporannya sudah dibangun di satu
+tempat dan menduplikasinya membuat dua versi bisa berbeda.
+
+Semua ini tidak menggantikan TextDraw server. Itu data RPC yang harus digambar mesin, dan
+menerjemahkannya ke HTML adalah proyek lain dengan hasil yang tidak konsisten antar server.

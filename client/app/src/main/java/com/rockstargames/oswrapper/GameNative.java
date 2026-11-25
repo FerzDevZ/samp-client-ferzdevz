@@ -77,10 +77,16 @@ public final class GameNative {
     public static native void implOnAccelerometerChanged(float x, float y, float z);
 
     /**
-     * Gamepad callbacks. libGame.so exports connected, disconnected and resume handlers as
-     * well, but nothing in Java declares them and no gamepad code calls them, so they stay
-     * unclaimed; `bin/jni-pins.py` lists them as dead exports rather than failures.
+     * Gamepad callbacks. The first three were exported by libGame.so from the start with no Java
+     * declaration, so a connected pad was invisible to the game. Signatures were read from the
+     * binary: onConnect(int), onDisconnect(int), onResume(std::vector<int>).
      */
+    public static native void implOnGamepadConnected(int controllerId);
+
+    public static native void implOnGamepadDisconnected(int controllerId);
+
+    public static native void implOnGamepadResume(int[] controllerIds);
+
     public static native void implOnGamepadAxesChanged(
             int controllerId,
             float x,

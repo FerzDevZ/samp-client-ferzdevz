@@ -21,10 +21,10 @@ bin/android-build.sh framework
 #   -> dist/samp-client-framework.apk (28 MB, signed, no libGame.so)
 
 # single APK install
-bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
+bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.2.0.apk
 
 # split install (base.apk + split_config.*.apk), the normal Play Store layout
-bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.1.0.apk
+bin/patch-apk.sh --gta-split-dir /path/to/split --out dist/samp-client-0.2.0.apk
 ```
 
 `--framework <path>` overrides the framework default. `--out` is required. Pass

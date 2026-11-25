@@ -152,6 +152,19 @@
     <string name="report_discord">Lapor bug</string>
     <string name="report_discord_note">Membuka Discord kami. Laporan diagnostik disalin lebih dulu, jadi bisa langsung kamu tempel di chat.</string>
     <string name="report_discord_missing">Tidak ada aplikasi yang bisa membuka tautan itu. Invite-nya discord.gg/fkhs4TXf</string>
+    <string name="guide_title">Panduan</string>
+    <string name="guide_subtitle">Offline, langsung dari APK.</string>
+    <string name="guide_open">Buka panduan</string>
+    <string name="guide_close">Tutup</string>
+    <string name="profile_section">Backup profil</string>
+    <string name="profile_export">Ekspor</string>
+    <string name="profile_import">Pulihkan</string>
+    <string name="profile_note">Satu zip berisi settings.ini dan daftar server, jadi HP baru mulai dari titik yang sama.</string>
+    <string name="profile_export_ok">Profil sudah diekspor.</string>
+    <string name="profile_export_fail">Ekspor gagal: %1$s</string>
+    <string name="profile_import_ok">Pengaturan dan %1$d server sudah dipulihkan.</string>
+    <string name="profile_import_partial">Pengaturan dipulihkan. File ini tidak berisi daftar server.</string>
+    <string name="profile_import_fail">Pemulihan gagal: %1$s</string>
     <string name="settings_section_support">Dukungan</string>
     <string name="home_bug_open">Lapor bug di Discord</string>
 </resources>

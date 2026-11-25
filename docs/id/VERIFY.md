@@ -47,7 +47,7 @@ Buka `Tampilan → Diagnostik`. Layar inilah yang mengubah laporan bug menjadi b
 
 | Baris | Harapan pada instalasi bersih | Harapan setelah setup |
 |---|---|---|
-| Versi aplikasi | `0.1.0 (1)` | sama |
+| Versi aplikasi | `0.2.0 (2)` | sama |
 | Pustaka native | `2/2 libGame.so …, libsamp.so …` | sama |
 | Titik masuk JNI | `5/5` | sama |
 | Data game | **gagal**, `0 files, 0 B` | lolos, jumlah berkas dan ukuran nyata |
@@ -104,7 +104,7 @@ direproduksi:
 ```
 [app crash]
 time   : 2026-11-25 06:20:11 UTC
-version: 0.1.0 (1)
+version: 0.2.0 (2)
 thread : main
 java.lang.IllegalStateException: boom
     at …
@@ -125,3 +125,14 @@ java.lang.IllegalStateException: boom
   periksa.
 - **Perangkat lain.** Android 15 dan 16 mengubah inset dan perilaku tombol kembali. Satu HP yang
   lolos adalah satu HP yang lolos.
+
+## Tambahan 0.2.0
+
+| Langkah | Lulus kalau |
+|---|---|
+| Colok stik saat game jalan | stik langsung dipakai dalam sedetik, tanpa restart, tanpa baris `[pad]` gagal di `GTA/logcat.txt` |
+| Tekan Home, lalu balik | stik masih jalan. Stik yang mati setelah pause pertama berarti `implOnGamepadResume` terlewat |
+| Buka Diagnostik dengan stik terpasang | barisnya menyebut nama dan id stik, jadi app tidak menebak |
+| Pengaturan, Ekspor, simpan zip | pemilih file muncul dan zip-nya ada setelah disimpan |
+| Install baru, Pengaturan, Pulihkan, pilih zip itu | pengaturan kembali dan daftar server menampilkan entri lama |
+| Pengaturan, Buka panduan | halaman terbuka offline, bahasanya ikut app, dan dua tombolnya sampai ke Diagnostik dan Discord |

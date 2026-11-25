@@ -153,6 +153,19 @@
     <string name="report_discord">Report a bug</string>
     <string name="report_discord_note">Opens our Discord. The diagnostics report is copied first, so you can paste it straight into the chat.</string>
     <string name="report_discord_missing">No app can open that link. The invite is discord.gg/fkhs4TXf</string>
+    <string name="guide_title">Guide</string>
+    <string name="guide_subtitle">Offline, straight from the APK.</string>
+    <string name="guide_open">Open guide</string>
+    <string name="guide_close">Close</string>
+    <string name="profile_section">Profile backup</string>
+    <string name="profile_export">Export</string>
+    <string name="profile_import">Restore</string>
+    <string name="profile_note">One zip with your settings.ini and server list, so a new phone starts where the old one stopped.</string>
+    <string name="profile_export_ok">Profile exported.</string>
+    <string name="profile_export_fail">Export failed: %1$s</string>
+    <string name="profile_import_ok">Restored settings and %1$d servers.</string>
+    <string name="profile_import_partial">Restored settings. This file has no server list.</string>
+    <string name="profile_import_fail">Restore failed: %1$s</string>
     <string name="settings_section_support">Support</string>
     <string name="home_bug_open">Report a bug on Discord</string>
 </resources>
