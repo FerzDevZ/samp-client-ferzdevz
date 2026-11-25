@@ -306,6 +306,21 @@ public final class Ui {
         return b;
     }
 
+    /** Replaces the leading icon on an existing button, keeping the label colour in sync. */
+    public static void setButtonIcon(Button b, int iconRes) {
+        if (b == null) {
+            return;
+        }
+        Drawable glyph = icon(b.getContext(), iconRes, b.getCurrentTextColor());
+        if (glyph == null) {
+            return;
+        }
+        int size = dp(b.getContext(), 18);
+        glyph.setBounds(0, 0, size, size);
+        b.setCompoundDrawables(glyph, null, null, null);
+        b.setCompoundDrawablePadding(dp(b.getContext(), 8));
+    }
+
     /** A drawable from resources, tinted. Returns null instead of throwing on a bad id. */
     public static Drawable icon(Context c, int resId, int tint) {
         Drawable raw = ContextCompat.getDrawable(c, resId);

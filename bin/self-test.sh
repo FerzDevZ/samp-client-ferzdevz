@@ -12,6 +12,7 @@
 #   bin/self-test.sh jni      only the native-vs-symbol check (needs libGame.so)
 #   bin/self-test.sh strings  only the English/Indonesian resource parity check
 #   bin/self-test.sh contrast only the palette contrast check (no device needed)
+#   bin/self-test.sh icons    only the launcher icon wiring check (no device needed)
 #
 # What it does NOT prove: that the game runs. That needs a phone and a GTA install.
 set -uo pipefail
@@ -321,6 +322,32 @@ run_contrast() {
   fi
 }
 
+run_icons() {
+  head_ "launcher icon wiring"
+  local out
+  if out="$(python3 bin/icon-check.py 2>&1)"; then
+    ok "$out"
+  else
+    bad "the icon is not wired end to end"
+    printf '%s\n' "$out" | sed -n '1,10p'
+  fi
+
+  # The real bug this catches: the manifest pointing at one layer of the icon. Rebuild that
+  # mistake in a scratch tree and require the check to reject it.
+  local tmp
+  tmp="$(mktemp -d)"
+  cp -a client/app/src/main/res "$tmp/res"
+  sed 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher_background"|' \
+    client/app/src/main/AndroidManifest.xml >"$tmp/AndroidManifest.xml"
+  if python3 bin/icon-check.py --res "$tmp/res" --manifest "$tmp/AndroidManifest.xml" \
+      >"$tmp/out.log" 2>&1; then
+    bad "the icon check accepted a manifest pointing at the background layer"
+  else
+    ok "flags an icon that points at the background layer"
+  fi
+  rm -rf "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
@@ -329,9 +356,10 @@ case "${1:-all}" in
   pins)    run_pins ;;
   jni)     run_jni ;;
   strings) run_strings ;;
+  icons)   run_icons ;;
   contrast) run_contrast ;;
-  all)     run_jvm; run_strings; run_contrast; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
-  *)       echo "usage: $0 [all|jvm|strings|contrast|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
+  all)     run_jvm; run_strings; run_contrast; run_icons; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
+  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

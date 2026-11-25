@@ -11,6 +11,8 @@ true turns out not to be.
 | `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | - |
 | `self-test.sh` | prove the JVM tests, the translation parity, the palette contrast, the cache round trip and the patcher refusals still pass | - |
 | `ui-contrast.py` | compute WCAG 2.2 AA ratios from the palette in `Ui.java`, no device and no rendering | - |
+| `make-icons.py` | rebuild the launcher artwork and the splash mark from one source picture, one rounded square per density | the source picture |
+| `icon-check.py` | prove the manifest, both adaptive XML files, the five densities and the splash mark all point at the same icon | - |
 | `patch-termux.sh` | same job on a phone: `zip -0`, `apksigner --lib-page-alignment`, no SDK binaries | it is the input |
 | `serve-apk.sh` | stages the newest APK and serves it over HTTP, printing the Tailscale and LAN URLs plus the sha256 | the built APK |
 | `apk-verify.py` | read the zip structures and prove the library is stored, aligned, intact; no SDK needed | - |
@@ -102,6 +104,8 @@ tidak benar.
 | `patch-apk.sh` | menyuntik `libGame.so` milik pengguna ke APK framework, realign, tanda tangan ulang | itu inputnya |
 | `self-test.sh` | membuktikan tes JVM, kesamaan kunci terjemahan, kontras palette, round trip cache, dan penolakan patcher masih lolos | - |
 | `ui-contrast.py` | menghitung rasio WCAG 2.2 AA dari palette di `Ui.java`, tanpa HP dan tanpa render | - |
+| `make-icons.py` | membangun ulang gambar ikon peluncur dan tanda splash dari satu gambar sumber, satu kotak sudut bulat per densitas | gambar sumbernya |
+| `icon-check.py` | membuktikan manifest, dua file XML adaptif, lima densitas, dan tanda splash menunjuk ke ikon yang sama | - |
 | `patch-termux.sh` | kerja yang sama di HP: `zip -0`, `apksigner --lib-page-alignment`, tanpa binary SDK | itu inputnya |
 | `serve-apk.sh` | menyalin APK terbaru lalu menyajikannya lewat HTTP, mencetak URL Tailscale dan LAN beserta sha256 | APK hasil build |
 | `apk-verify.py` | membaca struktur zip dan membuktikan library stored, aligned, utuh; tanpa SDK | - |

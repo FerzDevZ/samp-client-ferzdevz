@@ -174,7 +174,8 @@ up first, instead of repeating the same three words on three different controls.
 
 Controls are text first, with a vector glyph from `res/drawable/ic_*.xml` where one helps. The
 glyph is tinted with the label colour by `Ui.icon`, so a secondary button never comes out with a
-white icon on a light surface. The launcher icon is an adaptive vector, and `Theme.SampLauncher`
+white icon on a light surface. The launcher icon is an adaptive icon whose foreground is a bitmap
+per density, produced from the source drawing by `bin/make-icons.py`, and `Theme.SampLauncher`
 sets `splash_window` as the window background, which removes the white flash between the tap and
 the first frame.
 
@@ -240,9 +241,22 @@ unrelated interface attached:
 | `TEXT` | `#F3EEE6` | the warm off white of the sky |
 
 `WARN` stays distinct from `ACCENT` by hue and lightness, so a status dot is never mistaken for a
-button, and `bin/ui-contrast.py` keeps the pairs above AA. `ic_splash_mark.xml` and the adaptive
-launcher icon are the same sunset disc with palms, drawn as vectors, so the home screen icon, the
-splash window and the loading screen show one mark at every size.
+button, and `bin/ui-contrast.py` keeps the pairs above AA. `res/drawable-*/ic_brand.png` is the same
+drawing cut to a rounded square at 96 dp, so the home screen icon, the splash window and the loading
+screen show one mark at every size.
+
+The icon is shipped as a bitmap, not a traced vector, because it is a pen illustration: tracing it
+would drop the line work and the lettering. `bin/make-icons.py --source <picture>` finds the square
+inside a screenshot, applies a rounded mask, and writes `mipmap-*/ic_launcher_foreground.png` at the
+adaptive icon's 108 dp viewport with the art at 78 percent of it, which is inside the mask's safe
+zone. The numbers live in one place in that script instead of in five hand-cropped files.
+
+`bin/icon-check.py` guards the wiring, because the drawing can be perfect and invisible anyway. The
+manifest once declared `android:icon="@drawable/ic_launcher_background"`, the icon's own background
+layer: the build stayed green, every PNG was present, and every phone showed an empty navy square.
+The check compares the manifest reference, both adaptive XML files, the five densities, the absence
+of stale legacy `ic_launcher.webp` files, and the splash and loading references, and `bin/self-test.sh
+icons` re-creates that exact mistake in a scratch tree to prove the check rejects it.
 
 ### Reporting a bug
 

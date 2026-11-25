@@ -210,7 +210,11 @@ public class ServerBrowserActivity extends AppCompatActivity {
         LinearLayout header = Ui.row(this);
         LinearLayout labels = new LinearLayout(this);
         labels.setOrientation(LinearLayout.VERTICAL);
-        labels.addView(Ui.value(this, server.name()));
+        TextView nameView = Ui.value(this, server.name());
+        // Ui.value right-aligns because it is normally a status value. A server name is an entity,
+        // not a value, so it reads from the left edge like the address under it.
+        nameView.setGravity(android.view.Gravity.START);
+        labels.addView(nameView);
         labels.addView(Ui.mono(this, server.address()));
         TextView live = Ui.mono(this, getString(R.string.servers_probe_running));
         live.setTextColor(Ui.FAINT);
@@ -218,7 +222,9 @@ public class ServerBrowserActivity extends AppCompatActivity {
         liveSlots.put(server.address(), live);
         header.addView(labels, Ui.weight(this, 1f, 8f));
         if (active) {
-            header.addView(Ui.pill(this, getString(R.string.servers_current), Ui.OK));
+            // The pill marks the chosen server, not a healthy one. Green here contradicted the
+            // "no answer" line directly beneath it.
+            header.addView(Ui.pill(this, getString(R.string.servers_current), Ui.ACCENT));
         }
         block.addView(header, Ui.fill());
 

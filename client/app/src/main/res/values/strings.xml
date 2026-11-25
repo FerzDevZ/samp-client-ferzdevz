@@ -116,7 +116,7 @@
     <string name="servers_bad_port">Port must be a number</string>
     <string name="servers_bad_input">That address or name is not valid</string>
     <string name="servers_write_failed">Could not write the file: %1$s</string>
-    <string name="servers_current">Current server</string>
+    <string name="servers_current">Selected</string>
     <string name="servers_probe_running">Checking</string>
     <string name="servers_probe_ok">%1$d ms, %2$d of %3$d slots</string>
     <string name="servers_probe_offline">No answer</string>

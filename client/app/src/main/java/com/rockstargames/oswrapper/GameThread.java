@@ -381,7 +381,7 @@ public final class GameThread {
 
         @Override
         public void run() {
-            // FIX #2: removed useless try/catch InterruptedException — guardedRun() doesn't throw it
+            // FIX #2: removed useless try/catch InterruptedException: guardedRun() does not throw it
             guardedRun();
         }
 
@@ -449,7 +449,7 @@ public final class GameThread {
         }
     }
 
-    // FIX #3: switch on int constants — no more ordinal() / Enum issues
+    // FIX #3: switch on int constants, so no ordinal() / Enum issues
     public final void processPendingCallbacks() {
         Pair pair;
         Log.i(TAG, "[!!] processPendingCallbacks");

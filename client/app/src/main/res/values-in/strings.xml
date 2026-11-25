@@ -115,7 +115,7 @@
     <string name="servers_bad_port">Port harus berupa angka</string>
     <string name="servers_bad_input">Alamat atau nama tidak valid</string>
     <string name="servers_write_failed">Gagal menulis berkas: %1$s</string>
-    <string name="servers_current">Server aktif</string>
+    <string name="servers_current">Terpilih</string>
     <string name="servers_probe_running">Memeriksa</string>
     <string name="servers_probe_ok">%1$d ms, %2$d dari %3$d slot</string>
     <string name="servers_probe_offline">Tidak menjawab</string>

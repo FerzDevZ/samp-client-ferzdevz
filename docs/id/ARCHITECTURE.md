@@ -175,7 +175,8 @@ dulu, bukan mengulang tiga kata yang sama di tiga kontrol berbeda.
 
 Kontrol tetap mengutamakan teks, dengan satu ikon vektor dari `res/drawable/ic_*.xml` bila
 membantu. Ikonnya diwarnai mengikuti warna label lewat `Ui.icon`, jadi tombol sekunder tidak
-pernah muncul dengan ikon putih di permukaan terang. Ikon peluncur adalah vektor adaptif, dan
+pernah muncul dengan ikon putih di permukaan terang. Ikon peluncur adalah ikon adaptif dengan
+foreground berupa bitmap per densitas, dibuat dari gambar sumber lewat `bin/make-icons.py`, dan
 `Theme.SampLauncher` memakai `splash_window` sebagai window background, yang menghilangkan kilatan
 putih antara ketukan dan frame pertama.
 
@@ -239,9 +240,22 @@ bukan poster dengan antarmuka yang tidak berhubungan:
 | `TEXT` | `#F3EEE6` | putih hangat dari langitnya |
 
 `WARN` tetap berbeda dari `ACCENT` lewat hue dan terang, jadi titik status tidak pernah disangka
-tombol, dan `bin/ui-contrast.py` menjaga semua pasangan di atas AA. `ic_splash_mark.xml` dan ikon
-launcher adaptif memakai cakram matahari dengan palem yang sama, digambar sebagai vektor, jadi
-ikon di home screen, splash, dan loading screen menampilkan satu tanda di semua ukuran.
+tombol, dan `bin/ui-contrast.py` menjaga semua pasangan di atas AA. `res/drawable-*/ic_brand.png`
+adalah gambar yang sama dipotong jadi kotak bersudut bulat pada 96 dp, jadi ikon di home screen,
+splash, dan loading screen menampilkan satu tanda di semua ukuran.
+
+Ikon dikirim sebagai bitmap, bukan vektor hasil tracing, karena gambarnya ilustrasi pena: tracing
+akan membuang garis dan hurufnya. `bin/make-icons.py --source <gambar>` mencari kotak ikon di dalam
+screenshot, memasang masker sudut bulat, lalu menulis `mipmap-*/ic_launcher_foreground.png` pada
+viewport 108 dp milik ikon adaptif dengan gambar sebesar 78 persen, yang masih di dalam safe zone
+masker. Angkanya ada di satu tempat di skrip itu, bukan di lima file hasil crop manual.
+
+`bin/icon-check.py` menjaga sambungannya, karena gambar bisa sempurna tapi tetap tidak terlihat.
+Manifest pernah menulis `android:icon="@drawable/ic_launcher_background"`, yaitu layer latar ikon
+itu sendiri: build tetap hijau, semua PNG ada, dan semua ponsel menampilkan kotak navy kosong. Pemeriksa
+itu membandingkan rujukan di manifest, dua file XML adaptif, lima densitas, tidak adanya
+`ic_launcher.webp` lama, dan rujukan splash serta loading, lalu `bin/self-test.sh icons` membuat
+kesalahan yang sama di direktori sementara untuk membuktikan pemeriksa menolaknya.
 
 ### Melaporkan bug
 

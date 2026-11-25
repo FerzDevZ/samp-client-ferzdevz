@@ -274,6 +274,9 @@ public class MainActivity extends AppCompatActivity {
         boolean ready = dataPresent && serverChosen;
         startButton.setText(ready ? getString(R.string.home_start)
                 : getString(R.string.home_start_setup));
+        // The icon follows the label. A play triangle on a button that says "set up first" promises
+        // a game that will not start.
+        Ui.setButtonIcon(startButton, ready ? R.drawable.ic_play : R.drawable.ic_settings);
         if (summarySlot != null) {
             summarySlot.removeAllViews();
             summarySlot.addView(Ui.pill(this,
