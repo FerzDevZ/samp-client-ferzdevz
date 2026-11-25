@@ -54,7 +54,8 @@ returns 0.
 |---|---|
 | `bin/fetch-blobs.sh` | copies the two binary sets that cannot be tracked |
 | `bin/build-cache.sh` | builds `full` and `lite` asset trees with SHA-256 manifests |
-| `bin/android-build.sh` | build gate with a `native` mode CI can run |
+| `bin/patch-apk.sh` | completes the framework APK with a game-owned `libGame.so` |
+| `bin/android-build.sh` | build gate with `native` (CI) and `framework` (publishable) modes |
 | `.github/workflows/ci.yml` | compile-and-verify, fails if a proprietary binary is staged |
 | `docs/` | this documentation |
 

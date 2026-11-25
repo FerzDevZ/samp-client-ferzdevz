@@ -7,6 +7,9 @@
 #   bin/android-build.sh native     # C++ only: libsamp.so, no APK, no libGame.so
 #                                   #   (CI mode: proves our own code compiles
 #                                   #    without touching Rockstar binaries)
+#   bin/android-build.sh framework  # APK with libGame.so removed and re-signed:
+#                                   #   the distributable half, completed later by
+#                                   #   bin/patch-apk.sh using a game APK you own
 #
 # Requires: JDK 17, Android SDK with ndk;26.2.11394342 + cmake;3.22.1.
 # Verified green on: openjdk 17.0.21.1, NDK r26c, cmake 3.22.1, gradle 8.13.
@@ -23,12 +26,14 @@ export ANDROID_SDK_ROOT="$ANDROID_HOME"
 VARIANT="debug"
 CLEAN=0
 NATIVE_ONLY=0
+FRAMEWORK=0
 case "${1:-debug}" in
-  debug)   VARIANT="debug" ;;
-  release) VARIANT="release" ;;
-  clean)   CLEAN=1 ;;
-  native)  NATIVE_ONLY=1 ;;
-  *) echo "usage: $0 [debug|release|clean|native]" >&2; exit 2 ;;
+  debug)     VARIANT="debug" ;;
+  release)   VARIANT="release" ;;
+  clean)     CLEAN=1 ;;
+  native)    NATIVE_ONLY=1 ;;
+  framework) FRAMEWORK=1 ;;
+  *) echo "usage: $0 [debug|release|clean|native|framework]" >&2; exit 2 ;;
 esac
 
 die() { echo "FAIL: $*" >&2; exit 1; }
@@ -94,3 +99,43 @@ echo "PASS"
 echo "  apk      : $APK ($(du -h "$APK" | cut -f1))"
 echo "  libsamp  : $SO ($(du -h "$SO" 2>/dev/null | cut -f1))"
 echo "  abi      : arm64-v8a"
+
+# --- framework mode: strip the game library, re-sign, publishable -----------
+# An APK containing libGame.so cannot be redistributed. The framework is the same
+# app with that one file removed and signed with the local patcher key, so
+# bin/patch-apk.sh can put it back from a game APK the user owns.
+if [[ $FRAMEWORK -eq 1 ]]; then
+  BT="$(ls -d "$ANDROID_HOME"/build-tools/* 2>/dev/null | sort -V | tail -1)"
+  [[ -x "$BT/zipalign" && -x "$BT/apksigner" ]] || die "no zipalign/apksigner in $BT"
+  KSDIR="${PATCHER_KEYSTORE_DIR:-$HOME/.samp-client}"
+  KS="$KSDIR/patcher.keystore"
+  KS_PASS="${PATCHER_STOREPASS:-patchit}"
+  KS_ALIAS="${PATCHER_KEYALIAS:-patcher}"
+  if [[ ! -f "$KS" ]]; then
+    mkdir -p "$KSDIR"; chmod 700 "$KSDIR"
+    "$JAVA_HOME/bin/keytool" -genkeypair -keystore "$KS" -alias "$KS_ALIAS" \
+      -storepass "$KS_PASS" -keypass "$KS_PASS" -keyalg RSA -keysize 2048 \
+      -validity 10000 -dname "CN=SA-MP Client Patcher, O=local, C=ID" >/dev/null 2>&1 \
+      || die "keytool failed to create $KS"
+    chmod 600 "$KS"
+  fi
+  mkdir -p "$ROOT/dist"
+  FW="$ROOT/dist/samp-client-framework.apk"
+  cp "$APK" "$FW"
+  zip -q -d "$FW" "lib/arm64-v8a/libGame.so" || die "cannot remove libGame.so from the copy"
+  "$BT/zipalign" -p -f 4 "$FW" "$FW.aligned" >/dev/null || die "zipalign failed"
+  "$BT/apksigner" sign --ks "$KS" --ks-key-alias "$KS_ALIAS" \
+    --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
+    --out "$FW.signed" "$FW.aligned" || die "apksigner sign failed"
+  mv "$FW.signed" "$FW"; rm -f "$FW.aligned" "$FW.signed.idsig"
+  "$BT/apksigner" verify "$FW" >/dev/null 2>&1 || die "framework signature does not verify"
+  FW_INDEX="$(unzip -l "$FW")"
+  grep -q 'lib/arm64-v8a/libsamp.so' <<<"$FW_INDEX" || die "framework is missing libsamp.so"
+  if grep -q 'lib/arm64-v8a/libGame.so' <<<"$FW_INDEX"; then
+    die "framework still contains libGame.so — it is not distributable"
+  fi
+  ( cd "$ROOT/dist" && sha256sum "$(basename "$FW")" > "$(basename "$FW").sha256" )
+  echo "  framework: $FW ($(du -h "$FW" | cut -f1)) — no libGame.so, signed"
+  echo "  complete : bin/patch-apk.sh --gta-apk <your GTA SA apk> --out client.apk"
+fi
+exit 0

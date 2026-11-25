@@ -24,28 +24,26 @@ Everything below was executed on this machine, not assumed.
 | Game data | **not in this repo** — see [docs/DATA.md](docs/DATA.md) |
 | APK in a GitHub Release | **no** — it embeds Rockstar's `libGame.so`, see [docs/LEGAL.md](docs/LEGAL.md) |
 
-## Download
+## Getting an installable APK
 
-There is no download link. The APK cannot be published from here, and a link
-without the asset tree would install and then close itself.
-
-Build it, ~3 minutes:
+There is no published APK. An installable one contains Rockstar's `libGame.so`
+(8.5 MB) and cannot be redistributed from this repository, so it is built on your
+machine from a game APK you own:
 
 ```bash
-git clone https://github.com/FerzDevZ/samp-client-ferzdevz
-cd samp-client-ferzdevz
-bin/fetch-blobs.sh        # libGame.so + BASS .so from the upstream reference
-bin/android-build.sh      # -> client/app/build/outputs/apk/debug/samp-client-debug.apk
-adb install -r client/app/build/outputs/apk/debug/samp-client-debug.apk
+bin/android-build.sh framework        # 1. publishable half -> dist/samp-client-framework.apk (28 MB)
+bin/patch-apk.sh --gta-apk GTA.apk \
+                 --out dist/samp-client-0.1.0.apk      # 2. add libGame.so, realign, re-sign (37 MB)
+adb install -r dist/samp-client-0.1.0.apk              # 3. install
+adb push cache/full/. /storage/emulated/0/GTA/         # 4. assets, or the app closes on launch
 ```
 
-Then put the asset tree at `/storage/emulated/0/GTA/`, or the app closes on
-launch — [docs/DATA.md](docs/DATA.md).
+Full flow, measured timings and the four refusal cases: [docs/PATCHER.md](docs/PATCHER.md).
 
-If you only want to check that the code compiles, skip both:
+If you want to compile without any game file at all:
 
 ```bash
-bin/android-build.sh native     # libsamp.so only, no Rockstar binary needed
+bin/android-build.sh native     # libsamp.so only, 3.5 MB, that is what CI runs
 ```
 
 ## What each command proves
@@ -53,9 +51,11 @@ bin/android-build.sh native     # libsamp.so only, no Rockstar binary needed
 | Command | Proves |
 |---|---|
 | `bin/android-build.sh clean` | the whole client compiles and packages; inspects the APK instead of trusting gradle's exit code |
+| `bin/android-build.sh framework` | the publishable half: same APK with Rockstar's `libGame.so` removed and re-signed |
 | `bin/android-build.sh native` | our C++ compiles to a real ARM64 ELF with no Rockstar file present |
 | `bin/build-cache.sh …` | the asset tree is complete and matches a SHA-256 manifest |
 | `bin/build-cache.sh --verify` | an existing cache is byte-identical to its manifest |
+| `bin/patch-apk.sh` | the completed APK installs: both native libs stored, aligned, signature valid |
 
 ## Layout
 

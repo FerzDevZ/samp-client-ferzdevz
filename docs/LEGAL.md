@@ -32,6 +32,18 @@ that artifact contains only code from this repo.
 If you choose to distribute the APK yourself, that is your account and your
 decision; nothing in this repo automates it.
 
+## The framework APK, and what is still unresolved about it
+
+`bin/android-build.sh framework` produces an APK with Rockstar's `libGame.so`
+removed. It contains no Rockstar binary, but it does contain the
+`com/rockstargames/oswrapper/` Java classes, which came out of the game's DEX via
+jadx. Those are a derivative of Rockstar's code, not a clean-room rewrite.
+
+That distinction matters if you publish it: removing a binary is not the same as
+replacing decompiled source. Treat the framework as something to build locally,
+and treat a clean-room rewrite of the wrapper as outstanding work. The patcher and
+`libsamp.so` are unaffected — they are ours.
+
 ## Names left in place
 
 Three Java packages keep their original names because a prebuilt binary refers to

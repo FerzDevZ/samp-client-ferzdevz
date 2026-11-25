@@ -55,7 +55,8 @@ mengembalikan 0.
 |---|---|
 | `bin/fetch-blobs.sh` | menyalin dua set binary yang tidak boleh di-track |
 | `bin/build-cache.sh` | membangun tree aset `full` dan `lite` dengan manifest SHA-256 |
-| `bin/android-build.sh` | gate build dengan mode `native` yang bisa dijalankan CI |
+| `bin/patch-apk.sh` | melengkapi APK framework dengan `libGame.so` milik pengguna |
+| `bin/android-build.sh` | gate build dengan mode `native` (CI) dan `framework` (boleh diterbitkan) |
 | `.github/workflows/ci.yml` | kompilasi dan verifikasi, gagal bila binary proprietary di-stage |
 | `docs/` | dokumentasi ini |
 

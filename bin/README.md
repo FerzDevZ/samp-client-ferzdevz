@@ -6,6 +6,7 @@ true turns out not to be.
 | Script | Purpose | Needs `libGame.so` |
 |---|---|---|
 | `android-build.sh` | build `libsamp.so` and/or the APK, then inspect the artifact | yes, except in `native` mode |
+| `patch-apk.sh` | inject a game-owned `libGame.so` into the framework APK, realign, re-sign | it is the input |
 | `fetch-blobs.sh` | copy the two binary sets that cannot be tracked in git | — |
 | `build-cache.sh` | build and verify the `/storage/emulated/0/GTA/` asset tree | — |
 
@@ -16,7 +17,12 @@ bin/android-build.sh            # debug APK
 bin/android-build.sh release    # release APK (unsigned without a keystore)
 bin/android-build.sh clean      # wipe build dirs, then debug APK
 bin/android-build.sh native     # libsamp.so only — no APK, no libGame.so
+bin/android-build.sh framework  # APK minus libGame.so, re-signed -> dist/samp-client-framework.apk
 ```
+
+`framework` reads the APK gradle just built, deletes `lib/arm64-v8a/libGame.so`,
+aligns, signs with `~/.samp-client/patcher.keystore`, and asserts the game library
+is really gone. 28 MB instead of 36 MB.
 
 Preflight: JDK, NDK 26.2.11394342, cmake 3.22.1. Then it writes
 `client/local.properties`, sets the `gradlew` exec bit, repairs a missing trailing
@@ -25,7 +31,25 @@ newline in `client/gradle.properties`, builds, and asserts the result:
 - APK modes: `lib/arm64-v8a/libsamp.so` **and** `lib/arm64-v8a/libGame.so` inside the APK;
 - `native`: `libsamp.so` exists under `app/build/intermediates/cxx`.
 
-Measured here: `clean` 2m08s–2m50s, `native` 10s, both 0 warnings.
+Measured here: `clean` 2m08s–2m50s, `native` 10s, `framework` 11s on an incremental
+build, all 0 warnings.
+
+## patch-apk.sh
+
+```bash
+bin/patch-apk.sh --gta-apk GTA.apk --out dist/samp-client-0.1.0.apk
+bin/patch-apk.sh --gta-apk GTA.apk --framework dist/samp-client-framework.apk --out client.apk
+```
+
+Refuses unless the game APK declares `com.rockstargames.gtasa` and carries an arm64
+`libGame.so`, and unless the framework carries `libsamp.so` and no `libGame.so`.
+Injects with `zip -0` (stored — a deflated `.so` cannot be mmap'd), `zipalign -p -f 4`,
+signs, then verifies: signature, both libraries present and `Stored`, alignment still
+valid after signing, package unchanged.
+
+Tested: PASS on a fixture game APK (injected `libGame.so` byte-identical to the
+source), and three refusals — framework that still holds the game library, APK
+without it, APK with the wrong package.
 
 ## fetch-blobs.sh
 
@@ -66,6 +90,7 @@ tidak benar.
 | Script | Fungsi | Butuh `libGame.so` |
 |---|---|---|
 | `android-build.sh` | build `libsamp.so` dan/atau APK, lalu periksa artifact-nya | ya, kecuali mode `native` |
+| `patch-apk.sh` | menyuntik `libGame.so` milik pengguna ke APK framework, realign, tanda tangan ulang | itu inputnya |
 | `fetch-blobs.sh` | menyalin dua set binary yang tidak boleh masuk git | — |
 | `build-cache.sh` | membangun dan memverifikasi tree aset `/storage/emulated/0/GTA/` | — |
 
@@ -78,7 +103,25 @@ newline yang hilang di `client/gradle.properties`, build, dan memastikan hasilny
 - mode APK: `lib/arm64-v8a/libsamp.so` **dan** `lib/arm64-v8a/libGame.so` ada di dalam APK;
 - `native`: `libsamp.so` ada di `app/build/intermediates/cxx`.
 
-Terukur di sini: `clean` 2m08s–2m50s, `native` 10s, keduanya 0 warning.
+Mode `framework` membaca APK hasil gradle, menghapus `lib/arm64-v8a/libGame.so`,
+menyejajarkan, menandatangani dengan `~/.samp-client/patcher.keystore`, lalu
+memastikan library game benar-benar hilang. 28 MB, bukan 36 MB.
+
+Terukur di sini: `clean` 2m08s–2m50s, `native` 10s, `framework` 11s pada build
+inkremental, semuanya 0 warning.
+
+## patch-apk.sh
+
+Menolak kalau APK game tidak mendeklarasikan `com.rockstargames.gtasa` atau tidak
+membawa `libGame.so` arm64, dan menolak kalau framework tidak punya `libsamp.so`
+atau masih punya `libGame.so`. Menyuntik dengan `zip -0` (stored — `.so` yang
+dipadatkan tidak bisa di-mmap), `zipalign -p -f 4`, tanda tangan, lalu verifikasi:
+signature, kedua library ada dan `Stored`, alignment masih valid setelah
+ditandatangani, package tidak berubah.
+
+Sudah diuji: PASS pada APK game fixture (`libGame.so` hasil suntik identik
+byte-per-byte dengan sumber), dan tiga penolakan — framework yang masih membawa
+library game, APK tanpa library itu, APK dengan package salah.
 
 ## fetch-blobs.sh
 

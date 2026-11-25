@@ -31,6 +31,19 @@ artifact itu hanya berisi kode dari repo ini.
 Kalau kamu memilih mendistribusikan APK-nya sendiri, itu akunmu dan keputusanmu;
 tidak ada bagian di repo ini yang mengotomatiskan itu.
 
+## APK framework, dan yang belum selesai soal itu
+
+`bin/android-build.sh framework` menghasilkan APK tanpa `libGame.so` milik
+Rockstar. Tidak ada binary Rockstar di dalamnya, tapi ada class Java
+`com/rockstargames/oswrapper/` yang berasal dari DEX game lewat jadx. Itu turunan
+kode Rockstar, bukan hasil tulis ulang bersih.
+
+Pembedaan ini penting kalau kamu menerbitkannya: membuang binary tidak sama dengan
+mengganti source hasil dekompilasi. Perlakukan framework sebagai sesuatu yang
+dibangun lokal, dan anggap penulisan ulang wrapper secara bersih sebagai pekerjaan
+yang belum selesai. Patcher dan `libsamp.so` tidak terpengaruh — keduanya milik
+kita.
+
 ## Nama yang dibiarkan
 
 Tiga package Java memakai nama aslinya karena binary prebuilt merujuknya lewat path

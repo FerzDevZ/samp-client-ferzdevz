@@ -1,0 +1,68 @@
+# Patcher
+
+APK yang bisa dipasang butuh `libGame.so` milik Rockstar, dan itu tidak boleh
+didistribusikan. Patcher memecah klien jadi dua bagian: satu yang boleh
+diterbitkan, satu yang diambil dari instalasi game orang itu sendiri.
+
+```
+dist/samp-client-framework.apk   milik kita, 28 MB, tanpa libGame.so   <- boleh diterbitkan
+        +  lib/arm64-v8a/libGame.so  dari APK GTA SA milik pengguna
+        =  APK yang terpasang dan jalan
+```
+
+Tidak ada file lain dari APK game yang disalin, dan hasilnya tidak pernah keluar
+dari mesin yang menjalankan alat ini.
+
+## Pemakaian
+
+```bash
+# sekali, atau setelah kode klien berubah
+bin/android-build.sh framework
+#   -> dist/samp-client-framework.apk (28 MB, sudah ditandatangani, tanpa libGame.so)
+
+# untuk perangkat mana pun
+bin/patch-apk.sh --gta-apk /path/to/GTA.apk --out dist/samp-client-0.1.0.apk
+```
+
+`--framework <path>` menimpa lokasi framework default. `--out` wajib.
+
+## Urutan kerjanya
+
+1. Periksa APK game: harus punya `lib/arm64-v8a/libGame.so` dan mendeklarasikan
+   `package com.rockstargames.gtasa`. Gagal di sini jauh lebih murah daripada
+   menghasilkan APK mati berukuran 36 MB.
+2. Periksa framework: harus punya `libsamp.so` dan **tidak** punya `libGame.so`.
+3. Keluarkan `libGame.so` ke direktori sementara, pastikan isinya
+   `ELF 64-bit LSB shared object, ARM aarch64`.
+4. Suntik dengan `zip -0` — disimpan, bukan dipadatkan. Library native harus bisa
+   di-mmap langsung dari APK; yang dipadatkan tidak bisa, dan aplikasi mati dengan
+   `UnsatisfiedLinkError` sebelum UI muncul.
+5. `zipalign -p -f 4`: alignment halaman untuk `.so`, 4 byte untuk sisanya.
+6. Tanda tangani dengan `~/.samp-client/patcher.keystore`, dibuat saat pertama
+   dijalankan (`keytool`, RSA 2048, 10.000 hari, mode 600).
+7. Verifikasi artifact, bukan exit code: `apksigner verify`, kedua `.so` ada dan
+   terbaca, keduanya `Stored` di zip, `zipalign -c -p 4` masih lolos setelah
+   ditandatangani, dan `aapt2 dump badging` melaporkan `com.ferzdevzgta.game`.
+
+Terukur di mesin ini: framework 28 MB, hasil patch 37 MB, sekitar 20 detik setelah
+framework-nya ada.
+
+## Pengujian yang dijalankan
+
+| Kasus | Harus | Hasil |
+|---|---|---|
+| APK game + framework | PASS | PASS, 37 MB, `libGame.so` identik byte-per-byte dengan sumber (`sha256` dibandingkan) |
+| framework yang masih membawa `libGame.so` | tolak | `FAIL: … already contains libGame.so` |
+| APK tanpa `libGame.so` | tolak | `FAIL: … has no lib/arm64-v8a/libGame.so` |
+| APK dengan package salah | tolak | `FAIL: … is not GTA San Andreas (package 'com.ferzdevzgta.game')` |
+
+## Batasan
+
+- **Hanya arm64-v8a.** APK game harus membawa `libGame.so` arm64; kalau hanya ada
+  `armeabi-v7a`, alat ini menolak daripada menghasilkan APK rusak.
+- **Hanya base APK.** Instalasi split (`base.apk` + `config.arm64_v8a.apk`) butuh
+  split ABI-nya; gabungkan base dan split config arm64, lalu berikan base-nya.
+- **Aset terpisah.** APK tetap membaca `/storage/emulated/0/GTA/`; bangun tree itu
+  dengan `bin/build-cache.sh` dari instalasi game yang sama.
+- **Tanpa obfuscation, tanpa rename.** Kalau APK pengguna menamai library-nya lain
+  (hasil repack), pemeriksaan suntik akan menolaknya.

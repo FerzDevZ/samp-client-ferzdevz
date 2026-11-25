@@ -43,3 +43,7 @@ Format: `- **[YY-MM-DD · Component]**: <symptom> → **Root Cause**: <exact cau
 - **[26-11-25 · activity name]**: `android:name` must keep pointing at the real `.java` package after an `applicationId` change → **Invariant Rule**: manifest component names follow source packages; only the `R` class follows `namespace`.
 
 - **[26-11-25 · artfiact]**: the 5 exported JNI symbols in the shipped `libsamp.so` are the cheapest identity check there is → **Invariant Rule**: after any rename, assert the shipped `.so` exports the new names AND `aapt2 dump badging` reports the new launchable activity, before calling the rename done.
+
+- **[26-11-25 · patcher]**: injecting a native library into an existing APK produces an app that dies with `UnsatisfiedLinkError` before any UI → **Root Cause**: a compressed entry cannot be mmap'd, and `zip -r` deflates by default; alignment is also lost → **Invariant Rule**: inject with `zip -0`, then `zipalign -p -f 4`, then sign, then assert both `.so` entries report `Stored` and `zipalign -c -p 4` still passes on the signed file.
+
+- **[26-11-25 · patcher]**: a payload APK must be checked by package and by content before assembly → **Root Cause**: `aapt2 dump badging` on a file with no manifest fails with "could not identify format of APK", and any zip can carry `lib/arm64-v8a/`, so silence there means shipping a 37 MB brick → **Invariant Rule**: refuse unless the game APK reports `com.rockstargames.gtasa` and the framework reports `com.ferzdevzgta.game` with `libsamp.so` present and `libGame.so` absent.

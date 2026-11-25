@@ -24,28 +24,26 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Data game | **tidak ada di repo ini** — lihat [docs/id/DATA.md](docs/id/DATA.md) |
 | APK di GitHub Release | **tidak** — APK membawa `libGame.so` milik Rockstar, lihat [docs/id/LEGAL.md](docs/id/LEGAL.md) |
 
-## Unduhan
+## Mendapatkan APK yang bisa dipasang
 
-Tidak ada tautan unduhan. APK-nya tidak bisa diterbitkan dari sini, dan tautan
-tanpa tree aset hanya akan terpasang lalu langsung tertutup.
-
-Bangun sendiri, sekitar 3 menit:
+Tidak ada APK yang diterbitkan. APK yang bisa dipasang membawa `libGame.so` milik
+Rockstar (8,5 MB) dan tidak boleh didistribusikan dari repo ini, jadi dibangun di
+mesinmu dari APK game yang kamu miliki:
 
 ```bash
-git clone https://github.com/FerzDevZ/samp-client-ferzdevz
-cd samp-client-ferzdevz
-bin/fetch-blobs.sh        # libGame.so + BASS .so dari reference upstream
-bin/android-build.sh      # -> client/app/build/outputs/apk/debug/samp-client-debug.apk
-adb install -r client/app/build/outputs/apk/debug/samp-client-debug.apk
+bin/android-build.sh framework        # 1. separuh yang boleh diterbitkan -> dist/samp-client-framework.apk (28 MB)
+bin/patch-apk.sh --gta-apk GTA.apk \
+                 --out dist/samp-client-0.1.0.apk      # 2. tambah libGame.so, realign, tanda tangan ulang (37 MB)
+adb install -r dist/samp-client-0.1.0.apk              # 3. pasang
+adb push cache/full/. /storage/emulated/0/GTA/         # 4. aset, kalau tidak aplikasi tertutup saat dibuka
 ```
 
-Lalu taruh tree aset di `/storage/emulated/0/GTA/`, kalau tidak aplikasi tertutup
-saat dibuka — [docs/id/DATA.md](docs/id/DATA.md).
+Alur lengkap, waktu terukur, dan empat kasus penolakan: [docs/id/PATCHER.md](docs/id/PATCHER.md).
 
-Kalau hanya ingin memastikan kodenya terompilasi, lewati keduanya:
+Kalau hanya ingin mengompilasi tanpa file game sama sekali:
 
 ```bash
-bin/android-build.sh native     # libsamp.so saja, tanpa binary Rockstar
+bin/android-build.sh native     # libsamp.so saja, 3,5 MB, inilah yang dijalankan CI
 ```
 
 ## Apa yang dibuktikan tiap perintah
@@ -53,9 +51,11 @@ bin/android-build.sh native     # libsamp.so saja, tanpa binary Rockstar
 | Perintah | Bukti |
 |---|---|
 | `bin/android-build.sh clean` | seluruh klien terompilasi dan terpaket; memeriksa isi APK, tidak mempercayai exit code gradle |
+| `bin/android-build.sh framework` | separuh yang boleh diterbitkan: APK sama tanpa `libGame.so` milik Rockstar, ditandatangani ulang |
 | `bin/android-build.sh native` | C++ kita menghasilkan ELF ARM64 nyata tanpa file Rockstar |
 | `bin/build-cache.sh …` | tree aset lengkap dan cocok dengan manifest SHA-256 |
 | `bin/build-cache.sh --verify` | cache yang ada identik byte-per-byte dengan manifest-nya |
+| `bin/patch-apk.sh` | APK hasil rakitan bisa dipasang: kedua library native stored, aligned, signature valid |
 
 ## Struktur
 
