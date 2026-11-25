@@ -21,6 +21,7 @@ import com.ferzdevzgta.game.R;
 import com.ferzdevzgta.game.SAMP;
 import com.ferzdevzgta.game.data.CacheManifest;
 import com.ferzdevzgta.game.diag.Report;
+import com.ferzdevzgta.game.log.CrashHandler;
 import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.ui.dialog.DialogManager;
@@ -104,6 +105,11 @@ public class DiagnosticsActivity extends AppCompatActivity {
         passed += addCheck(card, R.string.diag_check_log, log.isFile(),
                 log.isFile() ? Report.bytes(log.length()) : getString(R.string.diag_missing));
 
+        String lastCrash = CrashHandler.lastCrash(log);
+        total++;
+        passed += addCheck(card, R.string.diag_check_crash, lastCrash.isEmpty(),
+                lastCrash.isEmpty() ? getString(R.string.diag_none) : firstLine(lastCrash, 2));
+
         root.addView(card, Ui.fill());
 
         Ui.gap(this, root, 14);
@@ -121,6 +127,18 @@ public class DiagnosticsActivity extends AppCompatActivity {
         share.setOnClickListener(v -> shareLog(log));
         actions.addView(share, Ui.weight(this, 1f, 0f));
         root.addView(actions, Ui.fill());
+
+        if (!lastCrash.isEmpty()) {
+            Ui.gap(this, root, 18);
+            root.addView(Ui.section(this, getString(R.string.diag_crash_title)));
+            Ui.gap(this, root, 8);
+            LinearLayout crashCard = Ui.card(this);
+            TextView crashText = Ui.mono(this, lastCrash);
+            crashText.setTextColor(Ui.ERR);
+            crashText.setTextIsSelectable(true);
+            crashCard.addView(crashText, Ui.fill());
+            root.addView(crashCard, Ui.fill());
+        }
 
         Ui.gap(this, root, 18);
         root.addView(Ui.section(this, getString(R.string.diag_log_title)));
@@ -240,6 +258,22 @@ public class DiagnosticsActivity extends AppCompatActivity {
             }
         }
         return "";
+    }
+
+    /** The first {@code count} lines of a block, for the one-line status row. */
+    private String firstLine(String block, int count) {
+        String[] lines = block.split("\n", -1);
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < Math.min(count, lines.length); i++) {
+            if (lines[i].trim().isEmpty()) {
+                continue;
+            }
+            if (out.length() > 0) {
+                out.append(' ');
+            }
+            out.append(lines[i].trim());
+        }
+        return out.toString();
     }
 
     private String tailText(File log) {

@@ -30,6 +30,7 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Bahasa | **ya**, Indonesia atau Inggris, dipilih di dalam aplikasi, disimpan di `ui_language`, `bin/self-test.sh strings` menolak kalau kedua file resource berbeda |
 | Status server langsung | **ya**, ping dan jumlah pemain per server di daftar, satu query UDP per baris dengan timeout 1200 ms, tidak pernah di main thread |
 | Diagnostik | **ya**, `DiagnosticsActivity` membaca HP: pustaka native, lima titik masuk JNI, pohon data, manifest, target, 20 baris log terakhir, salin dan bagikan |
+| Catatan crash | **ya**, pengecualian Java yang tidak tertangani ditambahkan ke `GTA/logcat.txt` sebagai blok bertanda dengan waktu UTC dan versi aplikasi, diputar pada 2 MiB, lalu tampil di Diagnostik |
 | Layar launcher | **didesain ulang**, menampilkan status data, server dan nickname sebelum menekan Start, `bin/ui-contrast.py` menjaga palette di atas WCAG AA |
 
 ## Mendapatkan APK yang bisa dipasang

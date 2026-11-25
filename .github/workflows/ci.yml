@@ -78,10 +78,10 @@ jobs:
         run: |
           set -eu
           if git ls-files --error-unmatch client/app/src/main/jniLibs/arm64-v8a/libGame.so 2>/dev/null; then
-            echo "libGame.so is tracked — it must never be committed"; exit 1
+            echo "libGame.so is tracked, it must never be committed"; exit 1
           fi
           if git ls-files 'client/app/src/main/cpp/samp/vendor/bass/libs/*'; then
-            echo "BASS .so files are tracked — licence forbids it"; exit 1
+            echo "BASS .so files are tracked, the licence forbids it"; exit 1
           fi
           echo "clean: no proprietary binaries in git"
 
@@ -105,3 +105,74 @@ jobs:
           name: libsamp-arm64-v8a-${{ github.sha }}
           path: client/app/build/intermediates/cxx/**/obj/arm64-v8a/libsamp.so
           if-no-files-found: error
+
+  android:
+    name: app APK (Java + CMake + resources)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK + NDK 26.2.11394342 + cmake 3.22.1
+        uses: android-actions/setup-android@v3
+        with:
+          packages: >-
+            platform-tools
+            platforms;android-36
+            build-tools;36.0.0
+            ndk;26.2.11394342
+            cmake;3.22.1
+
+      - name: Cache gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-apk-${{ hashFiles('client/**/*.gradle.kts', 'client/gradle/wrapper/gradle-wrapper.properties') }}
+
+      # A UI change that breaks compilation used to pass CI, because only the C++
+      # was ever built. This job compiles the Java, the resources and the manifest,
+      # which is where the launcher screens, the design system and the strings live.
+      - name: ":app:assembleDebug"
+        run: |
+          set -eu
+          cd client
+          ./gradlew --no-daemon :app:assembleDebug
+
+      - name: "Assert the APK exists and carries no Rockstar binary"
+        run: |
+          set -eu
+          APK=client/app/build/outputs/apk/debug/samp-client-debug.apk
+          test -f "$APK" || { echo "no APK produced"; exit 1; }
+          ls -l "$APK"
+          if unzip -l "$APK" | grep -q 'lib/arm64-v8a/libGame.so'; then
+            echo "libGame.so is inside the APK, a clean checkout must never contain it"; exit 1
+          fi
+          unzip -l "$APK" | grep -q 'lib/arm64-v8a/libsamp.so' \
+            || { echo "our own native library is missing from the APK"; exit 1; }
+          echo "APK is the patcher-ready half: our code only"
+
+      - name: "Assert the five JNI entry points reach the dex"
+        run: |
+          set -eu
+          APK=client/app/build/outputs/apk/debug/samp-client-debug.apk
+          DEX=$(mktemp -d)
+          unzip -q -o "$APK" 'classes*.dex' -d "$DEX"
+          for symbol in initializeSAMP sendDialogResponse Exit AttachClick Save; do
+            cat "$DEX"/classes*.dex | strings | grep -q "$symbol" \
+              || { echo "missing JNI entry point: $symbol"; exit 1; }
+          done
+          echo "5/5 JNI entry points present in the dex"
+
+      - name: "Palette and string parity"
+        run: |
+          set -eu
+          ./bin/ui-contrast.py
+          ./bin/self-test.sh strings

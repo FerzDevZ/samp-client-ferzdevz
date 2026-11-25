@@ -133,6 +133,8 @@
     <string name="diag_none">kosong</string>
     <string name="diag_unreadable">tidak terbaca</string>
     <string name="diag_log_title">20 baris log terakhir</string>
+    <string name="diag_check_crash">Crash terakhir</string>
+    <string name="diag_crash_title">Crash terakhir yang tercatat</string>
     <string name="diag_copy">Salin laporan</string>
     <string name="diag_copied">Laporan disalin</string>
     <string name="diag_share">Bagikan log</string>

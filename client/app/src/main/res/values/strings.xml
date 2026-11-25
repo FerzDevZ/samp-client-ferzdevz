@@ -134,6 +134,8 @@
     <string name="diag_none">none</string>
     <string name="diag_unreadable">unreadable</string>
     <string name="diag_log_title">Last 20 log lines</string>
+    <string name="diag_check_crash">Last crash</string>
+    <string name="diag_crash_title">Last recorded crash</string>
     <string name="diag_copy">Copy report</string>
     <string name="diag_copied">Report copied</string>
     <string name="diag_share">Share log</string>

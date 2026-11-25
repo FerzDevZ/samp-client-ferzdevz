@@ -30,6 +30,7 @@ Everything below was executed on this machine, not assumed.
 | Language | **yes**, Indonesian or English, chosen in the app, stored in `ui_language`, `bin/self-test.sh strings` refuses to let the two resource files drift apart |
 | Live server status | **yes**, ping and player count per listed server, one UDP query per row with a 1200 ms timeout, never on the main thread |
 | Diagnostics | **yes**, `DiagnosticsActivity` reads the phone: native libraries, the five JNI entry points, data tree, manifest, target, last 20 log lines, copy and share |
+| Crash record | **yes**, an uncaught Java exception is appended to `GTA/logcat.txt` as a marked block with a UTC stamp and the app version, rotated at 2 MiB, then shown in Diagnostics |
 | Launcher screen | **redesigned**, shows data, server and nickname state before you press Start, `bin/ui-contrast.py` holds the palette above WCAG AA |
 
 ## Getting an installable APK

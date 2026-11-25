@@ -5,6 +5,7 @@ import com.ferzdevzgta.game.data.CacheManifestTest;
 import com.ferzdevzgta.game.log.LogRotationTest;
 import com.ferzdevzgta.game.servers.GameConfigTest;
 import com.ferzdevzgta.game.diag.ReportTest;
+import com.ferzdevzgta.game.log.CrashHandlerTest;
 import com.ferzdevzgta.game.servers.ServerEndpointTest;
 import com.ferzdevzgta.game.servers.ServerQueryTest;
 import com.ferzdevzgta.game.servers.ServerListTest;
@@ -25,6 +26,7 @@ public final class TestMain {
         CacheDownloaderTest.run();
         System.out.println("-- LogRotation");
         LogRotationTest.run();
+        CrashHandlerTest.run();
         System.out.println("-- IniFile");
         IniFileTest.run();
         System.out.println("-- ServerEndpoint");

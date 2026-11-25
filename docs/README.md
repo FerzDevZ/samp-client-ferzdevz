@@ -1,6 +1,6 @@
 # docs/
 
-Two languages, eight documents each. English in `docs/`, Indonesian in `docs/id/`.
+Two languages, nine documents each. English in `docs/`, Indonesian in `docs/id/`.
 
 | Document | English | Indonesian | Answers |
 |---|---|---|---|
@@ -11,13 +11,14 @@ Two languages, eight documents each. English in `docs/`, Indonesian in `docs/id/
 | Legal | [LEGAL.md](LEGAL.md) | [id/LEGAL.md](id/LEGAL.md) | what is tracked, what is ignored and why, why no APK is published |
 | Patcher | [PATCHER.md](PATCHER.md) | [id/PATCHER.md](id/PATCHER.md) | how an installable APK is produced from a publishable framework plus a game APK the user owns |
 | Upstream delta | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | every change against `kuzia15/SAMP-Mobile` `GTA-2.11` |
+| Device verification | [VERIFY.md](VERIFY.md) | [id/VERIFY.md](id/VERIFY.md) | what to press on a real phone, what each screen must show, and what to capture when it does not |
 | Wrapper surface | [OSWRAPPER.md](OSWRAPPER.md) | [id/OSWRAPPER.md](id/OSWRAPPER.md) | which names `libGame.so` pins, what is free to rewrite, how far the rewrite has got |
 
 ---
 
 # docs/ (Bahasa Indonesia)
 
-Dua bahasa, enam dokumen masing-masing. Bahasa Inggris di `docs/`, bahasa Indonesia
+Dua bahasa, sembilan dokumen masing-masing. Bahasa Inggris di `docs/`, bahasa Indonesia
 di `docs/id/`.
 
 | Dokumen | English | Indonesia | Menjawab |
@@ -29,3 +30,4 @@ di `docs/id/`.
 | Legal | [LEGAL.md](LEGAL.md) | [id/LEGAL.md](id/LEGAL.md) | apa yang di-track, apa yang di-ignore dan alasannya, kenapa APK tidak diterbitkan |
 | Patcher | [PATCHER.md](PATCHER.md) | [id/PATCHER.md](id/PATCHER.md) | cara menghasilkan APK siap pasang dari framework yang boleh diterbitkan + APK game milik pengguna |
 | Selisih upstream | [UPSTREAM.md](UPSTREAM.md) | [id/UPSTREAM.md](id/UPSTREAM.md) | seluruh perubahan terhadap `kuzia15/SAMP-Mobile` `GTA-2.11` |
+| Verifikasi perangkat | [VERIFY.md](VERIFY.md) | [id/VERIFY.md](id/VERIFY.md) | apa yang ditekan di HP asli, apa yang harus muncul di tiap layar, dan apa yang dikumpulkan kalau tidak |
