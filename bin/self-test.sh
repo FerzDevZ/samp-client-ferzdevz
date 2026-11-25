@@ -349,6 +349,27 @@ run_icons() {
   rm -rf "$tmp"
 }
 
+run_guide() {
+  head_ "offline guide bridge"
+  if python3 bin/guide-check.py >"${TMPDIR:-/tmp}/guide.log" 2>&1; then
+    ok "$(cat "${TMPDIR:-/tmp}/guide.log")"
+  else
+    bad "$(cat "${TMPDIR:-/tmp}/guide.log")"
+  fi
+
+  # A page that calls something outside the bridge has to be refused, or the surface drifts.
+  local tmp
+  tmp="$(mktemp -d)"
+  cp client/app/src/main/assets/help/help.html "$tmp/help.html"
+  printf '\n<script>Panel.stealFiles()</script>\n' >>"$tmp/help.html"
+  if python3 bin/guide-check.py --page "$tmp/help.html" >/dev/null 2>&1; then
+    bad "the guide check accepted a method outside the bridge"
+  else
+    ok "flags a page that calls a method outside the bridge"
+  fi
+  rm -rf "$tmp"
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
@@ -359,8 +380,9 @@ case "${1:-all}" in
   strings) run_strings ;;
   icons)   run_icons ;;
   contrast) run_contrast ;;
-  all)     run_jvm; run_strings; run_contrast; run_icons; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
-  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
+  guide)   run_guide ;;
+  all)     run_jvm; run_strings; run_contrast; run_icons; run_guide; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
+  *)       echo "usage: $0 [all|jvm|strings|contrast|icons|guide|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"
