@@ -37,7 +37,3 @@ keystore.properties
 *.jks
 *.keystore
 google-services.json
-
-# --- agent toolkit (re-installable, not project source) ---------------------
-.agents/
-.freebuff/

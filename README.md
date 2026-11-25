@@ -15,8 +15,9 @@ Built on the open-source reference client [`kuzia15/SAMP-Mobile`](https://github
 | Debug APK assembles | **yes** — 43 MB, 1011 entries |
 | Clean rebuild from zero | **yes** — 2m12s, 0 warnings |
 | Patches required for Linux | 3 text + 1 binary duplicate removal, see `.patches/linux-port.patch` |
-| Telemetry stripped | **no** — reference tree still carries Firebase/AppLovin/Splunk |
-| Distributable artifact | **no** — not yet, see *Legal boundary* |
+| Telemetry stripped | **yes** — Firebase/AppLovin/Splunk removed, APK 43 MB → 36 MB |
+| Package identity | `com.ferzdevzgta.game` |
+| Distributable artifact | **still no** — see *Legal boundary* |
 
 ## Build
 
@@ -55,6 +56,8 @@ What `fetch-ref.sh` changes (all four documented in `MEMORY.md`):
 2. `libbass.so` / `libbass_ssl.so` deleted from `jniLibs/` (duplicate of the CMake link)
 3. `org.gradle.jvmargs` appended as a new line, not glued to the previous key
 4. `gradlew` made executable
+5. rebrand to `com.ferzdevzgta.game` + all telemetry SDKs stripped
+   (Firebase Analytics/Crashlytics/Messaging/Remote Config, AppLovin, Splunk Mint)
 
 ## Legal boundary
 

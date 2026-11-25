@@ -1,3 +1,100 @@
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index 9edaecf..52418e1 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -1,16 +1,14 @@
+ plugins {
+     id("com.android.application")
+-    id("com.google.gms.google-services")
+-    id("com.google.firebase.crashlytics")
+ }
+ 
+ android {
+     compileSdk = 36
+ 
+-    namespace = "com.gta.game"
++    namespace = "com.ferzdevzgta.game"
+ 
+     defaultConfig {
+-        applicationId = "com.gta.game"
++        applicationId = "com.ferzdevzgta.game"
+         minSdk = 28
+         targetSdk = 36
+         versionCode = 1
+@@ -63,12 +61,6 @@ android {
+             }
+         }
+         release {
+-            firebaseCrashlytics {
+-                nativeSymbolUploadEnabled = true
+-                strippedNativeLibsDir = "build/intermediates/stripped_native_libs/release/out/lib"
+-                unstrippedNativeLibsDir = "build/intermediates/merged_native_libs/release/out/lib"
+-            }
+-
+             ndk {
+                 debugSymbolLevel = "FULL"
+             }
+@@ -112,11 +104,6 @@ dependencies {
+     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+     implementation("com.android.volley:volley:1.2.1")
+     implementation("com.intuit.sdp:sdp-android:1.1.0")
+-    implementation("com.google.firebase:firebase-analytics")
+-    //implementation("com.google.firebase:firebase-crashlytics-ndk")
+-    implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
+-    implementation("com.google.firebase:firebase-messaging")
+-    implementation("com.google.firebase:firebase-config")
+     implementation("androidx.datastore:datastore-preferences:1.0.0")
+     implementation("androidx.datastore:datastore-core:1.0.0")
+     implementation("org.ini4j:ini4j:0.5.4")
+diff --git a/app/google-services.json b/app/google-services.json
+deleted file mode 100644
+index 1ffa53c..0000000
+--- a/app/google-services.json
++++ /dev/null
+@@ -1,29 +0,0 @@
+-{
+-  "project_info": {
+-    "project_number": "762518755799",
+-    "project_id": "gta-2-11",
+-    "storage_bucket": "gta-2-11.firebasestorage.app"
+-  },
+-  "client": [
+-    {
+-      "client_info": {
+-        "mobilesdk_app_id": "1:762518755799:android:df56c8be5b800740519392",
+-        "android_client_info": {
+-          "package_name": "com.gta.game"
+-        }
+-      },
+-      "oauth_client": [],
+-      "api_key": [
+-        {
+-          "current_key": "AIzaSyDjAELHrkWMKBJJxS_A3aAXODbY64Ow-ok"
+-        }
+-      ],
+-      "services": {
+-        "appinvite_service": {
+-          "other_platform_oauth_client": []
+-        }
+-      }
+-    }
+-  ],
+-  "configuration_version": "1"
+-}
+\ No newline at end of file
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 660bd30..ca1fc45 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools"
+-    package="com.gta.game">
++    package="com.ferzdevzgta.game">
+ 
+     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="36" />
+     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 diff --git a/app/src/main/cpp/samp/game/rgba.cpp b/app/src/main/cpp/samp/game/rgba.cpp
 index 099d852..30cac2c 100644
 --- a/app/src/main/cpp/samp/game/rgba.cpp
@@ -24,6 +121,203 @@ index 89a8cb3..2343401 100644
  #include "samp_widgets/voicebutton.h"
  
  #include "samp_widgets/dialogs/dialog.h"
+diff --git a/app/src/main/cpp/samp/main.cpp b/app/src/main/cpp/samp/main.cpp
+index 6f4bac6..dd7f985 100644
+--- a/app/src/main/cpp/samp/main.cpp
++++ b/app/src/main/cpp/samp/main.cpp
+@@ -23,7 +23,6 @@
+ 
+ #include "settings.h"
+ 
+-#include "crashlytics.h"
+ #include "game/CFirstPersonCamera.hpp"
+ #include "CServerManager.h"
+ 
+@@ -407,7 +406,6 @@ void Log(const char* fmt, ...)
+ 	va_end(arg);
+ 
+ 	LOGI("%s", buffer);
+-	firebase::crashlytics::Log(buffer);
+ 
+ 	if (flLog == nullptr) return;
+ 	fprintf(flLog, "%s\n", buffer);
+@@ -424,7 +422,7 @@ void LogVoice(const char* fmt, ...)
+ 
+ 	if (flLog == nullptr && pszStorage != nullptr)
+ 	{
+-		//sprintf(buffer, "/storage/emulated/0/Android/media/com.gta.game/SAMP/%s", SV::kLogFileName);
++		//sprintf(buffer, "/storage/emulated/0/Android/media/com.ferzdevzgta.game/SAMP/%s", SV::kLogFileName);
+ 		flLog = fopen(buffer, "w");
+ 	}
+ 
+diff --git a/app/src/main/java/com/gta/game/ui/AttachEdit.java b/app/src/main/java/com/gta/game/ui/AttachEdit.java
+index d50abd2..d837227 100644
+--- a/app/src/main/java/com/gta/game/ui/AttachEdit.java
++++ b/app/src/main/java/com/gta/game/ui/AttachEdit.java
+@@ -10,7 +10,7 @@ import android.widget.Button;
+ import androidx.constraintlayout.widget.ConstraintLayout;
+ 
+ import com.joom.paranoid.Obfuscate;
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.gta.launcher.util.Util;
+ @Obfuscate
+ public class AttachEdit {
+diff --git a/app/src/main/java/com/gta/game/ui/LoadingScreen.java b/app/src/main/java/com/gta/game/ui/LoadingScreen.java
+index 44edf35..3412e1b 100644
+--- a/app/src/main/java/com/gta/game/ui/LoadingScreen.java
++++ b/app/src/main/java/com/gta/game/ui/LoadingScreen.java
+@@ -10,7 +10,7 @@ import android.widget.ProgressBar;
+ 
+ import androidx.constraintlayout.widget.ConstraintLayout;
+ 
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ 
+ public class LoadingScreen {
+ 
+diff --git a/app/src/main/java/com/gta/game/ui/dialog/DialogAdapter.java b/app/src/main/java/com/gta/game/ui/dialog/DialogAdapter.java
+index 011af40..a7b1ceb 100644
+--- a/app/src/main/java/com/gta/game/ui/dialog/DialogAdapter.java
++++ b/app/src/main/java/com/gta/game/ui/dialog/DialogAdapter.java
+@@ -11,7 +11,7 @@ import android.widget.TextView;
+ import androidx.recyclerview.widget.RecyclerView;
+ 
+ import com.joom.paranoid.Obfuscate;
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.gta.launcher.util.Util;
+ 
+ import java.util.ArrayList;
+diff --git a/app/src/main/java/com/gta/game/ui/dialog/DialogManager.java b/app/src/main/java/com/gta/game/ui/dialog/DialogManager.java
+index 9267daf..085ea22 100644
+--- a/app/src/main/java/com/gta/game/ui/dialog/DialogManager.java
++++ b/app/src/main/java/com/gta/game/ui/dialog/DialogManager.java
+@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
+ import androidx.recyclerview.widget.SimpleItemAnimator;
+ 
+ import com.joom.paranoid.Obfuscate;
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.gta.launcher.util.CustomRecyclerView;
+ import com.gta.launcher.util.Util;
+ 
+diff --git a/app/src/main/java/com/gta/launcher/activity/MainActivity.java b/app/src/main/java/com/gta/launcher/activity/MainActivity.java
+index 234ee72..2a0495c 100644
+--- a/app/src/main/java/com/gta/launcher/activity/MainActivity.java
++++ b/app/src/main/java/com/gta/launcher/activity/MainActivity.java
+@@ -24,7 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.core.content.ContextCompat;
+ 
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.gta.game.SAMP;
+ 
+ public class MainActivity extends AppCompatActivity {
+diff --git a/app/src/main/java/com/rockstargames/gtasa/DownloaderActivity.java b/app/src/main/java/com/rockstargames/gtasa/DownloaderActivity.java
+index 2a1e2e1..659346a 100644
+--- a/app/src/main/java/com/rockstargames/gtasa/DownloaderActivity.java
++++ b/app/src/main/java/com/rockstargames/gtasa/DownloaderActivity.java
+@@ -1,6 +1,6 @@
+ package com.rockstargames.gtasa;
+ 
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.rockstargames.oswrapper.DownloaderActivityBase;
+ import com.rockstargames.oswrapper.DownloaderConfig;
+ import com.rockstargames.oswrapper.DownloaderPackConfig;
+diff --git a/app/src/main/java/com/rockstargames/oswrapper/DownloaderActivityBase.java b/app/src/main/java/com/rockstargames/oswrapper/DownloaderActivityBase.java
+index 7330c85..d85695b 100644
+--- a/app/src/main/java/com/rockstargames/oswrapper/DownloaderActivityBase.java
++++ b/app/src/main/java/com/rockstargames/oswrapper/DownloaderActivityBase.java
+@@ -22,7 +22,7 @@ import com.google.android.play.core.assetpacks.AssetPackState;
+ import com.google.android.play.core.assetpacks.AssetPackStateUpdateListener;
+ import com.google.android.play.core.assetpacks.model.AssetPackStatus;
+ import com.google.android.play.core.assetpacks.model.AssetPackStorageMethod;
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ 
+ import java.util.ArrayList;
+ import java.util.Arrays;
+diff --git a/app/src/main/java/com/rockstargames/oswrapper/DownloaderItem.java b/app/src/main/java/com/rockstargames/oswrapper/DownloaderItem.java
+index bfbde28..f478450 100644
+--- a/app/src/main/java/com/rockstargames/oswrapper/DownloaderItem.java
++++ b/app/src/main/java/com/rockstargames/oswrapper/DownloaderItem.java
+@@ -6,7 +6,7 @@ import android.view.View;
+ import android.widget.ProgressBar;
+ import android.widget.TextView;
+ 
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ 
+ import kotlin.jvm.internal.Intrinsics;
+ 
+diff --git a/app/src/main/java/com/rockstargames/oswrapper/GameActivityBase.java b/app/src/main/java/com/rockstargames/oswrapper/GameActivityBase.java
+index a8926b3..0676c6b 100644
+--- a/app/src/main/java/com/rockstargames/oswrapper/GameActivityBase.java
++++ b/app/src/main/java/com/rockstargames/oswrapper/GameActivityBase.java
+@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
+ import com.nvidia.devtech.NvAPKFile;
+ import com.nvidia.devtech.NvAPKFileHelper;
+ import com.nvidia.devtech.NvUtil;
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ 
+ 
+ import java.io.File;
+diff --git a/app/src/main/java/com/rockstargames/oswrapper/view/MovieHandler.java b/app/src/main/java/com/rockstargames/oswrapper/view/MovieHandler.java
+index 64f3372..cabb0c0 100644
+--- a/app/src/main/java/com/rockstargames/oswrapper/view/MovieHandler.java
++++ b/app/src/main/java/com/rockstargames/oswrapper/view/MovieHandler.java
+@@ -13,7 +13,7 @@ import android.view.SurfaceView;
+ import androidx.core.view.ViewCompat;
+ 
+ 
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.rockstargames.oswrapper.GameActivityBase;
+ import java.util.concurrent.Callable;
+ import java.util.concurrent.FutureTask;
+diff --git a/app/src/main/java/com/rockstargames/oswrapper/view/SplashScreenHandler.java b/app/src/main/java/com/rockstargames/oswrapper/view/SplashScreenHandler.java
+index 6f4cf75..ceda62f 100644
+--- a/app/src/main/java/com/rockstargames/oswrapper/view/SplashScreenHandler.java
++++ b/app/src/main/java/com/rockstargames/oswrapper/view/SplashScreenHandler.java
+@@ -6,7 +6,7 @@ import android.view.View;
+ import android.widget.ImageView;
+ import android.widget.TextView;
+ 
+-import com.gta.game.R;
++import com.ferzdevzgta.game.R;
+ import com.rockstargames.oswrapper.GameActivityBase;
+ import java.io.InputStream;
+ 
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 26f75b0..3e8c0ff 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -3,13 +3,10 @@ buildscript {
+     repositories {
+         google()
+         mavenCentral()
+-        maven { url = uri("https://artifacts.applovin.com/android") }
+         maven { url = uri("https://jitpack.io") }
+     }
+     dependencies {
+         classpath("com.android.tools.build:gradle:8.13.1")
+-        classpath("com.google.gms:google-services:4.3.15")
+-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.5.2")
+         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
+     }
+ }
+@@ -18,7 +15,6 @@ allprojects {
+     repositories {
+         mavenCentral()
+         maven { url = uri("https://jitpack.io") }
+-        maven { url = uri("https://mint.splunk.com/gradle/") }
+         maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+         google()
+     }
 diff --git a/gradle.properties b/gradle.properties
 index dab7c28..e9327df 100644
 --- a/gradle.properties
