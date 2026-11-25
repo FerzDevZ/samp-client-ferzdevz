@@ -1,0 +1,117 @@
+<resources>
+    <!-- Bahasa Indonesia. Setiap key di values/strings.xml harus ada di sini juga. -->
+    <string name="app_name">SA-MP FerzDevZ</string>
+    <string name="client_name">SA-MP FerzDevZ</string>
+    <string name="samp_ver">SA:MP 0.3.7</string>
+
+    <string name="language_title">Bahasa</string>
+    <string name="language_in">Indonesia</string>
+    <string name="language_en">English</string>
+    <string name="language_note">Hanya mengganti bahasa layar aplikasi. Di dalam game tetap memakai bahasanya sendiri.</string>
+
+    <string name="home_eyebrow">Klien Android</string>
+    <string name="home_start">Mainkan</string>
+    <string name="home_start_hint">Membuka klien dengan server yang tersimpan</string>
+    <string name="home_status_title">Siap dimainkan</string>
+    <string name="home_status_data">Data game</string>
+    <string name="home_status_data_ok">Terpasang</string>
+    <string name="home_status_data_missing">Belum terpasang</string>
+    <string name="home_status_server">Server</string>
+    <string name="home_status_server_none">Belum dipilih</string>
+    <string name="home_status_nick">Nama pemain</string>
+    <string name="home_status_nick_none">Belum diisi</string>
+    <string name="home_action_data">Data game</string>
+    <string name="home_action_server">Server</string>
+    <string name="home_action_settings">Tampilan</string>
+    <string name="home_bug_info">Menemukan bug? Laporkan, akan saya perbaiki.</string>
+    <string name="home_authors">terima kasih bkuzn dan afobazl</string>
+
+    <string name="perm_storage_required">Akses penyimpanan diperlukan agar game bisa jalan.</string>
+    <string name="perm_all_files_required">Aplikasi butuh akses penuh ke penyimpanan.</string>
+    <string name="perm_storage_denied">Tidak ada akses penyimpanan, jadi game tidak bisa dimulai.</string>
+
+    <string name="data_title">Data game</string>
+    <string name="data_intro">Pilih varian lalu sinkronkan. Hanya file yang hilang atau rusak yang diunduh ulang.</string>
+    <string name="data_variant_chosen">Varian: %1$s</string>
+    <string name="data_variant_full">Full</string>
+    <string name="data_variant_lite">Lite</string>
+    <string name="data_section_variant">Varian</string>
+    <string name="data_section_status">Status</string>
+    <string name="data_section_actions">Tindakan</string>
+    <string name="data_state_idle">Menunggu</string>
+    <string name="data_state_work">Berjalan</string>
+    <string name="data_state_ok">Siap</string>
+    <string name="data_state_error">Perlu perhatian</string>
+    <string name="data_status_idle">Belum diperiksa</string>
+    <string name="data_status_checking">Memeriksa isi folder GTA</string>
+    <string name="data_status_ok">Lengkap: %1$d file, %2$s</string>
+    <string name="data_status_broken">%1$d dari %2$d file perlu diunduh ulang</string>
+    <string name="data_status_no_manifest">Manifest tidak ditemukan</string>
+    <string name="data_status_prepare">Menyiapkan</string>
+    <string name="data_status_nothing_to_do">Tidak ada yang perlu diunduh (%1$d file sudah benar)</string>
+    <string name="data_status_done">Selesai: %1$s</string>
+    <string name="data_status_partial">%1$s, %2$d file belum beres</string>
+    <string name="data_status_cancelled">Dibatalkan</string>
+    <string name="data_status_failed">Gagal</string>
+    <string name="data_status_file">File %1$d dari %2$d</string>
+    <string name="data_status_bytes">%1$s dari %2$s</string>
+    <string name="data_action_sync">Sinkronkan data</string>
+    <string name="data_action_verify">Periksa saja</string>
+    <string name="data_action_settings">Pengaturan tampilan</string>
+    <string name="data_action_share_log">Bagikan log</string>
+    <string name="data_action_play">Mainkan</string>
+    <string name="data_error_no_manifest">Letakkan %1$s di folder GTA (dibuat oleh bin/build-cache.sh).</string>
+    <string name="data_error_no_endpoint">Alamat unduhan belum diisi</string>
+    <string name="data_error_endpoint_hint">Tambahkan ke GTA/SAMP/settings.ini:\n[download]\nurl = https://server-anda/</string>
+    <string name="data_no_log">Belum ada GTA/logcat.txt</string>
+
+    <string name="settings_title">Tampilan dan bahasa</string>
+    <string name="settings_intro">Nilai di bawah ditulis ke GTA/SAMP/settings.ini. Tombol sentuh di dalam game diatur dari editor HUD bawaan klien.</string>
+    <string name="settings_section_language">Bahasa</string>
+    <string name="settings_section_layout">Tata letak chat dan font</string>
+    <string name="settings_section_toggles">Sakelar tampilan</string>
+    <string name="settings_save">Simpan</string>
+    <string name="settings_reset">Kembalikan bawaan</string>
+    <string name="settings_reset_done">Nilai bawaan dipulihkan, belum disimpan</string>
+    <string name="settings_saved">%1$d nilai disimpan</string>
+    <string name="settings_invalid">%1$s harus berupa angka</string>
+    <string name="settings_no_ini">Tidak ada %1$s. Jalankan game sekali supaya filenya dibuat.</string>
+    <string name="settings_note_restart">Mulai ulang game agar perubahan dipakai.</string>
+    <string name="settings_field_chat_x">Posisi X chat</string>
+    <string name="settings_field_chat_y">Posisi Y chat</string>
+    <string name="settings_field_chat_w">Lebar chat</string>
+    <string name="settings_field_chat_h">Tinggi chat</string>
+    <string name="settings_field_chat_messages">Jumlah baris chat</string>
+    <string name="settings_field_font_size">Ukuran teks</string>
+    <string name="settings_field_font_outline">Tebal outline</string>
+    <string name="settings_field_fps_limit">Batas frame</string>
+    <string name="settings_flag_firstperson">Orang pertama</string>
+    <string name="settings_flag_fps">Tampilkan FPS</string>
+    <string name="settings_flag_radar">Radar persegi</string>
+    <string name="settings_flag_skybox">Skybox</string>
+    <string name="settings_flag_hparmour">Teks health dan armour</string>
+    <string name="settings_flag_keyboard">Keyboard Android</string>
+    <string name="settings_flag_dialog">Dialog klasik</string>
+
+    <string name="servers_title">Server</string>
+    <string name="servers_intro">Pilih server tujuan lalu tekan Connect. Alamat disimpan di GTA/SAMP/settings.ini dan dibaca klien saat frame pertama.</string>
+    <string name="servers_section_identity">Nama pemain</string>
+    <string name="servers_nickname">Nama pemain</string>
+    <string name="servers_nickname_hint">Maksimal 24 karakter, tanpa spasi</string>
+    <string name="servers_list">Daftar server</string>
+    <string name="servers_empty">Belum ada server. Tambahkan di bawah.</string>
+    <string name="servers_add">Tambah server</string>
+    <string name="servers_add_name">Nama tampilan (opsional)</string>
+    <string name="servers_add_host">Host atau IP</string>
+    <string name="servers_add_port">Port (kosong = 7777)</string>
+    <string name="servers_add_action">Tambahkan ke daftar</string>
+    <string name="servers_connect">Connect</string>
+    <string name="servers_remove">Hapus</string>
+    <string name="servers_added">%1$s ditambahkan ke daftar</string>
+    <string name="servers_removed">%1$s dihapus</string>
+    <string name="servers_connecting">Menyambung ke %1$s</string>
+    <string name="servers_bad_port">Port harus berupa angka</string>
+    <string name="servers_bad_input">Alamat atau nama tidak valid</string>
+    <string name="servers_write_failed">Gagal menulis berkas: %1$s</string>
+    <string name="servers_current">Server aktif</string>
+</resources>

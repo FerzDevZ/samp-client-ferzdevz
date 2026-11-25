@@ -7,6 +7,7 @@ import com.ferzdevzgta.game.servers.GameConfigTest;
 import com.ferzdevzgta.game.servers.ServerEndpointTest;
 import com.ferzdevzgta.game.servers.ServerListTest;
 import com.ferzdevzgta.game.settings.IniFileTest;
+import com.ferzdevzgta.game.ui.LanguageTest;
 
 /**
  * Runs every JVM test. No JUnit, no Gradle: the classes under test avoid Android
@@ -30,6 +31,8 @@ public final class TestMain {
         ServerListTest.run();
         System.out.println("-- GameConfig");
         GameConfigTest.run();
+        System.out.println("-- Language");
+        LanguageTest.run();
         System.exit(Check.report());
     }
 }

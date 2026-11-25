@@ -13,9 +13,9 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,13 +31,22 @@ import com.ferzdevzgta.game.servers.GameConfig;
 import com.ferzdevzgta.game.servers.ServerEndpoint;
 import com.ferzdevzgta.game.ui.DataSetupActivity;
 import com.ferzdevzgta.game.ui.ServerBrowserActivity;
+import com.ferzdevzgta.game.ui.Ui;
+import com.ferzdevzgta.game.ui.UiSettingsActivity;
 
 import java.io.File;
 
+/**
+ * Launcher screen: shows what the client would do right now (data present, server chosen,
+ * nickname) instead of an empty screen with one button, and offers the language switch on
+ * first run.
+ */
 public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private Button startButton;
-    private TextView title1, title2, authorText, cacheText;
+    private TextView dataValue;
+    private TextView serverValue;
+    private TextView nickValue;
     private boolean storagePermissionGranted = false;
 
     private final ActivityResultLauncher<String[]> requestStoragePermissionLauncher =
@@ -57,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     storagePermissionGranted = false;
                     Log.e("MainActivity", "Storage permissions denied");
-                    Toast.makeText(this, "Для работы игры необходим доступ к хранилищу", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.perm_storage_required, Toast.LENGTH_LONG).show();
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         requestManageStoragePermission();
@@ -75,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         storagePermissionGranted = false;
                         Log.e("MainActivity", "Manage storage permission denied");
-                        Toast.makeText(this, "Приложение требует полный доступ к хранилищу", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, R.string.perm_all_files_required, Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -86,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("MainActivity", "onCreate started");
 
+        Ui.paintWindow(this);
+
         // The native Log() appends forever; keep months of play from filling the disk.
         // A rotation failure must never stop the launch.
         try {
@@ -95,21 +106,136 @@ public class MainActivity extends AppCompatActivity {
         }
 
         try {
-            setFullScreenMode();
-            setContentView(R.layout.main_activity);
-
-            Log.d("MainActivity", "ContentView set");
-
-            initViews();
-            setupClickListeners();
-
+            setContentView(buildUi());
             checkAndRequestStoragePermission();
-
             Log.d("MainActivity", "onCreate completed successfully");
-
         } catch (Exception e) {
             Log.e("MainActivity", "Critical error in onCreate: " + e.getMessage(), e);
             finish();
+        }
+    }
+
+    private View buildUi() {
+        LinearLayout root = Ui.column(this);
+
+        root.addView(Ui.eyebrow(this, getString(R.string.home_eyebrow)));
+        Ui.gap(this, root, 8);
+        root.addView(Ui.title(this, getString(R.string.client_name)));
+        Ui.gap(this, root, 4);
+        root.addView(Ui.subtitle(this, getString(R.string.samp_ver)));
+
+        // What the next Start does, in three lines, instead of an empty middle.
+        Ui.gap(this, root, 24);
+        LinearLayout statusCard = Ui.card(this);
+        statusCard.addView(Ui.section(this, getString(R.string.home_status_title)));
+        LinearLayout dataRow = Ui.statusRow(this, getString(R.string.home_status_data), "", 0);
+        dataValue = (TextView) dataRow.getChildAt(1);
+        statusCard.addView(dataRow, Ui.fill());
+        LinearLayout serverRow = Ui.statusRow(this, getString(R.string.home_status_server), "", 0);
+        serverValue = (TextView) serverRow.getChildAt(1);
+        statusCard.addView(serverRow, Ui.fill());
+        LinearLayout nickRow = Ui.statusRow(this, getString(R.string.home_status_nick), "", 0);
+        nickValue = (TextView) nickRow.getChildAt(1);
+        statusCard.addView(nickRow, Ui.fill());
+        root.addView(statusCard, Ui.fill());
+
+        // Actions
+        Ui.gap(this, root, 20);
+        startButton = Ui.button(this, getString(R.string.home_start), Ui.PRIMARY);
+        startButton.setOnClickListener(v -> onStartPressed());
+        root.addView(startButton, Ui.fill());
+        Ui.gap(this, root, 6);
+        root.addView(Ui.label(this, getString(R.string.home_start_hint)));
+
+        Ui.gap(this, root, 16);
+        LinearLayout rowA = Ui.row(this);
+        Button dataButton = Ui.button(this, getString(R.string.home_action_data), Ui.SECONDARY);
+        Button serverButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY);
+        dataButton.setOnClickListener(v -> startActivity(new Intent(this, DataSetupActivity.class)));
+        serverButton.setOnClickListener(v -> startActivity(new Intent(this, ServerBrowserActivity.class)));
+        rowA.addView(dataButton, Ui.weight(this, 1f, 8f));
+        rowA.addView(serverButton, Ui.weight(this, 1f, 0f));
+        root.addView(rowA, Ui.fill());
+
+        Ui.gap(this, root, 8);
+        Button displayButton = Ui.button(this, getString(R.string.home_action_settings), Ui.SECONDARY);
+        displayButton.setOnClickListener(v -> startActivity(new Intent(this, UiSettingsActivity.class)));
+        root.addView(displayButton, Ui.fill());
+
+        // Language
+        Ui.gap(this, root, 24);
+        LinearLayout languageCard = Ui.card(this);
+        languageCard.addView(Ui.section(this, getString(R.string.language_title)));
+        languageCard.addView(Ui.languageSwitch(this), Ui.fill());
+        Ui.gap(this, languageCard, 10);
+        languageCard.addView(Ui.label(this, getString(R.string.language_note)));
+        root.addView(languageCard, Ui.fill());
+
+        // Credits
+        Ui.gap(this, root, 24);
+        TextView bug = Ui.label(this, getString(R.string.home_bug_info));
+        root.addView(bug);
+        Ui.gap(this, root, 4);
+        TextView credits = Ui.label(this, getString(R.string.home_authors));
+        credits.setTextColor(Ui.ACCENT);
+        credits.setOnClickListener(v -> openTelegram());
+        root.addView(credits);
+
+        return Ui.scroll(this, root);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshStatus();
+    }
+
+    /** Reflects the three things Start depends on, so the launcher never lies. */
+    private void refreshStatus() {
+        if (dataValue == null) {
+            return;
+        }
+        boolean dataPresent = gameDataPresent();
+        dataValue.setText(getString(dataPresent
+                ? R.string.home_status_data_ok
+                : R.string.home_status_data_missing));
+        dataValue.setTextColor(dataPresent ? Ui.OK : Ui.WARN);
+
+        ServerEndpoint server = GameConfig.readServer();
+        boolean serverChosen = server != null && !"127.0.0.1".equals(server.host());
+        serverValue.setText(serverChosen ? server.address() : getString(R.string.home_status_server_none));
+        serverValue.setTextColor(serverChosen ? Ui.TEXT : Ui.WARN);
+
+        String nick = GameConfig.readNickname();
+        boolean nickSet = nick != null && !nick.trim().isEmpty();
+        nickValue.setText(nickSet ? nick : getString(R.string.home_status_nick_none));
+        nickValue.setTextColor(nickSet ? Ui.TEXT : Ui.WARN);
+
+        startButton.setText(dataPresent ? getString(R.string.home_start)
+                : getString(R.string.home_action_data));
+    }
+
+    private void openTelegram() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/kuzia15")));
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error opening tg: " + e.getMessage());
+        }
+    }
+
+    private void onStartPressed() {
+        try {
+            if (!storagePermissionGranted) {
+                checkAndRequestStoragePermission();
+                return;
+            }
+            if (!gameDataPresent()) {
+                startActivity(new Intent(this, DataSetupActivity.class));
+                return;
+            }
+            startGame();
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error in start button click: " + e.getMessage());
         }
     }
 
@@ -176,71 +302,7 @@ public class MainActivity extends AppCompatActivity {
             }
             startGame();
         } else {
-            Toast.makeText(this, "Нет доступа к хранилищу. Игра не может быть запущена.", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void setFullScreenMode() {
-        try {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            );
-
-            getWindow().setFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-            );
-
-            getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
-            getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                WindowManager.LayoutParams params = getWindow().getAttributes();
-                params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-                getWindow().setAttributes(params);
-            }
-
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().hide();
-            }
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error in setFullScreenMode: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            try {
-                getWindow().getDecorView().setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                );
-            } catch (Exception e) {
-                Log.e("MainActivity", "Error in onWindowFocusChanged: " + e.getMessage());
-            }
-        }
-    }
-
-    private void initViews() {
-        try {
-            title1 = findViewById(R.id.title1);
-            title2 = findViewById(R.id.title2);
-            authorText = findViewById(R.id.authorText);
-            startButton = findViewById(R.id.startButton);
-
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error in initViews: " + e.getMessage());
+            Toast.makeText(this, R.string.perm_storage_denied, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -271,54 +333,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this,
                     getString(R.string.servers_write_failed, String.valueOf(e.getMessage())),
                     Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void setupClickListeners() {
-        try {
-            startButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100)
-                                .withEndAction(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        v.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
-                                    }
-                                })
-                                .start();
-
-                        if (storagePermissionGranted) {
-                            if (!gameDataPresent()) {
-                                startActivity(new Intent(MainActivity.this, DataSetupActivity.class));
-                                return;
-                            }
-                            startGame();
-                        } else {
-                            checkAndRequestStoragePermission();
-                        }
-                    } catch (Exception e) {
-                        Log.e("MainActivity", "Error in start button click: " + e.getMessage());
-                    }
-                }
-            });
-
-            authorText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("https://t.me/kuzia15"));
-                        startActivity(browserIntent);
-                    } catch (Exception e) {
-                        Log.e("MainActivity", "Error opening tg: " + e.getMessage());
-                    }
-                }
-            });
-
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error setting up click listeners: " + e.getMessage());
         }
     }
 

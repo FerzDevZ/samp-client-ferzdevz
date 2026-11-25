@@ -122,3 +122,40 @@ mengakhiri sesi:
 Set key yang ditulis `GameConfig` diperiksa terhadap `settings.cpp` oleh
 `GameConfigTest`, jadi menambah key di engine tanpa menambahkannya di template akan
 menggagalkan `bin/self-test.sh`.
+
+## Layar dan bahasa
+
+Ada lima layar di depan engine. Semuanya dibangun di Java memakai `ui/Ui.java`, bukan berkas
+layout, jadi palette, jarak dan ukuran sentuh tidak bisa berbeda antar layar:
+
+| Layar | Kelas | Tugas |
+|---|---|---|
+| Launcher | `launcher/activity/MainActivity.java` | menampilkan status data, server dan nama pemain, membuka game atau layar setup |
+| Data | `game/ui/DataSetupActivity.java` | pilih varian, verifikasi, unduh dengan resume, bagikan log |
+| Server | `game/ui/ServerBrowserActivity.java` | daftar server, tambah, hapus, sambung |
+| Pengaturan | `game/ui/UiSettingsActivity.java` | key `settings.ini` yang dibaca engine |
+| Bahasa | bagian dari launcher, data dan pengaturan | Indonesia atau Inggris |
+
+Bahasa disimpan oleh aplikasi, bukan oleh engine:
+
+- `game/ui/Language.java` memegang aturannya dan tanpa import Android, jadi
+  `tests/jvm/src/com/ferzdevzgta/game/ui/LanguageTest.java` bisa menjalankannya dengan
+  `javac` biasa. `id`, `id-ID`, `in` dan `IN_br` semuanya menjadi `in`; bahasa yang tidak
+  didukung jatuh ke Inggris; nilai kosong berarti "ikut perangkat".
+- `game/ui/LanguageStore.java` menyimpan pilihan di `ui_language` lalu memanggil
+  `AppCompatDelegate.setApplicationLocales`, yang membuat ulang layar.
+- `game/SampApplication.java` memakai pilihan tersimpan di `onCreate`, sebelum activity
+  pertama, jadi launcher tidak pernah berkedip dengan bahasa yang salah.
+
+`res/values/strings.xml` berisi bahasa Inggris, `res/values-in/strings.xml` berisi bahasa
+Indonesia, dan `bin/self-test.sh strings` gagal ketika sebuah key hanya ada di salah
+satunya, atau ketika kedua terjemahan memakai placeholder format yang berbeda.
+
+Engine punya bahasanya sendiri (`gui.Language` di `settings.ini`, dipetakan oleh
+`services/LanguageServices.java`) dan pemilih ini tidak menyentuhnya: UI game dan UI
+launcher diterjemahkan terpisah, dan `language_note` menjelaskannya di layar.
+
+Warna hanya ada di satu tempat, `ui/Ui.java`, dan `bin/ui-contrast.py` membaca berkas itu
+lalu menghitung rasio WCAG 2.2 AA untuk tujuh belas pasangan yang benar-benar dipakai
+layar. Warna hint yang terlalu gelap akan gagal di pemeriksaan itu, bukan menjadi tidak
+terbaca di HP.

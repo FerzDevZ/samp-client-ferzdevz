@@ -25,11 +25,12 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Edits the keys the native client owns in {@code SAMP/settings.ini}: chat box,
- * font size, frame limit and the GUI toggles that already exist in
- * {@code cpp/samp/settings.cpp}. Engine-drawn touch buttons are not here: the game
- * engine has its own adjustable-HUD editor (CAdjustableHUD), so adding a second
- * one would fight it.
+ * Edits the keys the native client owns in {@code SAMP/settings.ini}: chat box, font size,
+ * frame limit and the GUI toggles that already exist in {@code cpp/samp/settings.cpp}, plus the
+ * screen language, which is stored by the app rather than by the engine.
+ *
+ * Engine-drawn touch buttons are not here: the game engine has its own adjustable-HUD editor
+ * (CAdjustableHUD), so adding a second one would fight it.
  */
 public class UiSettingsActivity extends AppCompatActivity {
 
@@ -47,6 +48,17 @@ public class UiSettingsActivity extends AppCompatActivity {
             {"gui", "FPSLimit", "60"},
     };
 
+    private static final int[] NUMERIC_LABELS = {
+            R.string.settings_field_chat_x,
+            R.string.settings_field_chat_y,
+            R.string.settings_field_chat_w,
+            R.string.settings_field_chat_h,
+            R.string.settings_field_chat_messages,
+            R.string.settings_field_font_size,
+            R.string.settings_field_font_outline,
+            R.string.settings_field_fps_limit,
+    };
+
     // Only keys settings.cpp actually reads; a key the engine ignores is a lie.
     private static final String[][] FLAGS = {
             {"gui", "firstperson", "true"},
@@ -58,6 +70,16 @@ public class UiSettingsActivity extends AppCompatActivity {
             {"gui", "Dialog", "true"},
     };
 
+    private static final int[] FLAG_LABELS = {
+            R.string.settings_flag_firstperson,
+            R.string.settings_flag_fps,
+            R.string.settings_flag_radar,
+            R.string.settings_flag_skybox,
+            R.string.settings_flag_hparmour,
+            R.string.settings_flag_keyboard,
+            R.string.settings_flag_dialog,
+    };
+
     private final Map<String, EditText> numericFields = new LinkedHashMap<>();
     private final Map<String, CheckBox> flagFields = new LinkedHashMap<>();
     private IniFile ini;
@@ -65,108 +87,109 @@ public class UiSettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(Ui.BG);
-        LinearLayout root = Ui.screen(this);
-        root.setPadding(Ui.dp(this, 16), Ui.dp(this, 24), Ui.dp(this, 16), Ui.dp(this, 24));
-
-        root.addView(Ui.title(this, getString(R.string.settings_title)));
-        Ui.gap(this, root, 6);
-        root.addView(Ui.body(this, getString(R.string.settings_intro)));
-        Ui.gap(this, root, 14);
-
-        File f = new File(INI);
-        if (!f.isFile()) {
-            LinearLayout warn = Ui.card(this);
-            TextView t = Ui.body(this, getString(R.string.settings_no_ini, INI));
-            t.setTextColor(Ui.ERR);
-            warn.addView(t);
-            root.addView(warn);
-            Ui.gap(this, root, 12);
-            setContentView(scroll);
-            return;
-        }
-
-        try {
-            ini = IniFile.read(f);
-        } catch (IOException ex) {
-            LinearLayout warn = Ui.card(this);
-            TextView t = Ui.body(this, ex.getMessage() == null ? "read error" : ex.getMessage());
-            t.setTextColor(Ui.ERR);
-            warn.addView(t);
-            root.addView(warn);
-            setContentView(scroll);
-            return;
-        }
-
-        LinearLayout numbers = Ui.card(this);
-        numbers.addView(Ui.fieldLabel(this, getString(R.string.settings_section_layout)));
-        Ui.gap(this, numbers, 8);
-        for (String[] row : NUMERIC) {
-            addNumeric(numbers, row[0], row[1], row[2]);
-        }
-        root.addView(numbers);
-        Ui.gap(this, root, 12);
-
-        LinearLayout flags = Ui.card(this);
-        flags.addView(Ui.fieldLabel(this, getString(R.string.settings_section_toggles)));
-        Ui.gap(this, flags, 8);
-        for (String[] row : FLAGS) {
-            addFlag(flags, row[0], row[1], row[2]);
-        }
-        root.addView(flags);
-        Ui.gap(this, root, 12);
-
-        Button save = Ui.button(this, getString(R.string.settings_save), true);
-        root.addView(save);
-        Ui.gap(this, root, 8);
-
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        Button reset = Ui.button(this, getString(R.string.settings_reset), false);
-        Button share = Ui.button(this, getString(R.string.data_action_share_log), false);
-        LinearLayout.LayoutParams half = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        half.setMargins(0, 0, Ui.dp(this, 8), 0);
-        reset.setLayoutParams(half);
-        share.setLayoutParams(half);
-        row.addView(reset);
-        row.addView(share);
-        root.addView(row);
-
-        Ui.gap(this, root, 12);
-        TextView note = Ui.body(this, getString(R.string.settings_note_restart));
-        root.addView(note);
-
-        scroll.addView(root);
-        setContentView(scroll);
-
-        save.setOnClickListener(v -> save());
-        reset.setOnClickListener(v -> reset());
-        share.setOnClickListener(v -> shareLog());
+        Ui.paintWindow(this);
+        setContentView(buildUi());
     }
 
-    private void addNumeric(LinearLayout parent, String section, String key, String fallback) {
-        Ui.gap(this, parent, 6);
-        parent.addView(Ui.fieldLabel(this, key));
-        EditText field = new EditText(this);
-        field.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+    private ScrollView buildUi() {
+        LinearLayout root = Ui.column(this);
+
+        root.addView(Ui.eyebrow(this, getString(R.string.app_name)));
+        Ui.gap(this, root, 6);
+        root.addView(Ui.title(this, getString(R.string.settings_title)));
+        Ui.gap(this, root, 8);
+        root.addView(Ui.body(this, getString(R.string.settings_intro)));
+
+        // Language first: it is the only setting that changes this screen itself.
+        Ui.gap(this, root, 20);
+        LinearLayout languageCard = Ui.card(this);
+        languageCard.addView(Ui.section(this, getString(R.string.settings_section_language)));
+        languageCard.addView(Ui.languageSwitch(this), Ui.fill());
+        Ui.gap(this, languageCard, 10);
+        languageCard.addView(Ui.label(this, getString(R.string.language_note)));
+        root.addView(languageCard, Ui.fill());
+
+        File file = new File(INI);
+        if (!file.isFile()) {
+            Ui.gap(this, root, 12);
+            root.addView(warning(getString(R.string.settings_no_ini, INI)), Ui.fill());
+            return Ui.scroll(this, root);
+        }
+        try {
+            ini = IniFile.read(file);
+        } catch (IOException ex) {
+            Ui.gap(this, root, 12);
+            root.addView(warning(ex.getMessage() == null ? "read error" : ex.getMessage()),
+                    Ui.fill());
+            return Ui.scroll(this, root);
+        }
+
+        Ui.gap(this, root, 12);
+        LinearLayout numbers = Ui.card(this);
+        numbers.addView(Ui.section(this, getString(R.string.settings_section_layout)));
+        for (int i = 0; i < NUMERIC.length; i++) {
+            addNumeric(numbers, NUMERIC[i][0], NUMERIC[i][1], NUMERIC[i][2], NUMERIC_LABELS[i]);
+        }
+        root.addView(numbers, Ui.fill());
+
+        Ui.gap(this, root, 12);
+        LinearLayout flags = Ui.card(this);
+        flags.addView(Ui.section(this, getString(R.string.settings_section_toggles)));
+        for (int i = 0; i < FLAGS.length; i++) {
+            addFlag(flags, FLAGS[i][0], FLAGS[i][1], FLAGS[i][2], FLAG_LABELS[i]);
+        }
+        root.addView(flags, Ui.fill());
+
+        Ui.gap(this, root, 20);
+        Button save = Ui.button(this, getString(R.string.settings_save), Ui.PRIMARY);
+        save.setOnClickListener(v -> save());
+        root.addView(save, Ui.fill());
+
+        Ui.gap(this, root, 8);
+        LinearLayout row = Ui.row(this);
+        Button reset = Ui.button(this, getString(R.string.settings_reset), Ui.SECONDARY);
+        Button share = Ui.button(this, getString(R.string.data_action_share_log), Ui.SECONDARY);
+        reset.setOnClickListener(v -> reset());
+        share.setOnClickListener(v -> shareLog());
+        row.addView(reset, Ui.weight(this, 1f, 8f));
+        row.addView(share, Ui.weight(this, 1f, 0f));
+        root.addView(row, Ui.fill());
+
+        Ui.gap(this, root, 14);
+        root.addView(Ui.label(this, getString(R.string.settings_note_restart)));
+
+        return Ui.scroll(this, root);
+    }
+
+    private LinearLayout warning(String message) {
+        LinearLayout card = Ui.card(this);
+        TextView text = Ui.body(this, message);
+        text.setTextColor(Ui.ERR);
+        card.addView(text);
+        return card;
+    }
+
+    private void addNumeric(LinearLayout parent, String section, String key, String fallback,
+                            int labelRes) {
+        Ui.gap(this, parent, 12);
+        LinearLayout labelRow = Ui.row(this);
+        labelRow.addView(Ui.label(this, getString(labelRes)),
+                Ui.weight(this, 1f, 8f));
+        labelRow.addView(Ui.mono(this, key));
+        parent.addView(labelRow, Ui.fill());
+
+        EditText field = Ui.input(this, fallback,
+                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         field.setText(ini.get(section, key, fallback));
-        field.setTextColor(Ui.TEXT);
-        field.setTextSize(14f);
-        field.setBackgroundColor(Ui.BG);
-        field.setPadding(Ui.dp(this, 10), Ui.dp(this, 8), Ui.dp(this, 10), Ui.dp(this, 8));
-        parent.addView(field, Ui.fill());
+        parent.addView(field, Ui.fill(6, this));
         numericFields.put(section + "." + key, field);
     }
 
-    private void addFlag(LinearLayout parent, String section, String key, String fallback) {
-        CheckBox box = new CheckBox(this);
-        box.setText(key);
-        box.setTextColor(Ui.TEXT);
-        box.setTextSize(14f);
+    private void addFlag(LinearLayout parent, String section, String key, String fallback,
+                         int labelRes) {
+        CheckBox box = Ui.toggle(this, getString(labelRes));
         box.setChecked(Boolean.parseBoolean(ini.get(section, key, fallback)));
-        parent.addView(box);
+        parent.addView(box, Ui.fill());
         flagFields.put(section + "." + key, box);
     }
 
@@ -176,7 +199,8 @@ public class UiSettingsActivity extends AppCompatActivity {
             String[] parts = e.getKey().split("\\.");
             String raw = e.getValue().getText().toString().trim();
             if (!isNumber(raw)) {
-                Toast.makeText(this, getString(R.string.settings_invalid, parts[1]), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.settings_invalid, parts[1]),
+                        Toast.LENGTH_LONG).show();
                 e.getValue().requestFocus();
                 return;
             }

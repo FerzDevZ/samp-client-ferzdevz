@@ -27,6 +27,8 @@ Semua baris di bawah dijalankan di mesin ini, bukan diasumsikan.
 | Tulis ulang wrapper | **berjalan**, 20 dari 21 file, tinggal `GameThread`, sisanya dilaporkan `bin/oswrapper-audit.sh`, namanya dijaga `bin/wrapper-pins.sh` dan `bin/jni-pins.py` |
 | Patch di HP | **ya**, `bin/patch-termux.sh` dengan apksigner, tanpa binary SDK |
 | Memilih server | **ya**, `ServerBrowserActivity` menulis `SAMP/settings.ini` dari `SAMP/servers.txt`, tanpa edit manual |
+| Bahasa | **ya**, Indonesia atau Inggris, dipilih di dalam aplikasi, disimpan di `ui_language`, `bin/self-test.sh strings` menolak kalau kedua file resource berbeda |
+| Layar launcher | **didesain ulang**, menampilkan status data, server dan nickname sebelum menekan Start, `bin/ui-contrast.py` menjaga palette di atas WCAG AA |
 
 ## Mendapatkan APK yang bisa dipasang
 

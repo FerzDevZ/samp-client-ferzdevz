@@ -121,3 +121,40 @@ The player never edits the ini by hand. Two guards keep a bad file from ending t
 The key set written by `GameConfig` is checked against `settings.cpp` by
 `GameConfigTest`, so adding a key to the engine without adding it to the template fails
 `bin/self-test.sh`.
+
+## Screens and language
+
+Five screens sit in front of the engine. Each one is built in Java against `ui/Ui.java`
+instead of a layout file, so the palette, spacing and touch targets cannot drift apart
+between screens:
+
+| Screen | Class | Job |
+|---|---|---|
+| Launcher | `launcher/activity/MainActivity.java` | shows data, server and nickname state, opens the game or the setup screen |
+| Data | `game/ui/DataSetupActivity.java` | variant pick, verify, resumable download, share log |
+| Servers | `game/ui/ServerBrowserActivity.java` | server list, add, remove, connect |
+| Settings | `game/ui/UiSettingsActivity.java` | the `settings.ini` keys the engine reads |
+| Language | part of launcher, data and settings | Indonesian or English |
+
+The language is stored by the app, not by the engine:
+
+- `game/ui/Language.java` holds the rules and has no Android imports, so
+  `tests/jvm/src/com/ferzdevzgta/game/ui/LanguageTest.java` runs it under plain `javac`.
+  `id`, `id-ID`, `in` and `IN_br` all fold to `in`; an unsupported language falls back to
+  English; an empty value means "follow the device".
+- `game/ui/LanguageStore.java` persists the choice under `ui_language` and calls
+  `AppCompatDelegate.setApplicationLocales`, which recreates the screens.
+- `game/SampApplication.java` applies the stored choice in `onCreate`, before the first
+  activity, so the launcher never flashes the wrong language.
+
+`res/values/strings.xml` is English, `res/values-in/strings.xml` is Indonesian, and
+`bin/self-test.sh strings` fails when a key exists in one file and not the other, or when
+the two translations use different format placeholders.
+
+The engine keeps its own language (`gui.Language` in `settings.ini`, mapped by
+`services/LanguageServices.java`) and this selector does not touch it: the game UI and the
+launcher UI are translated separately, and `language_note` says so on screen.
+
+Colours live in one place, `ui/Ui.java`, and `bin/ui-contrast.py` reads that file and
+computes WCAG 2.2 AA ratios for the seventeen pairs the screens actually use. A darker hint
+colour fails that check instead of becoming unreadable on a phone.

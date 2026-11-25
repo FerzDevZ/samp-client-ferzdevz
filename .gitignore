@@ -52,3 +52,6 @@ dist/
 
 # Per-session notes stay out of the repo
 MEMORY.md
+
+# User screenshots used while reviewing the UI
+.shots/

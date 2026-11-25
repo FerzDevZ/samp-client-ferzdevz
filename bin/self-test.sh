@@ -10,6 +10,8 @@
 #   bin/self-test.sh termux   only the on-phone patcher (needs apksigner)
 #   bin/self-test.sh pins     only the wrapper name check (needs compiled classes)
 #   bin/self-test.sh jni      only the native-vs-symbol check (needs libGame.so)
+#   bin/self-test.sh strings  only the English/Indonesian resource parity check
+#   bin/self-test.sh contrast only the palette contrast check (no device needed)
 #
 # What it does NOT prove: that the game runs. That needs a phone and a GTA install.
 set -uo pipefail
@@ -36,6 +38,7 @@ run_jvm() {
                 client/app/src/main/java/com/ferzdevzgta/game/log \
                 client/app/src/main/java/com/ferzdevzgta/game/servers \
                 client/app/src/main/java/com/ferzdevzgta/game/settings \
+                client/app/src/main/java/com/ferzdevzgta/game/ui/Language.java \
                 tests/jvm/src -name '*.java')"
   if ! "$JAVAC_BIN" -Xlint:all,-serial -d "$out/classes" $srcs 2>"$out/javac.log"; then
     bad "javac failed"
@@ -251,6 +254,71 @@ run_jni() {
   rm -rf "$tmp"
 }
 
+run_strings() {
+  head_ "translation parity"
+  if python3 - <<'PY'
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+BASE = "client/app/src/main/res"
+
+
+def keys(path):
+    root = ET.parse(path).getroot()
+    out = {}
+    for node in root:
+        if not isinstance(node.tag, str):
+            continue
+        name = node.get("name")
+        if name is None:
+            continue
+        out[name] = "".join(node.itertext()).strip()
+    return out
+
+
+def placeholders(text):
+    return sorted(re.findall(r"%[0-9]+[a-z]|%[a-z]", text))
+
+
+problems = []
+en = keys(BASE + "/values/strings.xml")
+idn = keys(BASE + "/values-in/strings.xml")
+
+if len(en) < 40:
+    print("  parsed only %d strings, the resource files are not where this test expects" % len(en))
+    sys.exit(1)
+
+for name in sorted(set(en) - set(idn)):
+    problems.append("missing in values-in: " + name)
+for name in sorted(set(idn) - set(en)):
+    problems.append("missing in values: " + name)
+for name in sorted(set(en) & set(idn)):
+    if placeholders(en[name]) != placeholders(idn[name]):
+        problems.append("placeholder mismatch: " + name)
+    if not idn[name]:
+        problems.append("empty translation: " + name)
+
+if problems:
+    for line in problems:
+        print("  " + line)
+    sys.exit(1)
+print("%d strings, key sets match" % len(en))
+PY
+  then ok "English and Indonesian use the same keys"; else bad "translation drift"; fi
+}
+
+run_contrast() {
+  head_ "palette contrast"
+  local out
+  if out="$(python3 bin/ui-contrast.py 2>&1)"; then
+    ok "$out"
+  else
+    bad "contrast below WCAG AA"
+    printf '%s\n' "$out" | sed -n '1,20p'
+  fi
+}
+
 case "${1:-all}" in
   jvm)     run_jvm ;;
   cache)   run_cache ;;
@@ -258,8 +326,10 @@ case "${1:-all}" in
   termux)  run_termux ;;
   pins)    run_pins ;;
   jni)     run_jni ;;
-  all)     run_jvm; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
-  *)       echo "usage: $0 [all|jvm|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
+  strings) run_strings ;;
+  contrast) run_contrast ;;
+  all)     run_jvm; run_strings; run_contrast; run_cache; run_patcher; run_termux; run_pins; run_jni ;;
+  *)       echo "usage: $0 [all|jvm|strings|contrast|cache|patcher|termux|pins|jni]" >&2; exit 2 ;;
 esac
 
 printf '\n%d passed, %d failed\n' "$pass" "$fail"

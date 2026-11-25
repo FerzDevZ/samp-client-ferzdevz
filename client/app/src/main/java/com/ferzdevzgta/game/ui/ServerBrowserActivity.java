@@ -3,8 +3,6 @@ package com.ferzdevzgta.game.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -43,88 +41,93 @@ public class ServerBrowserActivity extends AppCompatActivity {
     private EditText hostField;
     private EditText portField;
     private LinearLayout listBox;
-    private TextView status;
+    private LinearLayout statusPillSlot;
+    private TextView statusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(Ui.BG);
-        LinearLayout root = Ui.screen(this);
-        root.setPadding(Ui.dp(this, 16), Ui.dp(this, 24), Ui.dp(this, 16), Ui.dp(this, 24));
-
-        root.addView(Ui.title(this, getString(R.string.servers_title)));
-        Ui.gap(this, root, 6);
-        root.addView(Ui.body(this, getString(R.string.servers_intro)));
-        Ui.gap(this, root, 14);
-
-        root.addView(nicknameCard());
-        Ui.gap(this, root, 12);
-        root.addView(listCard());
-        Ui.gap(this, root, 12);
-        root.addView(addCard());
-        Ui.gap(this, root, 12);
-
-        status = Ui.body(this, "");
-        status.setTextColor(Ui.MUTED);
-        root.addView(status);
-
-        scroll.addView(root);
-        setContentView(scroll);
-
+        Ui.paintWindow(this);
+        setContentView(buildUi());
         reload();
     }
 
-    private View nicknameCard() {
+    private ScrollView buildUi() {
+        LinearLayout root = Ui.column(this);
+
+        root.addView(Ui.eyebrow(this, getString(R.string.app_name)));
+        Ui.gap(this, root, 6);
+        root.addView(Ui.title(this, getString(R.string.servers_title)));
+        Ui.gap(this, root, 8);
+        root.addView(Ui.body(this, getString(R.string.servers_intro)));
+
+        Ui.gap(this, root, 20);
+        root.addView(nicknameCard(), Ui.fill());
+        Ui.gap(this, root, 12);
+        root.addView(listCard(), Ui.fill());
+        Ui.gap(this, root, 12);
+        root.addView(addCard(), Ui.fill());
+
+        Ui.gap(this, root, 16);
+        LinearLayout statusRow = Ui.row(this);
+        statusPillSlot = new LinearLayout(this);
+        statusPillSlot.setOrientation(LinearLayout.HORIZONTAL);
+        statusRow.addView(statusPillSlot);
+        TextView spacer = new TextView(this);
+        statusRow.addView(spacer, Ui.weight(this, 1f, 0f));
+        root.addView(statusRow);
+        Ui.gap(this, root, 6);
+        statusText = Ui.body(this, "");
+        root.addView(statusText);
+
+        return Ui.scroll(this, root);
+    }
+
+    private LinearLayout nicknameCard() {
         LinearLayout card = Ui.card(this);
-        card.addView(Ui.fieldLabel(this, getString(R.string.servers_nickname)));
-        Ui.gap(this, card, 6);
-        nicknameField = new EditText(this);
+        card.addView(Ui.section(this, getString(R.string.servers_section_identity)));
+        nicknameField = Ui.input(this, getString(R.string.servers_nickname_hint),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         nicknameField.setSingleLine(true);
-        nicknameField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        nicknameField.setTextColor(Ui.TEXT);
         String saved = GameConfig.readNickname();
         nicknameField.setText(saved == null ? "" : saved);
-        nicknameField.setHint(R.string.servers_nickname_hint);
         card.addView(nicknameField, Ui.fill());
+        Ui.gap(this, card, 8);
+        card.addView(Ui.label(this, getString(R.string.servers_nickname_hint)));
         return card;
     }
 
-    private View listCard() {
+    private LinearLayout listCard() {
         LinearLayout card = Ui.card(this);
-        card.addView(Ui.fieldLabel(this, getString(R.string.servers_list)));
-        Ui.gap(this, card, 6);
+        card.addView(Ui.section(this, getString(R.string.servers_list)));
         listBox = new LinearLayout(this);
         listBox.setOrientation(LinearLayout.VERTICAL);
         card.addView(listBox, Ui.fill());
         return card;
     }
 
-    private View addCard() {
+    private LinearLayout addCard() {
         LinearLayout card = Ui.card(this);
-        card.addView(Ui.fieldLabel(this, getString(R.string.servers_add)));
-        Ui.gap(this, card, 6);
+        card.addView(Ui.section(this, getString(R.string.servers_add)));
 
-        nameField = textField(card, R.string.servers_add_name, false);
-        hostField = textField(card, R.string.servers_add_host, false);
-        portField = textField(card, R.string.servers_add_port, true);
+        nameField = field(card, R.string.servers_add_name, false);
+        Ui.gap(this, card, 8);
+        hostField = field(card, R.string.servers_add_host, false);
+        Ui.gap(this, card, 8);
+        portField = field(card, R.string.servers_add_port, true);
 
-        Ui.gap(this, card, 10);
-        Button add = Ui.button(this, getString(R.string.servers_add_action), false);
+        Ui.gap(this, card, 14);
+        Button add = Ui.button(this, getString(R.string.servers_add_action), Ui.SECONDARY);
         add.setOnClickListener(v -> addCurrentFields());
         card.addView(add, Ui.fill());
         return card;
     }
 
-    private EditText textField(LinearLayout parent, int hint, boolean numeric) {
-        EditText field = new EditText(this);
-        field.setSingleLine(true);
-        field.setHint(hint);
-        field.setTextColor(Ui.TEXT);
-        field.setInputType(numeric
+    private EditText field(LinearLayout parent, int hint, boolean numeric) {
+        EditText field = Ui.input(this, getString(hint), numeric
                 ? InputType.TYPE_CLASS_NUMBER
                 : InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        field.setSingleLine(true);
         parent.addView(field, Ui.fill());
         return field;
     }
@@ -132,11 +135,10 @@ public class ServerBrowserActivity extends AppCompatActivity {
     private void reload() {
         servers.clear();
         servers.addAll(readServers());
-        if (servers.isEmpty()) {
-            ServerEndpoint saved = GameConfig.readServer();
-            if (saved != null && !"127.0.0.1".equals(saved.host())) {
-                servers.add(saved);
-            }
+        ServerEndpoint saved = GameConfig.readServer();
+        boolean savedUsable = saved != null && !"127.0.0.1".equals(saved.host());
+        if (servers.isEmpty() && savedUsable) {
+            servers.add(saved);
         }
         listBox.removeAllViews();
         if (servers.isEmpty()) {
@@ -144,38 +146,37 @@ public class ServerBrowserActivity extends AppCompatActivity {
             return;
         }
         for (ServerEndpoint server : servers) {
-            listBox.addView(row(server), Ui.fill());
+            boolean active = savedUsable && saved.address().equals(server.address());
+            listBox.addView(serverBlock(server, active), Ui.fill());
         }
     }
 
-    private View row(ServerEndpoint server) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, Ui.dp(this, 6), 0, Ui.dp(this, 6));
+    private LinearLayout serverBlock(ServerEndpoint server, boolean active) {
+        LinearLayout block = new LinearLayout(this);
+        block.setOrientation(LinearLayout.VERTICAL);
+        block.setPadding(0, Ui.dp(this, 10), 0, Ui.dp(this, 10));
 
+        LinearLayout header = Ui.row(this);
         LinearLayout labels = new LinearLayout(this);
         labels.setOrientation(LinearLayout.VERTICAL);
-        TextView name = Ui.fieldLabel(this, server.name());
-        TextView address = Ui.mono(this, server.address());
-        labels.addView(name);
-        labels.addView(address);
+        labels.addView(Ui.value(this, server.name()));
+        labels.addView(Ui.mono(this, server.address()));
+        header.addView(labels, Ui.weight(this, 1f, 8f));
+        if (active) {
+            header.addView(Ui.pill(this, getString(R.string.servers_current), Ui.OK));
+        }
+        block.addView(header, Ui.fill());
 
-        LinearLayout.LayoutParams wide = new LinearLayout.LayoutParams(0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        row.addView(labels, wide);
-
-        Button connect = Ui.button(this, getString(R.string.servers_connect), true);
+        Ui.gap(this, block, 10);
+        LinearLayout actions = Ui.row(this);
+        Button connect = Ui.button(this, getString(R.string.servers_connect), Ui.PRIMARY);
         connect.setOnClickListener(v -> connect(server));
-        row.addView(connect);
-
-        Button remove = Ui.button(this, getString(R.string.servers_remove), false);
+        actions.addView(connect, Ui.weight(this, 1f, 8f));
+        Button remove = Ui.button(this, getString(R.string.servers_remove), Ui.GHOST);
         remove.setOnClickListener(v -> remove(server));
-        LinearLayout.LayoutParams narrow = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        narrow.setMargins(Ui.dp(this, 8), 0, 0, 0);
-        row.addView(remove, narrow);
-        return row;
+        actions.addView(remove);
+        block.addView(actions, Ui.fill());
+        return block;
     }
 
     private void addCurrentFields() {
@@ -187,7 +188,7 @@ public class ServerBrowserActivity extends AppCompatActivity {
             try {
                 port = Integer.parseInt(portText);
             } catch (NumberFormatException notANumber) {
-                showError(getString(R.string.servers_bad_port));
+                showError(getString(R.string.servers_bad_port), Ui.ERR);
                 return;
             }
         }
@@ -195,7 +196,7 @@ public class ServerBrowserActivity extends AppCompatActivity {
         try {
             endpoint = new ServerEndpoint(name, host, port);
         } catch (IllegalArgumentException rejected) {
-            showError(rejected.getMessage());
+            showError(rejected.getMessage(), Ui.ERR);
             return;
         }
         servers.clear();
@@ -205,8 +206,7 @@ public class ServerBrowserActivity extends AppCompatActivity {
         hostField.setText("");
         portField.setText("");
         reload();
-        status.setText(getString(R.string.servers_added, endpoint.address()));
-        status.setTextColor(Ui.OK);
+        showError(getString(R.string.servers_added, endpoint.address()), Ui.OK);
     }
 
     private void remove(ServerEndpoint server) {
@@ -219,10 +219,9 @@ public class ServerBrowserActivity extends AppCompatActivity {
         try {
             writeServers(remaining);
             reload();
-            status.setText(getString(R.string.servers_removed, server.address()));
-            status.setTextColor(Ui.MUTED);
+            showError(getString(R.string.servers_removed, server.address()), Ui.MUTED);
         } catch (IOException failure) {
-            showError(getString(R.string.servers_write_failed, failure.getMessage()));
+            showError(getString(R.string.servers_write_failed, failure.getMessage()), Ui.ERR);
         }
     }
 
@@ -231,18 +230,19 @@ public class ServerBrowserActivity extends AppCompatActivity {
         try {
             GameConfig.save(nickname, server, null);
         } catch (IllegalArgumentException rejected) {
-            showError(rejected.getMessage());
+            showError(rejected.getMessage(), Ui.ERR);
             return;
         } catch (IOException failure) {
-            showError(getString(R.string.servers_write_failed, failure.getMessage()));
+            showError(getString(R.string.servers_write_failed, failure.getMessage()), Ui.ERR);
             return;
         }
-        Toast.makeText(this, getString(R.string.servers_connecting, server.address()), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.servers_connecting, server.address()),
+                Toast.LENGTH_SHORT).show();
         try {
             startActivity(new Intent(this, SAMP.class));
             finish();
         } catch (Exception cannotStart) {
-            showError(String.valueOf(cannotStart.getMessage()));
+            showError(String.valueOf(cannotStart.getMessage()), Ui.ERR);
         }
     }
 
@@ -263,7 +263,7 @@ public class ServerBrowserActivity extends AppCompatActivity {
         try {
             writeServers(servers);
         } catch (IOException failure) {
-            showError(getString(R.string.servers_write_failed, failure.getMessage()));
+            showError(getString(R.string.servers_write_failed, failure.getMessage()), Ui.ERR);
         }
     }
 
@@ -276,8 +276,16 @@ public class ServerBrowserActivity extends AppCompatActivity {
         Files.write(file.toPath(), ServerList.serialize(list).getBytes(StandardCharsets.UTF_8));
     }
 
-    private void showError(String message) {
-        status.setText(message == null ? getString(R.string.servers_bad_input) : message);
-        status.setTextColor(Ui.ERR);
+    private void showError(String message, int tone) {
+        if (statusPillSlot != null) {
+            statusPillSlot.removeAllViews();
+            statusPillSlot.addView(Ui.pill(this, tone == Ui.ERR
+                    ? getString(R.string.data_state_error)
+                    : getString(R.string.data_state_ok), tone));
+        }
+        if (statusText != null) {
+            statusText.setText(message == null ? getString(R.string.servers_bad_input) : message);
+            statusText.setTextColor(tone == Ui.MUTED ? Ui.MUTED : tone);
+        }
     }
 }

@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -49,148 +48,131 @@ public class DataSetupActivity extends AppCompatActivity {
     private final AtomicBoolean busy = new AtomicBoolean(false);
 
     private String variant = "full";
-    private TextView status;
+    private TextView statusText;
     private TextView detail;
-    private TextView variantLabel;
+    private LinearLayout pillSlot;
     private ProgressBar progress;
-    private Button fullButton;
-    private Button liteButton;
     private Button syncButton;
-    private Button playButton;
+    private LinearLayout variantSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ScrollView scroll = new ScrollView(this);
-        scroll.setBackgroundColor(Ui.BG);
-        LinearLayout root = Ui.screen(this);
-        root.setPadding(Ui.dp(this, 16), Ui.dp(this, 24), Ui.dp(this, 16), Ui.dp(this, 24));
-
-        root.addView(Ui.title(this, getString(R.string.data_title)));
-        Ui.gap(this, root, 6);
-        root.addView(Ui.body(this, getString(R.string.data_intro)));
-        Ui.gap(this, root, 14);
-
-        LinearLayout picker = Ui.card(this);
-        variantLabel = Ui.fieldLabel(this, "");
-        picker.addView(variantLabel);
-        Ui.gap(this, picker, 8);
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        fullButton = Ui.button(this, getString(R.string.data_variant_full), false);
-        liteButton = Ui.button(this, getString(R.string.data_variant_lite), false);
-        LinearLayout.LayoutParams half = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-        half.setMargins(0, 0, Ui.dp(this, 8), 0);
-        fullButton.setLayoutParams(half);
-        liteButton.setLayoutParams(half);
-        row.addView(fullButton);
-        row.addView(liteButton);
-        picker.addView(row);
-        root.addView(picker);
-        Ui.gap(this, root, 12);
-
-        LinearLayout progressCard = Ui.card(this);
-        status = Ui.fieldLabel(this, getString(R.string.data_status_idle));
-        progressCard.addView(status);
-        Ui.gap(this, progressCard, 8);
-        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(1000);
-        progress.setProgress(0);
-        progressCard.addView(progress);
-        root.addView(progressCard);
-        Ui.gap(this, root, 12);
-
-        syncButton = Ui.button(this, getString(R.string.data_action_sync), true);
-        root.addView(syncButton);
-        Ui.gap(this, root, 8);
-
-        LinearLayout secondary = new LinearLayout(this);
-        secondary.setOrientation(LinearLayout.HORIZONTAL);
-        Button verifyButton = Ui.button(this, getString(R.string.data_action_verify), false);
-        Button settingsButton = Ui.button(this, getString(R.string.data_action_settings), false);
-        verifyButton.setLayoutParams(half);
-        settingsButton.setLayoutParams(half);
-        secondary.addView(verifyButton);
-        secondary.addView(settingsButton);
-        root.addView(secondary);
-        Ui.gap(this, root, 8);
-
-        LinearLayout third = new LinearLayout(this);
-        third.setOrientation(LinearLayout.HORIZONTAL);
-        Button logButton = Ui.button(this, getString(R.string.data_action_share_log), false);
-        Button serversButton = Ui.button(this, getString(R.string.servers_title), false);
-        logButton.setLayoutParams(half);
-        serversButton.setLayoutParams(half);
-        third.addView(logButton);
-        third.addView(serversButton);
-        root.addView(third);
-        Ui.gap(this, root, 8);
-
-        playButton = Ui.button(this, getString(R.string.data_action_play), true);
-        root.addView(playButton);
-        Ui.gap(this, root, 14);
-
-        detail = Ui.mono(this, "");
-        root.addView(detail);
-
-        scroll.addView(root);
-        setContentView(scroll);
-
-        fullButton.setOnClickListener(v -> chooseVariant("full"));
-        liteButton.setOnClickListener(v -> chooseVariant("lite"));
-        syncButton.setOnClickListener(v -> sync());
-        verifyButton.setOnClickListener(v -> verifyOnly());
-        settingsButton.setOnClickListener(v ->
-                startActivity(new Intent(this, UiSettingsActivity.class)));
-        logButton.setOnClickListener(v -> shareLog());
-        serversButton.setOnClickListener(v ->
-                startActivity(new Intent(this, ServerBrowserActivity.class)));
-        playButton.setOnClickListener(v -> {
-            try {
-                GameConfig.ensureSettings();
-            } catch (IOException failure) {
-                setStatus(getString(R.string.servers_write_failed, failure.getMessage()), Ui.ERR, 0);
-                return;
-            }
-            ServerEndpoint target = GameConfig.readServer();
-            if (target == null || "127.0.0.1".equals(target.host())) {
-                // No server chosen yet: pick one instead of booting into a dead connection.
-                startActivity(new Intent(this, ServerBrowserActivity.class));
-                return;
-            }
-            startActivity(new Intent(this, com.ferzdevzgta.game.SAMP.class));
-            finish();
-        });
-
+        Ui.paintWindow(this);
+        setContentView(buildUi());
         chooseVariant("full");
         verifyOnly();
     }
 
-    private void chooseVariant(String v) {
-        variant = v;
-        variantLabel.setText(getString(R.string.data_variant_chosen,
-                v.equals("full") ? getString(R.string.data_variant_full) : getString(R.string.data_variant_lite)));
-        paintToggle();
-        verifyOnly();
+    private ScrollView buildUi() {
+        LinearLayout root = Ui.column(this);
+
+        root.addView(Ui.eyebrow(this, getString(R.string.app_name)));
+        Ui.gap(this, root, 6);
+        root.addView(Ui.title(this, getString(R.string.data_title)));
+        Ui.gap(this, root, 8);
+        root.addView(Ui.body(this, getString(R.string.data_intro)));
+
+        // Variant
+        Ui.gap(this, root, 20);
+        LinearLayout variantCard = Ui.card(this);
+        variantCard.addView(Ui.section(this, getString(R.string.data_section_variant)));
+        variantSwitch = Ui.segmented(this,
+                new String[]{getString(R.string.data_variant_full), getString(R.string.data_variant_lite)},
+                0,
+                index -> chooseVariant(index == 0 ? "full" : "lite"));
+        variantCard.addView(variantSwitch, Ui.fill());
+        root.addView(variantCard, Ui.fill(0, this));
+
+        // Status
+        Ui.gap(this, root, 12);
+        LinearLayout statusCard = Ui.card(this);
+        LinearLayout statusHeader = Ui.row(this);
+        TextView statusLabel = Ui.section(this, getString(R.string.data_section_status));
+        statusLabel.setPadding(0, 0, 0, 0);
+        statusHeader.addView(statusLabel, new LinearLayout.LayoutParams(0,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        pillSlot = new LinearLayout(this);
+        pillSlot.setOrientation(LinearLayout.HORIZONTAL);
+        statusHeader.addView(pillSlot);
+        statusCard.addView(statusHeader);
+        Ui.gap(this, statusCard, 8);
+        statusText = Ui.body(this, getString(R.string.data_status_idle));
+        statusCard.addView(statusText);
+        progress = Ui.progress(this);
+        statusCard.addView(progress);
+        detail = Ui.mono(this, "");
+        statusCard.addView(detail);
+        root.addView(statusCard, Ui.fill());
+
+        // Primary action
+        Ui.gap(this, root, 16);
+        syncButton = Ui.button(this, getString(R.string.data_action_sync), Ui.PRIMARY);
+        root.addView(syncButton, Ui.fill());
+
+        // Secondary actions, two per row so nothing is narrower than a thumb
+        Ui.gap(this, root, 8);
+        LinearLayout rowA = Ui.row(this);
+        Button verifyButton = Ui.button(this, getString(R.string.data_action_verify), Ui.SECONDARY);
+        Button logButton = Ui.button(this, getString(R.string.data_action_share_log), Ui.SECONDARY);
+        rowA.addView(verifyButton, Ui.weight(this, 1f, 8f));
+        rowA.addView(logButton, Ui.weight(this, 1f, 0f));
+        root.addView(rowA, Ui.fill());
+
+        Ui.gap(this, root, 8);
+        LinearLayout rowB = Ui.row(this);
+        Button serversButton = Ui.button(this, getString(R.string.home_action_server), Ui.SECONDARY);
+        Button settingsButton = Ui.button(this, getString(R.string.home_action_settings), Ui.SECONDARY);
+        rowB.addView(serversButton, Ui.weight(this, 1f, 8f));
+        rowB.addView(settingsButton, Ui.weight(this, 1f, 0f));
+        root.addView(rowB, Ui.fill());
+
+        // Play
+        Ui.gap(this, root, 20);
+        Button playButton = Ui.button(this, getString(R.string.data_action_play), Ui.PRIMARY);
+        root.addView(playButton, Ui.fill());
+
+        // Language, reachable on the first run before any data exists
+        Ui.gap(this, root, 20);
+        LinearLayout languageCard = Ui.card(this);
+        languageCard.addView(Ui.section(this, getString(R.string.settings_section_language)));
+        languageCard.addView(Ui.languageSwitch(this), Ui.fill());
+        Ui.gap(this, languageCard, 8);
+        languageCard.addView(Ui.label(this, getString(R.string.language_note)));
+        root.addView(languageCard, Ui.fill());
+
+        verifyButton.setOnClickListener(v -> verifyOnly());
+        logButton.setOnClickListener(v -> shareLog());
+        serversButton.setOnClickListener(v ->
+                startActivity(new Intent(this, ServerBrowserActivity.class)));
+        settingsButton.setOnClickListener(v ->
+                startActivity(new Intent(this, UiSettingsActivity.class)));
+        syncButton.setOnClickListener(v -> sync());
+        playButton.setOnClickListener(v -> play());
+
+        return Ui.scroll(this, root);
     }
 
-    private void paintToggle() {
-        boolean full = "full".equals(variant);
-        fullButton.setTextColor(full ? 0xFF0B0E12 : Ui.TEXT);
-        liteButton.setTextColor(full ? Ui.TEXT : 0xFF0B0E12);
-        android.graphics.drawable.GradientDrawable a = new android.graphics.drawable.GradientDrawable();
-        a.setCornerRadius(Ui.dp(this, 10));
-        a.setColor(full ? Ui.ACCENT : Ui.CARD);
-        a.setStroke(Ui.dp(this, 1), full ? Ui.ACCENT : Ui.STROKE);
-        fullButton.setBackground(a);
-        android.graphics.drawable.GradientDrawable b = new android.graphics.drawable.GradientDrawable();
-        b.setCornerRadius(Ui.dp(this, 10));
-        b.setColor(full ? Ui.CARD : Ui.ACCENT);
-        b.setStroke(Ui.dp(this, 1), full ? Ui.STROKE : Ui.ACCENT);
-        liteButton.setBackground(b);
-        fullButton.setEnabled(!busy.get());
-        liteButton.setEnabled(!busy.get());
+    private void play() {
+        try {
+            GameConfig.ensureSettings();
+        } catch (IOException failure) {
+            setStatus(getString(R.string.servers_write_failed, failure.getMessage()), Ui.ERR, 0, 0);
+            return;
+        }
+        ServerEndpoint target = GameConfig.readServer();
+        if (target == null || "127.0.0.1".equals(target.host())) {
+            // No server chosen yet: pick one instead of booting into a dead connection.
+            startActivity(new Intent(this, ServerBrowserActivity.class));
+            return;
+        }
+        startActivity(new Intent(this, com.ferzdevzgta.game.SAMP.class));
+        finish();
+    }
+
+    private void chooseVariant(String v) {
+        variant = v;
+        verifyOnly();
     }
 
     private File manifestFile() {
@@ -225,7 +207,7 @@ public class DataSetupActivity extends AppCompatActivity {
         if (busy.get()) {
             return;
         }
-        setStatus(getString(R.string.data_status_checking), Ui.MUTED, 0);
+        setStatus(getString(R.string.data_status_checking), Ui.MUTED, Ui.MUTED, 0);
         worker.execute(() -> {
             try {
                 CacheManifest m = readManifest();
@@ -243,14 +225,16 @@ public class DataSetupActivity extends AppCompatActivity {
                     }
                     sb.append(p).append('\n');
                 }
+                final boolean clean = problems.isEmpty();
                 ui.post(() -> {
-                    setStatus(text, problems.isEmpty() ? Ui.OK : Ui.ERR, problems.isEmpty() ? 1000 : 0);
+                    setStatus(text, clean ? Ui.OK : Ui.ERR, clean ? Ui.OK : Ui.ERR,
+                            clean ? 1000 : 0);
                     setDetail(sb.length() == 0 ? "" : sb.toString());
                     syncButton.setEnabled(true);
                 });
             } catch (Exception ex) {
                 ui.post(() -> {
-                    setStatus(getString(R.string.data_status_no_manifest), Ui.ERR, 0);
+                    setStatus(getString(R.string.data_status_no_manifest), Ui.ERR, Ui.ERR, 0);
                     setDetail(ex.getMessage() == null ? ex.toString() : ex.getMessage());
                     syncButton.setEnabled(true);
                 });
@@ -263,11 +247,9 @@ public class DataSetupActivity extends AppCompatActivity {
             return;
         }
         syncButton.setEnabled(false);
-        fullButton.setEnabled(false);
-        liteButton.setEnabled(false);
         setDetail("");
         final String base = endpoint();
-        setStatus(getString(R.string.data_status_prepare), Ui.MUTED, 0);
+        setStatus(getString(R.string.data_status_prepare), Ui.MUTED, Ui.MUTED, 0);
 
         worker.execute(() -> {
             try {
@@ -276,14 +258,15 @@ public class DataSetupActivity extends AppCompatActivity {
                 java.util.List<String> missing = m.verify(root);
                 if (missing.isEmpty()) {
                     ui.post(() -> {
-                        setStatus(getString(R.string.data_status_nothing_to_do, m.entries().size()), Ui.OK, 1000);
+                        setStatus(getString(R.string.data_status_nothing_to_do, m.entries().size()),
+                                Ui.OK, Ui.OK, 1000);
                         done();
                     });
                     return;
                 }
                 if (base == null) {
                     ui.post(() -> {
-                        setStatus(getString(R.string.data_error_no_endpoint), Ui.ERR, 0);
+                        setStatus(getString(R.string.data_error_no_endpoint), Ui.ERR, Ui.ERR, 0);
                         setDetail(getString(R.string.data_error_endpoint_hint));
                         done();
                     });
@@ -294,9 +277,11 @@ public class DataSetupActivity extends AppCompatActivity {
                 java.util.List<String> after = m.verify(root);
                 ui.post(() -> {
                     if (after.isEmpty() && result.ok()) {
-                        setStatus(getString(R.string.data_status_done, result.summary()), Ui.OK, 1000);
+                        setStatus(getString(R.string.data_status_done, result.summary()),
+                                Ui.OK, Ui.OK, 1000);
                     } else {
-                        setStatus(getString(R.string.data_status_partial, result.summary(), after.size()), Ui.ERR, 0);
+                        setStatus(getString(R.string.data_status_partial, result.summary(), after.size()),
+                                Ui.ERR, Ui.ERR, 0);
                         StringBuilder sb = new StringBuilder();
                         for (String f : result.failures) {
                             sb.append(f).append('\n');
@@ -311,12 +296,12 @@ public class DataSetupActivity extends AppCompatActivity {
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 ui.post(() -> {
-                    setStatus(getString(R.string.data_status_cancelled), Ui.MUTED, 0);
+                    setStatus(getString(R.string.data_status_cancelled), Ui.MUTED, Ui.MUTED, 0);
                     done();
                 });
             } catch (Exception ex) {
                 ui.post(() -> {
-                    setStatus(getString(R.string.data_status_failed), Ui.ERR, 0);
+                    setStatus(getString(R.string.data_status_failed), Ui.ERR, Ui.ERR, 0);
                     setDetail(ex.getMessage() == null ? ex.toString() : ex.getMessage());
                     done();
                 });
@@ -327,15 +312,15 @@ public class DataSetupActivity extends AppCompatActivity {
     private void done() {
         busy.set(false);
         syncButton.setEnabled(true);
-        fullButton.setEnabled(true);
-        liteButton.setEnabled(true);
-        paintToggle();
+        if (variantSwitch != null) {
+            variantSwitch.setAlpha(1f);
+        }
     }
 
     private final class ProgressUi implements CacheDownloader.Progress {
         public void onFileStart(String path, int index, int count) {
             ui.post(() -> {
-                setStatus(getString(R.string.data_status_file, index, count), Ui.TEXT, 0);
+                setStatus(getString(R.string.data_status_file, index, count), Ui.TEXT, Ui.ACCENT, -1);
                 setDetail(path);
             });
         }
@@ -347,7 +332,8 @@ public class DataSetupActivity extends AppCompatActivity {
             int permille = (int) Math.min(1000, (done * 1000) / size);
             ui.post(() -> {
                 progress.setProgress(permille);
-                setStatus(getString(R.string.data_status_bytes, megabytes(done), megabytes(size)), Ui.TEXT, permille);
+                setStatus(getString(R.string.data_status_bytes, megabytes(done), megabytes(size)),
+                        Ui.TEXT, Ui.ACCENT, permille);
             });
         }
 
@@ -360,17 +346,41 @@ public class DataSetupActivity extends AppCompatActivity {
         }
     }
 
-    private void setStatus(String text, int color, int permille) {
-        status.setText(text);
-        status.setTextColor(color);
-        if (permille >= 0) {
+    /**
+     * One status line plus one badge. The badge word comes from the tone, so the text can stay
+     * a full sentence with numbers in it.
+     */
+    private void setStatus(String text, int textColour, int tone, int permille) {
+        if (statusText != null) {
+            statusText.setText(text);
+            statusText.setTextColor(textColour);
+        }
+        if (pillSlot != null) {
+            pillSlot.removeAllViews();
+            pillSlot.addView(Ui.pill(this, toneWord(tone), tone));
+        }
+        if (progress != null && permille >= 0) {
             progress.setProgress(permille);
         }
     }
 
+    private String toneWord(int tone) {
+        if (tone == Ui.OK) {
+            return getString(R.string.data_state_ok);
+        }
+        if (tone == Ui.ERR) {
+            return getString(R.string.data_state_error);
+        }
+        if (tone == Ui.MUTED) {
+            return getString(R.string.data_state_idle);
+        }
+        return getString(R.string.data_state_work);
+    }
+
     private void setDetail(String text) {
-        detail.setText(text == null ? "" : text);
-        detail.setTextColor(Ui.MUTED);
+        if (detail != null) {
+            detail.setText(text == null ? "" : text);
+        }
     }
 
     private void shareLog() {

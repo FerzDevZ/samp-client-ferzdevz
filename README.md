@@ -27,6 +27,8 @@ Everything below was executed on this machine, not assumed.
 | Wrapper rewrite | **in progress**, 20 of 21 files, only `GameThread` left, `bin/oswrapper-audit.sh` reports the rest, `bin/wrapper-pins.sh` and `bin/jni-pins.py` guard the names |
 | Patch on the phone | **yes**, `bin/patch-termux.sh` with apksigner, no SDK binaries needed |
 | Choosing a server | **yes**, `ServerBrowserActivity` writes `SAMP/settings.ini` from `SAMP/servers.txt`, no hand-editing |
+| Language | **yes**, Indonesian or English, chosen in the app, stored in `ui_language`, `bin/self-test.sh strings` refuses to let the two resource files drift apart |
+| Launcher screen | **redesigned**, shows data, server and nickname state before you press Start, `bin/ui-contrast.py` holds the palette above WCAG AA |
 
 ## Getting an installable APK
 
